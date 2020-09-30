@@ -120,7 +120,9 @@ fi
 readSecretString() {
   local secretName="$1"
   local dataPath="$2"
-  jq -r </secrets/secrets.json '.[$secretName] | '"$dataPath" --arg secretName "$secretName"
+  if ! jq -e -r </secrets/secrets.json '.[$secretName] | '"$dataPath" --arg secretName "$secretName"
+  then echo 1>&2 "Could not find path $dataPath in secret $secretName"
+  fi
 }
 
 readSecretJSON() {
