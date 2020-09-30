@@ -123,7 +123,12 @@ mkEffect (
   '';
 
   prePutState = ''
-    nixops export >$stateFileName
+    nixops export >"$stateFileName"
+    if [[ ! -s "$stateFileName" ]]; then
+      echo 1>&2 "NixOps state export was empty. Upload cancelled."
+      rm "$stateFileName"
+      exit 1
+    fi
   '';
 
   putStateScript = ''
