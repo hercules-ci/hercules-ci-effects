@@ -79,18 +79,20 @@ invokeOverride mkDrv {
   #      manual intervention.
   priorCheckPhase = ''
     runHook prePriorCheck
-    if eval "$priorCheckScript"; then
-      echo 1>&2 -e 'Prior check \e[32;1mOK\e[0m.'
-    else
-      echo 1>&2
-      echo 1>&2 -e 'WARNING: Prior check \e[31;1mFAILED\e[0m!'
-      echo 1>&2
-      echo 1>&2 Continuing execution to allow subsequent steps to hopefully fix the problem.
+    if [[ -n "$priorCheckScript" ]]; then
+      if eval "$priorCheckScript"; then
+        echo 1>&2 -e 'Prior check \e[32;1mOK\e[0m.'
+      else
+        echo 1>&2
+        echo 1>&2 -e 'WARNING: Prior check \e[31;1mFAILED\e[0m!'
+        echo 1>&2
+        echo 1>&2 Continuing execution to allow subsequent steps to hopefully fix the problem.
+      fi
     fi
 
     runHook postPriorCheck
   '';
-  priorCheckScript = ":";
+  priorCheckScript = "";
 
   effectPhase = ''
     runHook preEffect
