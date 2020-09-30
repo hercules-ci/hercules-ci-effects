@@ -84,6 +84,7 @@ mkEffect (
 
   # Like `args // `, but also sets the defaults
   inherit networkFiles stateName NIX_PATH;
+  NIXOPS_DEPLOYMENT = args.NIXOPS_DEPLOYMENT or name;
 
   getStateScript = ''
     stateFileName="$PWD/nixops-state.json"
@@ -94,13 +95,12 @@ mkEffect (
     if test -f $stateFileName; then
       echo "importing state"
       nixops import \
-        -d $stateName \
         --include-keys \
         <$stateFileName
-      nixops modify -d $stateName $networkFiles
+      nixops modify $networkFiles
     else
       echo "creating new deployment state"
-      nixops create -d $stateName $networkFiles
+      nixops create $networkFiles
     fi
     nixops set-args ${
       let
@@ -117,14 +117,13 @@ mkEffect (
     echo -n "version: "
     nixops --version
     nixops deploy \
-      -d $stateName \
       --confirm \
       --allow-reboot \
       --allow-recreate \
   '';
 
   prePutState = ''
-    nixops export -d $stateName >$stateFileName
+    nixops export >$stateFileName
   '';
 
   putStateScript = ''
@@ -136,11 +135,11 @@ mkEffect (
   #   check the state of the machines in the network (note that this might alter
   #   the internal nixops state to consolidate with the real state of the resource)
   effectCheckScript = ''
-    nixops check -d "$stateName"
+    nixops check
   '';
 
   priorCheckScript = ''
-    nixops check -d "$stateName"
+    nixops check
   '';
 
 })
