@@ -142,3 +142,12 @@ aws_access_key_id = $(readSecretString "$secretName" .aws_access_key_id)
 
 EOF
 }
+
+writeSSHKey() {
+  local secretName="${1:-ssh}"
+  local privateName="${2:-$HOME/.ssh/id_rsa}"
+  mkdir -p "$(dirname "$privateName")"
+  readSecretString "$secretName" .privateKey >"$privateName"
+  chmod 0400 "$privateName"
+  ssh-keygen -y -f "$privateName" >"$privateName.pub"
+}
