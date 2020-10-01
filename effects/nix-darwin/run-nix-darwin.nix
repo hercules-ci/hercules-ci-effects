@@ -36,9 +36,11 @@ let
     };
 
   suffix =
-    if conf.config.networking.hostName == null
-      then ""
-      else "-${conf.config.networking.hostName}";
+    if args ? name
+    then "-${args.name}"
+    else if conf.config.networking.hostName == null
+    then ""
+    else "-${conf.config.networking.hostName}";
 in
 mkEffect (args // {
   name = "nix-darwin${suffix}";
