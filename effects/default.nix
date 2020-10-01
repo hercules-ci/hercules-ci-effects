@@ -10,6 +10,8 @@ let
 in {
   mkEffect = callPackage ./effect/effect.nix { };
 
+  runNixDarwin = callPackage ./nix-darwin/run-nix-darwin.nix { inherit (self) mkEffect; };
+
   runNixOps = callPackage ./nixops/run-nixops.nix { inherit (self) mkEffect; };
 
   # A simple example
