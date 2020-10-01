@@ -153,3 +153,23 @@ writeSSHKey() {
   chmod 0400 "$privateName"
   ssh-keygen -y -f "$privateName" >"$privateName.pub"
 }
+
+writeDockerKey() {
+  local secretName="${1:-docker}"
+  local directory="${2:-$HOME/.docker}"
+
+  mkdir -p $directory
+
+  readSecretString "$secretName" .clientKey >"$directory/key.pem"
+  readSecretString "$secretName" .clientCertificate >"$directory/cert.pem"
+  readSecretString "$secretName" .CACertificate >"$directory/ca.pem"
+
+  # Please permission checks if any
+  chmod 0400 "$directory"/{key,cert,ca}.pem
+}
+useDockerHost() {
+  local host="${1}"
+  local port="${2:-2376}"
+  export DOCKER_HOST=tcp://$host:$port
+  export DOCKER_TLS_VERIFY=1
+}
