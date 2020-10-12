@@ -54,6 +54,9 @@ args@{
   # Specify extra network expressions here to fill in the missing definitions.
   prebuildOnlyNetworkFiles ? [],
 
+  # Network files that are only used when deploy, so not when prebuilding.
+  deployOnlyNetworkFiles ? [],
+
   # Override the Hercules CI State name if so desired. The default should
   # suffice.
   stateName ? "nixops-${name}.json",
@@ -83,7 +86,7 @@ mkEffect (
   inputs = [ nix nixops ];
 
   # Like `args // `, but also sets the defaults
-  inherit networkFiles stateName NIX_PATH;
+  inherit deployOnlyNetworkFiles networkFiles stateName NIX_PATH;
   NIXOPS_DEPLOYMENT = args.NIXOPS_DEPLOYMENT or name;
 
   getStateScript = ''
@@ -97,10 +100,10 @@ mkEffect (
       nixops import \
         --include-keys \
         <$stateFileName
-      nixops modify $networkFiles
+      nixops modify $networkFiles $deployOnlyNetworkFiles
     else
       echo "creating new deployment state"
-      nixops create $networkFiles
+      nixops create $networkFiles $deployOnlyNetworkFiles
     fi
     nixops set-args ${
       let
