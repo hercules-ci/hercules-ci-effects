@@ -61,6 +61,9 @@ args@{
   # suffice.
   stateName ? "nixops-${name}.json",
 
+  # Not all NixOps backends currently maintain known_hosts.
+  knownHostsName ? "nixops-${name}.known_hosts",
+
   # Specify which secrets are to be loaded into the Effect sandbox.
   # For example { aws = "${env}-aws"; } will make the production-aws secret
   # available when env is "production"
@@ -86,12 +89,14 @@ mkEffect (
   inputs = [ nix nixops ];
 
   # Like `args // `, but also sets the defaults
-  inherit deployOnlyNetworkFiles networkFiles stateName NIX_PATH;
+  inherit deployOnlyNetworkFiles networkFiles stateName knownHostsName NIX_PATH;
   NIXOPS_DEPLOYMENT = args.NIXOPS_DEPLOYMENT or name;
 
   getStateScript = ''
     stateFileName="$PWD/nixops-state.json"
     getStateFile "$stateName" "$stateFileName"
+    mkdir -p ~/.ssh
+    getStateFile "$knownHostsName" ~/.ssh/known_hosts
   '';
 
   postGetState = ''
@@ -136,6 +141,7 @@ mkEffect (
 
   putStateScript = ''
     putStateFile "$stateName" "$stateFileName"
+    putStateFile "$knownHostsName" ~/.ssh/known_hosts
   '';
 
   # We assume that `check` is idempotent and not required for any other operations.
