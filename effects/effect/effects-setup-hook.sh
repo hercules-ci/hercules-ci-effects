@@ -6,7 +6,7 @@
 
 initHerculesCIAPI() {
   herculesCIHeaders=$PWD/hercules-ci.headers
-  jq </secrets/secrets.json >$herculesCIHeaders -r '"Authorization: Bearer \(."hercules-ci".data.token)"'
+  jq <"$HERCULES_CI_SECRETS_JSON" >$herculesCIHeaders -r '"Authorization: Bearer \(."hercules-ci".data.token)"'
 }
 preInitHooks+=("initHerculesCIAPI")
 
@@ -120,7 +120,7 @@ fi
 readSecretString() {
   local secretName="$1"
   local dataPath="$2"
-  if ! jq -e -r </secrets/secrets.json '.[$secretName].data | '"$dataPath" --arg secretName "$secretName"
+  if ! jq -e -r <"$HERCULES_CI_SECRETS_JSON" '.[$secretName].data | '"$dataPath" --arg secretName "$secretName"
   then echo 1>&2 "Could not find path $dataPath in secret $secretName"
   fi
 }
@@ -128,7 +128,7 @@ readSecretString() {
 readSecretJSON() {
   local secretName="$1"
   local dataPath="$2"
-  jq -c </secrets/secrets.json '.[$secretName].data | '"$dataPath" --arg secretName "$secretName"
+  jq -c <"$HERCULES_CI_SECRETS_JSON" '.[$secretName].data | '"$dataPath" --arg secretName "$secretName"
 }
 
 writeAWSSecret() {
