@@ -16,6 +16,8 @@ in {
 
   runNixOps = callPackage ./nixops/run-nixops.nix { inherit (self) mkEffect; };
 
+  runNixOps2 = callPackage ./nixops2/run-nixops.nix { inherit (self) mkEffect; };
+
   # A simple example
   runPutUrl = callPackage ./run-put-url.nix { inherit (self) mkEffect; };
 
