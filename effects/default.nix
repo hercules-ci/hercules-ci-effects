@@ -6,9 +6,21 @@ pkgs:
 
 let
   inherit (pkgs) callPackage;
+  inherit (pkgs.lib) recurseIntoAttrs optionalAttrs;
 
 in {
   mkEffect = callPackage ./effect/effect.nix { };
+
+  runIf = condition: v:
+    recurseIntoAttrs (
+      (
+        if condition
+        then { run = v; }
+        else { dependencies = v // { isEffect = false; buildDependenciesOnly = true; }; }
+      ) // optionalAttrs (v ? prebuilt) {
+        inherit (v) prebuilt;
+      }
+    );
 
   runArion = callPackage ./arion/run-arion.nix { inherit (self) mkEffect; };
 
