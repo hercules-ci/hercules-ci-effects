@@ -26,7 +26,7 @@ Example `secrets.json`:
 
 _Optional_
 
-The name of the secret to read. Must match the attribute name of a xref:reference/nix-function/mkEffect.adoc#secretsMap[`secretsMap`] entry.
+The name of the secret to read. Must match the attribute name of a xref:reference/nix-functions/mkEffect.adoc#secretsMap[`secretsMap`] entry.
 
 Default: `docker`.
 

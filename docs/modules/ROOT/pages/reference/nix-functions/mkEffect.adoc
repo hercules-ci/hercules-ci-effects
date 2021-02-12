@@ -126,7 +126,7 @@ See xref:param-inputs[essential parameters]
 === `passthru`
 
 Adds attributes to the returned effect. Use this to set the `prebuilt` attribute
-that is recognized by xref:runIf.adoc[]
+that is recognized by xref:reference/nix-functions/runIf.adoc[]
 
 ```nix
     passthru = {

@@ -25,7 +25,7 @@ Write SSH credentials correctly based on a fixed secret format.
 
 _Optional._ Default: `ssh`
 
-The name of the secret to read. Must match the attribute name of a xref:reference/nix-function/mkEffect.adoc#secretsMap[`secretsMap`] entry.
+The name of the secret to read. Must match the attribute name of a xref:reference/nix-functions/mkEffect.adoc#secretsMap[`secretsMap`] entry.
 
 === `$privateName`
 
