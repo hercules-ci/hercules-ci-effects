@@ -1,0 +1,48 @@
+
+# Writing a Custom Effect
+
+To write a custom effect, it's easiest to prototype it in the repository where
+you want to apply it.
+
+You can then iterate on a template like below. 
+
+```nix
+let
+  # TODO: Use a recent version
+  effectsSrc = builtins.fetchTarball "https://github.com/hercules-ci/hercules-ci-effects/archive/b67cfbbb31802389e1fb6a9c75360968d201693b.tar.gz";
+
+  # TODO: Use a recent version
+  nixpkgs = builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/a6a3a368dda.tar.gz";
+  pkgs = import nixpkgs {
+    system = "x86_64-linux";
+    overlays = [
+      (import "${effectsSrc}/overlay.nix")
+    ];
+  };
+
+  inherit (pkgs.effects) mkEffect;
+  runNeatCopy = args@{
+    hostname,
+    package,
+    ...
+  }: mkEffect (args // {
+
+    # This style of variable passing allows overrideAttrs and modification in
+    # hooks like the userSetupScript.
+    inherit hostname package;
+    effectScript = ''
+      nix-copy-closure --use-substitutes --to "$hostname" "$package"
+    '';
+  });
+
+in
+{
+  my-neat = runNeatCopy {
+    hostname = "neathost";
+    package = pkgs.hello;
+  };
+}
+```
+
+When it works, consider making a pull request to `hercules-ci-effects` for the
+opportunity of review and improvements.

@@ -1,0 +1,13 @@
+
+= `runNixDarwin`
+
+_runNixDarwin {two-colons} AttrSet -> Effect_
+
+Deploy a nix-darwin configuration, to maintain a macOS machine.
+
+TBD
+
+[discrete]
+== See also
+
+* xref:reference/nix-functions/runNixOS.adoc[`runNixOS`]

@@ -1,0 +1,15 @@
+
+= `runNixOps`
+
+_runNixOps {two-colons} AttrSet -> Effect_
+
+Provision interrelated machine configurations and other cloud resources.
+
+TBD
+
+[discrete]
+== See also
+
+* xref:reference/nix-functions/runNixOS.adoc[`runNixOS`] -- a simpler solution for single pre-existing machines
+
+* xref:reference/nix-functions/runArion.adoc[`runArion`] -- deploy services to Docker using NixOS, Nix or Docker-based images

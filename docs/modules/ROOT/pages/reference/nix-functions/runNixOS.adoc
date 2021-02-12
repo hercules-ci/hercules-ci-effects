@@ -1,0 +1,19 @@
+
+= `runNixOS`
+
+_runNixOS {two-colons} AttrSet -> Effect_
+
+Deploy a NixOS configuration to a machine.
+
+TBD
+
+[discrete]
+== See also
+
+* xref:guide/deploy-a-nixos-machine.adoc[] -- a step by step guide to deploy to an existing NixOS machine
+
+* xref:reference/nix-functions/runNixDarwin.adoc[`runNixOps`] -- provision interrelated machine configurations and other cloud resources
+
+* xref:reference/nix-functions/runArion.adoc[`runArion`] -- deploy services to Docker using NixOS, Nix or Docker-based images
+
+* xref:reference/nix-functions/runNixDarwin.adoc[`runNixDarwin`] -- the macOS equivalent for deploying to a single Apple machine configured with nix-darwin

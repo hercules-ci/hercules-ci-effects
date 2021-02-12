@@ -1,0 +1,19 @@
+
+= hercules-ci-effects
+
+WARNING: Effects are in beta and require a recent `hercules-ci-agent` from the `master` branch.
+
+This `hercules-ci-effects` repository provides useful abstractions and implementations to automate tasks such as deployment.
+
+Hercules CI Effects as implemented by the agent are a fairly low-level interface
+for executing programs that interact with the Nix store, centralized state, secrets and the real world.
+
+`hercules-ci-effects` provides a standard library of both Nix and bash
+functions. Its foundation is the `mkEffect` function, which extends
+Nixpkgs' `stdenv` to handle the typical inputs and lifecycle of an effect.
+
+Furthermore, it provides Nix functions that perform a number of common
+deployment tasks, such as xref:reference/nix-functions/runNixOS.adoc[`runNixOS`] and xref:reference/nix-functions/runNixOps.adoc[`runNixOps`].
+
+It also comes with a library of bash functions that help manage secrets,
+configuration files and provide access to the state file API.

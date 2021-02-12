@@ -1,0 +1,5 @@
+name: hercules-ci-effects
+title: hercules-ci-effects Documentation
+version: 'master'
+nav:
+- modules/ROOT/nav.adoc
