@@ -41,9 +41,8 @@ args@{
     passthru = {
       prebuilt = toplevel;
     } // passthru;
-  } // optionalAttrs (!args?src) {
-    # TODO: move this logic to mkEffect?
-    dontUnpack = true;
+
+    dontUnpack = args.dontUnpack or true;
   } // optionalAttrs (hostKey != null) {
     inherit hostKey;
   })
