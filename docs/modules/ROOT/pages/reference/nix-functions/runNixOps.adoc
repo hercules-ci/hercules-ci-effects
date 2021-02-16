@@ -23,7 +23,7 @@ NixOps network expressions and other files required for the deployment.
 Unlike some other deployment methods, NixOps needs access to the actual expression files.
 
 Confidential information should not be committed and included here, but inserted via
-`secrets.json` and xref:reference/nix-function/mkEffect.adoc#param-userSetupScript[`userSetupScript`].
+`secrets.json` and xref:reference/nix-functions/mkEffect.adoc#param-userSetupScript[`userSetupScript`].
 
 [[param-networkFiles]]
 === `networkFiles`
