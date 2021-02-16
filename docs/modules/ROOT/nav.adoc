@@ -18,6 +18,8 @@
 ** xref:reference/nix-functions/runNixOps.adoc[`runNixOps`]
 ** xref:reference/nix-functions/runNixOS.adoc[`runNixOS`]
 * Bash Functions Reference
+** xref:reference/bash-functions/getStateFile.adoc[`getStateFile`]
+** xref:reference/bash-functions/putStateFile.adoc[`putStateFile`]
 ** xref:reference/bash-functions/readSecretJSON.adoc[`readSecretJSON`]
 ** xref:reference/bash-functions/readSecretString.adoc[`readSecretString`]
 ** xref:reference/bash-functions/useDockerHost.adoc[`useDockerHost`]

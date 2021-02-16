@@ -5,14 +5,101 @@ _runNixOS {two-colons} AttrSet -> Effect_
 
 Deploy a NixOS configuration to a machine.
 
-TBD
+[[parameters]]
+== Parameters
+
+
+[[param-config]]
+=== `config`
+
+You may want to use xref:param-configuration[] instead.
+
+This option allows you to insert a custom NixOS invocation, in case your
+configuration has already been invoked with the module system.
+
+When this option is set, xref:param-system[], xref:param-configuration[] and xref:param-nixpkgs[] are ignored.
+
+
+[[param-configuration]]
+=== `configuration`
+
+A NixOS configuration file or module.
+
+Example: `configuration = ./configuration.nix;`
+
+Required, unless you invoke the module system yourself via xref:param-config.
+
+
+[[param-nixpkgs]]
+=== `nixpkgs`
+
+Path of the Nixpkgs sources to use. These also include the NixOS sources.
+
+Default: `pkgs.path`, where `pkgs` is the Nixpkgs invocation that included the effects overlay.
+
+
+[[param-secretsMap]]
+=== `secretsMap`
+
+See xref:reference/nix-functions/mkEffect.adoc#param-secretsMap[`secretsMap` in `mkEffect`]
+
+Example:
+
+```nix
+    secretsMap.ssh = "myuser-ssh";
+```
+
+
+[[param-sshDestination]]
+=== `sshDestination`
+
+Hostname to SSH to.
+
+[quote, `man 1 ssh`]
+"destination, which may be specified as either [user@]hostname or a URI of
+ the form ssh://[user@]hostname[:port.]"
+
+
+[[param-system]]
+=== `system`
+
+The Nix `system` of the machine to deploy.
+
+Example: `system = "x86_64-linux";`
+
+Example: `system = "aarch64-linux";`
+
+See https://nixos.org/manual/nix/stable/#ch-supported-platforms[Nix supported platforms,role=external]
+
+Required, unless you pass the module system result via xref:param-config.
+
+
+[[param-userSetupScript]]
+=== `userSetupScript`
+
+Example:
+
+```nix
+    userSetupScript = ''
+      writeSSHKey
+      cat >>~/.ssh/known_hosts <<EOF
+      203.0.113.2 ecdsa-sha2-nistp256 AA.....pw=
+      EOF
+    '';
+```
+
+See:
+
+* xref:reference/bash-functions/writeSSHKey.adoc[]
+* xref:reference/nix-functions/mkEffect.adoc#param-userSetupScript[`userSetupScript` in `mkEffect`]
+
 
 [discrete]
 == See also
 
 * xref:guide/deploy-a-nixos-machine.adoc[] -- a step by step guide to deploy to an existing NixOS machine
 
-* xref:reference/nix-functions/runNixDarwin.adoc[`runNixOps`] -- provision interrelated machine configurations and other cloud resources
+* xref:reference/nix-functions/runNixOps.adoc[`runNixOps`] -- provision interrelated machine configurations and other cloud resources
 
 * xref:reference/nix-functions/runArion.adoc[`runArion`] -- deploy services to Docker using NixOS, Nix or Docker-based images
 

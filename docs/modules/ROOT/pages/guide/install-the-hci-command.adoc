@@ -1,0 +1,83 @@
+
+= Install the `hci` command
+
+To make use of the state file API on the command line, you can install the
+`hci` command; short for Hercules CI.
+
+It can be installed in many ways. A binary cache is also available:
+
+```console
+$ cachix use hercules-ci
+```
+
+== Install into flake
+
+Add `hercules-ci-agent` to your `inputs` and add the `defaultApp` to your
+`devShell`. For example:
+
+```nix
+{
+  inputs = {
+    # ...
+    hercules-ci-agent.url = "github:hercules-ci/hercules-ci-agent/master";
+  };
+
+  outputs = 
+    # ...
+    {
+      # ...
+      devShell = pkgs.mkShell {
+        nativeBuildInputs = [
+          # ...
+          hercules-ci-agent.defaultApp.${system}
+        ];
+      };
+    }
+}
+```
+
+== Install into `shell.nix`
+
+It hasn't been released into Nixpkgs yet, so you need to import from the
+`hercules-ci-agent` repo.
+
+```nix
+let
+  pkgs = #...
+
+  # Update hash or pin differently
+  hercules-ci-agentSrc = builtins.fetchTarball "https://github.com/hercules-ci/hercules-ci-agent/archive/f0974a6897663dace4f7e28457fdfeef19b7fbde.tar.gz";
+
+  hci = (import hercules-ci-agentSrc).defaultApp.${pkgs.system};
+in
+pkgs.mkShell {
+  nativeBuildInputs = [
+    hci
+  ];
+}
+```
+
+== Install into a system configuration
+
+This configuration module works for NixOS and nix-darwin:
+
+```nix
+{ pkgs, ... }:
+let
+  # Update hash or pin differently
+  hercules-ci-agentSrc = builtins.fetchTarball "https://github.com/hercules-ci/hercules-ci-agent/archive/f0974a6897663dace4f7e28457fdfeef19b7fbde.tar.gz";
+
+  hci = (import hercules-ci-agentSrc).defaultApp.${pkgs.system};
+in
+{
+  environment.systemPackages = [
+    hci
+  ];
+}
+```
+
+== Install into user profile
+
+```shell
+$ nix-env -iA hercules-ci-cli -f https://github.com/hercules-ci/hercules-ci-agent/archive/master.tar.gz
+```

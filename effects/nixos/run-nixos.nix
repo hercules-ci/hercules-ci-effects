@@ -16,6 +16,7 @@ args@{
       (
         import (nixpkgs + "/nixos/lib/eval-config.nix") {
           modules = [configuration];
+          inherit system;
         }
       ).config,
     profile ? "/nix/var/nix/profiles/system",

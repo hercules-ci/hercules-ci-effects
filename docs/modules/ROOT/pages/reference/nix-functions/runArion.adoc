@@ -126,9 +126,9 @@ See xref:reference/nix-functions/mkEffect.adoc#param-userSetupScript[`userSetupS
 
 
 [[extra-params]]
-=== `...`
+=== `...` -- remaining arguments
 
-Remaining arguments are passed directly to xref:reference/nix-functions/mkEffect.adoc[].
+Other attributes are passed to xref:reference/nix-functions/mkEffect.adoc[mkEffect], which passes its remaining arguments to `mkDerivation`.
 
 [discrete]
 == See also

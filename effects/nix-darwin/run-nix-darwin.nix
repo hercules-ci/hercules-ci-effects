@@ -22,7 +22,7 @@ args@{
   nixpkgs ? path,
 
   # System, defaults to x86_64-darwin
-  system ? "x86_64-darwin",
+  system,
 
   passthru ? {},
 

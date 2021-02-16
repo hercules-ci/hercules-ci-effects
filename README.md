@@ -14,9 +14,7 @@ tasks such as deployment.
 
 ## Prerequisites
 
- - You're running an agent for the GitHub account you're working with.
-
- - You've set up a `ci.nix` in your repo.
+ - You've [built](https://docs.hercules-ci.com/hercules-ci/getting-started/) your repo's `ci.nix` on Hercules CI
 
 ## Installation
 
@@ -24,12 +22,24 @@ tasks such as deployment.
 
 - Expose the return value of one of the functions below as an attribute in your `ci.nix`.
 
-TBD: Nix flake instructions
-TBD: Example
+See [the NixOS deployment guide](https://docs.hercules-ci.com/hercules-ci-effects/guide/deploy-a-nixos-machine.html) for an example.
 
 # Usage
 
-TBD: Documentation per function
+See the Nix Functions Reference and Bash Functions Reference on the [documentation site](https://docs.hercules-ci.com/hercules-ci-effects/).
+
+Here's an example:
+
+```nix
+  production = runIf (src.ref == "refs/heads/master") (
+    effects.runNixOps {
+      name = "production";
+      src = pkgs.lib.cleanSource ./.;
+      networkFiles = ["network.nix"];
+      secretsMap.aws = "production-aws";
+    }
+  );
+```
 
 # License
 
@@ -45,3 +55,4 @@ Twitter: [@hercules_ci](https://twitter.com/hercules_ci)
  * [hercules-ci-effects Contributors](https://github.com/hercules-ci/hercules-ci-effects/graphs/contributors)
  * [Nix](https://nixos.org/nix)
  * [NixOps](https://nixos.org/nixops)
+ * [nix-darwin](https://nixos.org/LnL7/nix-darwin)

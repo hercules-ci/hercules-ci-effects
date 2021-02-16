@@ -7,12 +7,12 @@ A framework for writing any effect.
 
 == Essential Parameters
 
-[[extra-args,`mkEffect{...}`]]
-=== `...`
+[[extra-params,`mkEffect{...}`]]
+=== `...` -- remaining arguments
 
-Any arguments not explicitly listed here are passed through verbatim and
-become part of the environment, like https://nixos.org/manual/nixpkgs/stable/#chap-stdenv[`pkgs.stdenv.mkDerivation`]
-does. Most stdenv functionality can be used here as well.
+Any arguments not explicitly listed here are passed through unmodified to https://nixos.org/manual/nixpkgs/stable/#chap-stdenv[`pkgs.stdenvNoCC.mkDerivation`],
+where most attributes are added to the process environment.
+Most stdenv functionality can be used here as well, with the notable exception of not having build outputs.
 
 [[param-effectScript]]
 === `effectScript`
