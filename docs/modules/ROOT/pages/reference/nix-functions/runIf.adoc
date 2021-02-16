@@ -1,0 +1,27 @@
+
+= `runIf`
+
+_runIf {two-colons} Bool -> Effect -> AttrSet_
+
+Make an effect conditional, but make always make sure it is buildable.
+
+If the boolean condition evaluates to `true`, return a `run` attribute containing
+the effect, so that it will be executed.
+
+If the boolean condition is false, return a `dependencies` attribute to make sure
+the effect's dependencies are buildable.
+
+Regardless of the condition, return a `prebuilt` attribute if it is present on
+the effect.
+
+// original size was ~43em
+image::effect-attributes.png[title=`{ staging = runIf true (/* ... */); }` shown in the dashboard,caption=,width=500]
+
+
+[discrete]
+== See also
+
+* xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]
+
+* xref:guide/deploy-a-nixos-machine.adoc#branches[Deploy a NixOS machine / branches]
+  -- an example use of `runIf` for continuous deployment

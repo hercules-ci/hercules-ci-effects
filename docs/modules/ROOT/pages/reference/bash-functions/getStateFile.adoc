@@ -1,0 +1,25 @@
+
+= `getStateFile`
+
+`getStateFile $stateName $fileName`
+
+Download a state file and write to a local file in the effect sandbox.
+
+[[parameters]]
+== Parameters
+
+[[param-stateName]]
+=== `$stateName`
+
+Name of the remote state file to read.
+
+You can find existing state files in the dashboard by navigating to your project and clicking the btn:[State] tab.
+
+[[param-fileName]]
+=== `$fileName`
+
+Local file to write to.
+
+== See also
+
+* xref:reference/bash-functions/putStateFile.adoc[]

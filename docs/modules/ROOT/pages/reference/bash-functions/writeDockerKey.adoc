@@ -1,0 +1,43 @@
+
+= `writeDockerKey`
+
+`writeDockerKey $secretName $directory`
+
+Write Docker TLS credentials correctly based on a fixed secret format.
+
+Example `secrets.json`:
+
+```json
+{
+  "default-docker": {
+    "kind": "Secret",
+    "data": {
+      "clientCertificate": "-----BEGIN CERTIFICATE-----\nMI[...]",
+      "clientKey": "-----BEGIN RSA PRIVATE KEY-----\nMI[...]",
+      "CACertificate": "-----BEGIN CERTIFICATE-----\nMI[...]"
+    }
+  }
+}
+```
+
+== Parameters
+
+=== `$secretName`
+
+_Optional_
+
+The name of the secret to read. Must match the attribute name of a xref:reference/nix-functions/mkEffect.adoc#secretsMap[`secretsMap`] entry.
+
+Default: `docker`.
+
+=== `$directory`
+
+_Optional_
+
+Where to write the key and certificates.
+
+Default: `~/.docker`; the Docker client's default location.
+
+== See also
+
+* xref:reference/bash-functions/useDockerHost.adoc[]

@@ -1,0 +1,25 @@
+
+= `putStateFile`
+
+`putStateFile $stateName $fileName`
+
+Read a local file and upload it as a state file.
+
+[[parameters]]
+== Parameters
+
+[[param-stateName]]
+=== `$stateName`
+
+Name of the remote state file to create or update. 
+
+You can find existing state files in the dashboard by navigating to your project and clicking the btn:[State] tab.
+
+[[param-fileName]]
+=== `$fileName`
+
+Local file to read from.
+
+== See also
+
+* xref:reference/bash-functions/getStateFile.adoc[]

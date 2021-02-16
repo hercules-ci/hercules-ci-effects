@@ -1,0 +1,138 @@
+
+= `runArion`
+
+_runArion {two-colons} AttrSet -> Effect_
+
+Perform an xref:arion:ROOT:index.adoc[Arion] deployment, like `arion up -d`.
+
+This function supports two styles of invocation, as illustrated in the examples:
+
+`arion-pkgs.nix`-based:
+
+```nix
+pkgs.effects.runArion {
+  name = "neat-project";
+  # requires ./arion-compose.nix and ./arion-pkgs.nix
+  directory = ./.;
+  userSetupScript = ''
+    # ...
+  '';
+}
+```
+
+or `pkgs` reuse:
+
+```nix
+pkgs.effects.runArion {
+  name = "neat-project";
+  # ignores arion-pkgs.nix even if present
+  modules = ./neat-project-arion-compose.nix;
+  userSetupScript = ''
+    # ...
+  '';
+}
+```
+
+[[parameters]]
+== `Parameters`
+
+[[param-name]]
+=== `name`
+
+The Docker Compose project name.
+
+[[param-directory]]
+=== `directory`
+
+Required unless `modules` is set.
+
+Uses the `arion-compose.nix` and `arion-pkgs.nix` files inside the passed directory.
+
+[[param-modules]]
+=== `modules`
+
+Required unless `directory` is set.
+
+Use the specified modules in place or `arion-compose.nix`. 
+Uses the `pkgs` that you passed to `hercules-ci-effects` instead of
+`arion-pkgs.nix`, unless you also set xref:param-pkgs[].
+
+Example:
+```nix
+modules = [
+  ./alternate-compose.nix
+  { config.services.webserver.service.useHostStore = false; }
+];
+```
+
+[[param-pkgs]]
+=== `pkgs`
+
+Nixpkgs invocation, optional.
+
+If xref:param-directory[] is not given, pkgs will default to the Nixpkgs that runArion linked to.
+
+Example:
+
+```nix
+pkgs = import ./pinned-nixpkgs.nix { system = "x86_64-linux"; };
+```
+
+[[param-uid]]
+=== `uid`
+
+This parameter is intended for local development only and usually does not have
+a well-defined meaning in the context of a remote deployment.
+
+By default, any use of the `uid` parameter inside the deployment will cause an
+error.
+
+[[param-hostNixStorePrefix]]
+=== `hostNixStorePrefix`
+
+Prefixes store paths on the host, allowing the Nix store to be
+stored at an alternate location without altering the format of
+store paths.
+
+See xref:arion:ROOT:options.adoc#_host_nixstoreprefix[`host.nixStorePrefix`]
+
+[[param-secretsMap]]
+=== `secretsMap`
+
+Example:
+
+```nix
+secretsMap.docker = "default-docker";
+```
+
+See xref:reference/nix-functions/mkEffect.adoc#param-secretsMap[`secretsMap` in `mkEffect`]
+
+[[param-userSetupScript]]
+=== `userSetupScript`
+
+Example:
+
+```nix
+userSetupScript = ''
+    # Uses secretsMap.docker value
+    writeDockerKey
+    useDockerHost 203.0.113.2 12376
+  '';
+```
+
+See xref:reference/nix-functions/mkEffect.adoc#param-userSetupScript[`userSetupScript` in `mkEffect`],
+  xref:reference/bash-functions/writeDockerKey.adoc[`writeDockerKey`],
+  xref:reference/bash-functions/useDockerHost.adoc[`useDockerHost`]
+
+
+[[extra-params]]
+=== `...` -- remaining arguments
+
+Other attributes are passed to xref:reference/nix-functions/mkEffect.adoc[mkEffect], which passes its remaining arguments to `mkDerivation`.
+
+[discrete]
+== See also
+
+* xref:reference/nix-functions/runNixOps.adoc[`runNixOps`] -- provision cloud resources and VM-based networks of NixOS machines
+* xref:reference/bash-functions/writeDockerKey.adoc[`writeDockerKey`] -- write Docker TLS credentials from a secret
+* xref:reference/bash-functions/useDockerHost.adoc[`useDockerHost`] -- set environment to use a Docker host

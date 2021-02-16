@@ -1,0 +1,231 @@
+
+= `mkEffect`
+
+_mkEffect {two-colons} AttrSet -> Effect_
+
+A framework for writing any effect.
+
+== Essential Parameters
+
+[[extra-params,`mkEffect{...}`]]
+=== `...` -- remaining arguments
+
+Any arguments not explicitly listed here are passed through unmodified to https://nixos.org/manual/nixpkgs/stable/#chap-stdenv[`pkgs.stdenvNoCC.mkDerivation`],
+where most attributes are added to the process environment.
+Most stdenv functionality can be used here as well, with the notable exception of not having build outputs.
+
+[[param-effectScript]]
+=== `effectScript`
+
+Bash statements that form the essence of the effect.
+
+[[param-userSetupScript]]
+=== `userSetupScript`
+
+Bash statements to set up user configuration files. Unlike
+the Nix build sandbox, Effects can make use of a home directory.
+
+Various bash functions are available, such as xref:reference/bash-functions/writeSSHKey.adoc[]
+
+When writing an effect function, it's often a good idea to let the caller extend
+this with their own script.
+
+[[param-inputs]]
+=== `inputs`
+
+A list of packages that are added to `PATH`.
+This behaves like https://nixos.org/manual/nixpkgs/stable/#var-stdenv-nativeBuildInputs[`nativeBuildInputs` in `mkDerivation`^,role=external].
+
+[[param-secretsMap]]
+=== `secretsMap`
+
+An attribute set of strings that select secrets from the agent's
+`secrets.json`. For example
+
+```nix
+secretsMap = {
+  "ssh" = "default-ssh";
+};
+```
+
+reads the `default-ssh` secret from `secrets.json` and makes it available to
+the effect as a secret named `ssh`.
+
+== All Effect-related parameters
+
+This does not include all `stdenv` parameters that are passed through.
+
+[[param-dontUnpack]]
+=== `dontUnpack`
+
+Set this to `true` if your effect does not need a `src` attribute. Many effects
+can use prebuilt configurations and therefore don't require source files of their own.
+
+`mkEffect` xref:param-phases[does keep] `stdenv`'s `unpackPhase` and `patchPhase`.
+
+[[param-effectCheckPhase]]
+=== `effectCheckPhase`
+
+Default: run the `preEffectCheck` hooks, xref:param-effectCheckScript[] and `postEffectCheck` hooks.
+
+Not meant to be set; use xref:param-effectCheckScript[] or add to the hooks.
+
+[[param-effectCheckScript]]
+=== `effectCheckScript`
+
+Bash statement that check the state of any updated resources.
+
+Runs after xref:param-putStatePhase[] and `preEffectCheck` hooks.
+
+[discrete]
+=== `effectScript`
+
+See xref:param-effectScript[essential parameters]
+
+[[param-effectPhase]]
+=== `effectPhase`
+
+Default: run the `preEffect` hooks, xref:param-effectScript[] and `postEffect` hooks.
+
+Not meant to be set; use xref:param-effectScript[] or add to the hooks.
+
+[[param-getStatePhase]]
+=== `getStatePhase`
+
+Default: run the `preGetState` hooks, xref:param-getStateScript[] and `postGetState` hooks.
+
+Not meant for overriding. See xref:param-getStateScript`.
+
+[[param-getStateScript]]
+=== `getStateScript`
+
+Bash statements to retrieve the state files.
+
+See also xref:param-putStateScript[].
+
+[[param-initPhase]]
+=== `initPhase`
+
+Default: run the `preInit` hooks, xref:param-initScript[] and `postInit` hooks.
+
+Not meant for overriding. Most setup is better done in xref:param-userSetupPhase[].
+
+[[param-initScript]]
+=== `initScript`
+
+Performs very basic setup tasks to make the sandbox match some expectations.
+
+Not meant to be set. See xref:param-userSetupScript[].
+
+[discrete]
+=== `inputs`
+
+See xref:param-inputs[essential parameters]
+
+[[param-passthru]]
+=== `passthru`
+
+Adds attributes to the returned effect. Use this to set the `prebuilt` attribute
+that is recognized by xref:reference/nix-functions/runIf.adoc[]
+
+```nix
+    passthru = {
+      prebuilt = myTopLevelConfigDerivation;
+    } // (args.passthru or {});
+```
+
+[[param-phases]]
+=== `phases`
+
+Overrides the default phases:
+
+* xref:param-initPhase[]
+* `unpackPhase` (for when `src` is set)
+* `patchPhase` (same)
+* xref:param-getStatePhase[]
+* xref:param-userSetupPhase[]
+* xref:param-priorCheckPhase[]
+* xref:param-effectPhase[]
+* xref:param-putStatePhase[]
+* xref:param-effectCheckPhase[]
+
+[[param-priorCheckPhase]]
+=== `priorCheckPhase`
+
+NOTE: `priorCheckScript` can not be used to prevent further execution of the effect.
+
+Default: run the `prePriorCheck` hooks, xref:param-priorCheckScript[`priorCheckScript`], report the exit status of that script, and run the `postPriorCheck` hooks.
+
+Execution of the effect is allowed to continue despite a failed `priorCheckScript`.
+
+Hook execution is as normal.
+
+[[param-priorCheckScript]]
+=== `priorCheckScript`
+
+NOTE: `priorCheckScript` can not be used to prevent further execution of the effect.
+
+Default: `""`
+
+Bash statements that check the state of existing resources before the effect
+runs. Effect execution continues regardless of the outcome, in hope that the
+effect improves the state of the resources.
+
+
+[[param-putStatePhase]]
+=== `putStatePhase`
+
+Default: run the `prePutState` hooks, xref:param-putStateScript[] and `postPutState` hooks.
+
+Not meant for overriding. See xref:param-putStateScript[].
+
+Runs not only after xref:param-effectPhase[] but also after any failure.
+
+[[param-putStateScript]]
+=== `putStateScript`
+
+Bash statements to store the state files. These will also be run if the script fails, along with the `prePutState` and `postPutState` hooks.
+
+See also xref:param-getStateScript[].
+
+[discrete]
+=== `secretsMap`
+
+See xref:param-secretsMap[essential parameters]
+
+[[param-userSetupPhase]]
+=== `userSetupPhase`
+
+Default: run the `preUserSetup` hooks, xref:param-userSetupScript[`userSetupScript`] and `postUserSetup` hooks.
+
+Not meant for overriding; use xref:param-userSetupScript[`userSetupScript`] or add to the hooks.
+
+[discrete]
+=== `userSetupScript`
+
+See xref:param-userSetupScript[essential parameters]
+
+[[return-value]]
+== Return value
+
+`mkEffect` returns an "Effect", which is a derivation-like attribute set that will be run in `hercules-ci-agent`'s Effect sandbox instead of Nix's build sandbox, as explained in the xref:index.adoc[introduction]. It can not be used as a dependency of a derivation, because that would undo Nix's nice properties.
+
+It retains most of the attributes you can expect on a derivation attribute set. Notable attributes are listed below.
+
+[[attr-isEffect]]
+=== `isEffect`
+
+Marks this derivation as an effect, rather than a buildable derivation.
+
+=== `prebuilt`
+
+_Optional_
+
+A derivation that contains all the configuration that will be applied.
+
+This can be set via xref:param-passthru[].
+
+[discrete]
+== See also
+
+* xref:reference/nix-functions/runIf.adoc[`runIf`]

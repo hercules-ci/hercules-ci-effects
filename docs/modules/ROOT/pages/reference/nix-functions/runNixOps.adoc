@@ -1,0 +1,104 @@
+
+= `runNixOps`
+
+_runNixOps {two-colons} AttrSet -> Effect_
+
+Provision interrelated machine configurations and other cloud resources.
+
+For a practical introduction, check out the guide xref:guide/deploy-a-nixops-network.adoc[].
+
+
+[[parameters]]
+== `Parameters`
+
+[[param-name]]
+=== `name`
+
+The NixOps deployment name.
+
+[[param-src]]
+=== `src`
+
+NixOps network expressions and other files required for the deployment.
+Unlike some other deployment methods, NixOps needs access to the actual expression files.
+
+Confidential information should not be committed and included here, but inserted via
+`secrets.json` and xref:reference/nix-function/mkEffect.adoc#param-userSetupScript[`userSetupScript`].
+
+[[param-networkFiles]]
+=== `networkFiles`
+
+Default: `["network.nix"]`
+
+Files in `src` that are always used as network expressions.
+
+[[param-prebuild]]
+=== `prebuild`
+
+Default: `true`
+
+Whether to build the network during the Hercules CI build phase. This ensures
+that all packages are in the cache and avoids attempting a deployment when
+some packages can't be built.
+
+
+[[param-prebuildOnlyNetworkFiles]]
+=== `prebuildOnlyNetworkFiles`
+
+Default: `[]`
+
+Prebuild runs outside of NixOps, which means that some info may be missing.
+Specify extra network expressions here to fill in or override the missing definitions.
+
+[[param-deployOnlyNetworkFiles]]
+=== `deployOnlyNetworkFiles`
+
+Default: `[]`
+
+Network files that are only used when deploying; not when prebuilding.
+
+[[param-stateName]]
+=== `stateName`
+
+Default: `"nixops-$\{name}.json"`
+
+Override the Hercules CI state file name, in case it's necessary.
+
+The state file only contains a single deployment.
+
+[[param-knownHostsName]]
+=== `knownHostsName`
+
+Default: `"nixops-$\{name}.known_hosts"`
+
+Some NixOps backends do not update the `~/.ssh/known_hosts` file. `runNixOps`
+will persist this file as a state file with the name set here.
+
+[[param-secretsMap]]
+=== `secretsMap`
+
+See xref:reference/nix-functions/mkEffect.adoc#param-secretsMap[`secretsMap` in `mkEffect`]
+
+[[param-userSetupScript]]
+=== `userSetupScript`
+
+See xref:reference/nix-functions/mkEffect.adoc#param-userSetupScript[`userSetupScript` in `mkEffect`]
+
+[[param-NIX_PATH]]
+=== `NIX_PATH`
+
+Default: `"nixpkgs=${pkgs.path}"`, where `pkgs` is the Nixpkgs invocation that included the effects overlay.
+
+Necessary for looking up `<nixpkgs>` or potentially other locations using angle bracket syntax.
+
+[[extra-params]]
+=== `...` -- remaining arguments
+
+Other attributes are passed to xref:reference/nix-functions/mkEffect.adoc[mkEffect], which passes its remaining arguments to `mkDerivation`.
+
+[discrete]
+== See also
+
+* xref:reference/nix-functions/runNixOS.adoc[`runNixOS`] -- a simpler solution for single pre-existing machines
+
+* xref:reference/nix-functions/runArion.adoc[`runArion`] -- deploy services to Docker using NixOS, Nix or Docker-based images

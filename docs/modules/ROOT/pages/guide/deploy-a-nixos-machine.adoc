@@ -1,0 +1,158 @@
+
+= Deploy a NixOS Machine
+
+This guide will show you how you can roll out a NixOS configuration when `master`
+is updated.
+
+NOTE: When an agent deploys itself, it interrupts its deployment. This is a sub-par experience that will be https://github.com/hercules-ci/hercules-ci-agent/issues/273[improved.] Nonetheless, this may work well enough to be useful.
+
+Prerequisites:
+
+ - You have xref:master@hercules-ci:ROOT:getting-started/index.adoc[set up an agent] for the account that owns the repository
+ - You have root access to a NixOS machine
+ - You have added a repository to your Hercules CI installation
+
+== Add an SSH Key
+
+The agent needs valid credentials to log in, so we configure this before we
+add the effect.
+
+If your agent doesn't already have an appropriate keypair, add a secret to your
+agent's `secrets.json` file.
+
+Use the `\n` escape sequence to enter line breaks.
+
+NOTE: the ergonomics https://github.com/hercules-ci/hercules-ci-agent/issues/274[will be improved]
+
+```json
+  "default-ssh": {
+    "kind": "Secret",
+    "data": {
+      "privateKey":
+         "-----BEGIN OPENSSH PRIVATE KEY-----\n.....\n-----END OPENSSH PRIVATE KEY-----\n",
+      "publicKey":
+         "ssh-rsa ..... default-ssh@hercules-ci\n"
+    }
+  }
+```
+
+Add the public key to your host `/etc/nixos/configuration.nix`
+
+```nix
+users.users.root.openssh.authorizedKeys.keyFiles =
+  ["ssh-rsa ..... default-ssh@hercules-ci"];
+```
+
+and switch
+
+```console
+neathost# nixos-rebuild switch
+```
+
+TIP: If you want to use your binary cache, configure it on the remote machine and `nixos-rebuild switch`. Although not a requirement, it is advisable when you have
+significant custom store paths and multiple machines or a slow connection to them.
+
+== Gather configuration
+
+Copy the `/etc/nixos/configuration.nix` and any dependencies like `hardware-configuration.nix` to your repository.
+
+Determine the version of the Nixpkgs channel:
+
+```console
+# nixos-version 
+20.09.1632.a6a3a368dda (Nightingale)
+
+```
+
+Find the SSH host key, locally in your SSH client state. Use the machine's IP address or hostname:
+
+```console
+$ grep 203.0.113.2 ~/.ssh/known_hosts
+203.0.113.2 ssh-ed25519 AA.....
+
+```
+
+Alternatively, if you haven't logged in there before, you can use `ssh-keyscan`, although you should verify the keys.
+
+Use the commit id, hostname and host key to create a `ci.nix` file in your repository:
+
+```nix
+{ src ? { ref = null; } }:
+let
+  # replace hash or use different pinning solution
+  nixpkgs = builtins.fetchTarball
+    "https://github.com/NixOS/nixpkgs/archive/a6a3a368dda.tar.gz";
+  pkgs = import nixpkgs {
+    system = "x86_64-linux";
+    overlays = [
+      (import (effectsSrc + "/overlay.nix"))
+    ];
+  };
+
+  # update hash if desired or use different pinning solution
+  effectsSrc = builtins.fetchTarball
+    "https://github.com/hercules-ci/hercules-ci-effects/archive/b67cfbbb31802389e1fb6a9c75360968d201693b.tar.gz";
+
+  inherit (pkgs.effects) runNixOS runIf;
+
+in
+{
+  neathost = runIf (src.ref == "refs/heads/master")
+    (runNixOS {
+      configuration = ./configuration.nix;
+
+      # this references secrets.json on your agent
+      secretsMap.ssh = "default-ssh";
+
+      # replace this with the appropriate line from ~/.ssh/known_hosts
+      userSetupScript = ''
+        writeSSHKey ssh
+        cat >>~/.ssh/known_hosts <<EOF
+        203.0.113.2 ssh-ed25519 AA.....
+        EOF
+      '';
+
+      # replace with hostname or ip address for ssh
+      sshDestination = "203.0.113.2";
+
+    });
+}
+```
+
+== Try it
+
+When you commit and push these files to a new branch (not `master`), you'll see
+that `runIf` has turned `nearhost` into an attrset with `dependencies` and `prebuilt` derivations. These make sure your NixOS deployment effect is likely
+to work, but don't perform the actual deployment.
+
+When you create a pull request from your branch into `master`, and Hercules CI
+gives it a good status.
+
+When you merge your branch into `master`, the job for `master` will have a
+`neathost.run` effect that does perform the deployment.
+
+[[branches]]
+== Branches
+
+Instead of `master` in `refs/heads/master`, you can make your deployment track
+other branches.
+
+Multiple machines can be defined side by side in their own attributes,
+potentially tracking different branches if that fits your workflow.
+
+For example, you can implement a staging/production setup with continuous
+deployment to staging and manually triggered deployment to production:
+
+```nix
+stagingHost = runIf (src.ref == "refs/heads/master")
+  (/* ... */);
+
+productionHost = runIf (src.ref == "refs/heads/production")
+  (/* ... */);
+```
+
+== More
+
+You have completed this guide! Specifically you have used CI to trigger the deployment of an existing NixOS machine and you've configured it to track the right branch.
+
+If you want to know more, you can check out the xref:reference/nix-functions/runNixOS.adoc[`runNixOS` function reference] or read about the other effects in the menu.

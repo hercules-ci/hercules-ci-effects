@@ -1,0 +1,36 @@
+
+= `writeSSHKey`
+
+`writeSSHKey $secretName $privateName`
+
+Write SSH credentials correctly based on a fixed secret format.
+
+`secrets.json` example:
+
+```json
+  "default-ssh": {
+    "kind": "Secret",
+    "data": {
+      "privateKey":
+         "-----BEGIN OPENSSH PRIVATE KEY-----\n.....\n-----END OPENSSH PRIVATE KEY-----\n",
+      "publicKey":
+         "ssh-rsa ..... default-ssh@hercules-ci\n"
+    }
+  }
+```
+
+== Parameters
+
+[[param-secretName]]
+=== `$secretName`
+
+_Optional._ Default: `ssh`
+
+The name of the secret to read. Must match the attribute name of a xref:reference/nix-functions/mkEffect.adoc#secretsMap[`secretsMap`] entry.
+
+[[param-privateName]]
+=== `$privateName`
+
+_Optional._ Default: `~/.ssh/id_rsa`
+
+Where to write the private key. A public key will be derived and written to `$\{privateName}.pub`

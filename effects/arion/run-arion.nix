@@ -12,7 +12,7 @@ args@{
 
   # Arion compose modules, example: [ ./alternate-compose.nix ]
   # If you only specify modules, pkgs will default to the Nixpkgs that runArion linked to.
-  modules,
+  modules ? [ (directory + "/arion-compose.nix") ],
 
   # Nixpkgs invocation
   #

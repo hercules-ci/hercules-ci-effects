@@ -1,0 +1,96 @@
+
+= `runNixDarwin`
+
+_runNixDarwin {two-colons} AttrSet -> Effect_
+
+Deploys a nix-darwin configuration, to maintain a macOS machine.
+
+Use the nix-darwin installer first, then base the configuration off the generated ~/.nixpkgs/darwin-configuration.nix.
+
+[[parameters]]
+== Parameters
+
+[[param-configuration]]
+=== `configuration`
+
+The main configuration module; file path or module expression.
+
+You can start out by copying `~/.nixpkgs/darwin-configuration.nix` into your
+repo.
+
+
+[[param-nix-darwin]]
+=== `nix-darwin`
+
+Path of the nix-darwin sources to use.
+
+
+[[param-nixpkgs]]
+=== `nixpkgs`
+
+Path of the Nixpkgs sources to use.
+
+Default: `pkgs.path`, where `pkgs` is the Nixpkgs invocation that included the effects overlay.
+
+
+[[param-secretsMap]]
+=== `secretsMap`
+
+See xref:reference/nix-functions/mkEffect.adoc#param-secretsMap[`secretsMap` in `mkEffect`]
+
+Example:
+
+```nix
+    secretsMap.ssh = "myuser-ssh";
+```
+
+
+[[param-sshDestination]]
+=== `sshDestination`
+
+Hostname to SSH to.
+
+[quote, `man 1 ssh`]
+"destination, which may be specified as either [user@]hostname or a URI of
+ the form ssh://[user@]hostname[:port.]"
+
+
+[[param-system]]
+=== `system`
+
+The Nix `system` of the machine to deploy.
+
+Example: `x86_64-darwin`
+
+Example: `aarch64-darwin`
+
+See https://nixos.org/manual/nix/stable/#ch-supported-platforms[Nix supported platforms,role=external]
+
+[[param-userSetupScript]]
+=== `userSetupScript`
+
+Example:
+
+```nix
+    userSetupScript = ''
+      writeSSHKey
+      cat >>~/.ssh/known_hosts <<EOF
+      203.0.113.2 ecdsa-sha2-nistp256 AA.....pw=
+      EOF
+    '';
+```
+
+See:
+
+* xref:reference/bash-functions/writeSSHKey.adoc[]
+* xref:reference/nix-functions/mkEffect.adoc#param-userSetupScript[`userSetupScript` in `mkEffect`]
+
+[[extra-params]]
+=== `...` -- remaining arguments
+
+Other attributes are passed to xref:reference/nix-functions/mkEffect.adoc[mkEffect], which passes its remaining arguments to `mkDerivation`.
+
+[discrete]
+== See also
+
+* xref:reference/nix-functions/runNixOS.adoc[`runNixOS`]

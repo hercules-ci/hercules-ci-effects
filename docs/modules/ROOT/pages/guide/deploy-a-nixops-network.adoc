@@ -1,0 +1,165 @@
+
+= Deploy a NixOps Network
+
+This guide will show you how you can roll out a NixOps configuration when a branch is updated.
+
+WARNING: When an agent deploys itself, it interrupts its deployment. This is might cause issues with NixOps' state file, so using NixOps to deploy your agents is not recommended for now. This will be https://github.com/hercules-ci/hercules-ci-agent/issues/273[improved.]
+
+NOTE: Usage of secrets inside a NixOps deployment has not been documented yet, because a standard solution is under development.
+
+Prerequisites:
+
+ - You have xref:master@hercules-ci:ROOT:getting-started/index.adoc[set up an agent] for the account that owns the repository
+ - You have deployed a NixOps network before
+ - You have added a repository to your Hercules CI installation
+ - You have xref:guide/install-the-hci-command.adoc[added the `hci` command] to your shell or user profile
+
+== Import state file (optional)
+
+If you want to deploy an existing network, you need to import the state file in
+order to give access to the existing machines and resources.
+
+First, find the network you want to automate.
+
+```console
+$ nixops list
++--------------------------------------+----------------------------------+-----------------------------+------------+---------+
+| UUID                                 | Name                             | Description                 | # Machines |   Type  |
++--------------------------------------+----------------------------------+-----------------------------+------------+---------+
+| e8c96407-026f-11eb-8821-024213d29dcb | foo                              | Unnamed NixOps network      |          0 |         |
++--------------------------------------+----------------------------------+-----------------------------+------------+---------+
+```
+
+Then, upload the state. State files identified by the project and file name.
+
+[source,console]
+----
+$ nixops export -d e8c96407-026f-11eb-8821-024213d29dcb \ # <1>
+    | hci state put --project github/neat-org/neat-repo \ # <2>
+        --name nixops-foo.json \ # <3>
+        --file -
+----
+<1> replace by the UUID of your deployment
+<2> replace by the project path that matches your repository
+<3> replace `foo` by the name of the deployment
+
+== Add `runNixOps` to `ci.nix`
+
+This guide helps you write the `ci.nix` file in steps.
+
+Let's start with a basic invocation of xref:reference/nix-functions/runNixOps.adoc[`runNixOps`]:
+
+[source,nix]
+----
+let
+  # replace hash or use different pinning solution
+  nixpkgs = builtins.fetchTarball
+    "https://github.com/NixOS/nixpkgs/archive/a6a3a368dda.tar.gz";
+  pkgs = import nixpkgs {
+    system = "x86_64-linux";
+    overlays = [
+      (import "${effectsSrc}/overlay.nix")
+    ];
+  };
+
+  # update hash if desired or use different pinning solution
+  effectsSrc = builtins.fetchTarball
+    "https://github.com/hercules-ci/hercules-ci-effects/archive/b67cfbbb31802389e1fb6a9c75360968d201693b.tar.gz";
+
+  inherit (pkgs.effects) runNixOps runIf;
+  inherit (pkgs) lib;
+in
+
+{
+  neat-network = runIf true (
+    runNixOps {
+      name = "foo";
+      src = lib.cleanSource ./.; <1>
+      networkFiles = ["network.nix" "network-aws.nix"]; <2>
+    }
+  );
+}
+----
+<1> Unlike some other deployment methods, NixOps needs access to the actual expression files.
+<2> For the same reason, we specify the expression files as path strings relative to `src`.
+
+
+== Add secrets to your agents
+
+For example, with `writeAWSSecret`
+
+```nix
+runNixOps {
+  # ...
+  userSetupScript = ''
+    writeAWSSecret aws default
+  '';
+  secretsMap."aws" = "neat-aws";
+}
+```
+
+and add to `secrets.json` on your agents:
+
+```json
+  "neat-aws": {
+    "kind": "Secret",
+    "data": {
+      "aws_access_key_id": "AKIA.....",
+      "aws_secret_access_key": "....."
+    }
+  }
+```
+
+== Prebuild the network
+
+To make sure all packages are cached, create a network file to replace any
+values that are unknown when the network configuration can't access secrets or
+cloud resources.
+
+Create an empty network file `network-stub.nix`:
+
+```nix
+{
+}
+```
+
+and add it to `prebuildOnlyNetworkFiles`:
+
+```nix
+runNixOps {
+  # ...
+  networkFiles = ["network.nix" "network-aws.nix"];
+  prebuildOnlyNetworkFiles = ["network-stub.nix"];
+}
+```
+
+Then iterate on `network-stub.nix` until `nix-instantiate ci.nix -A neat-network.prebuilt` succeeds.
+
+See xref:reference/nix-functions/runNixOps.adoc#param-deployOnlyNetworkFiles[`deployOnlyNetworkFiles`] if you have overrides that you only want to use during continuous deployment.
+
+== Push
+
+Commit any remaining changes and push your branch. Your agents will build and deploy your network.
+
+Meanwhile, you can configure which branch causes your deployment to run. For example, if you only want to deploy when you've merged into the `production` branch, use:
+
+```nix
+# Make ci.nix a function with default argument
+{ src ? { ref = null; }}:
+
+# ...
+
+  neat-network = runIf (src.ref == "refs/heads/production") (
+    runNixOps {
+      # ...
+    }
+  );
+
+}
+```
+
+After push/PR/merge, your continuous deployment is ready for use.
+
+== Further reading
+
+* xref:reference/nix-functions/runNixOps.adoc[`runNixOps`] function

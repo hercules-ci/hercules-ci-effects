@@ -1,0 +1,23 @@
+
+= `useDockerHost`
+
+`useDockerHost $host $port`
+
+Configure environment variables to connect to specified Docker host.
+
+[[parameters]]
+== Parameters
+
+[[param-host]]
+=== `$host`
+
+Hostname or IP address to connect to.
+
+[[param-port]]
+=== `$port`
+
+_Optional._ Port number of the Docker API, defaults to 2376; the Docker client default.
+
+== See also
+
+* xref:reference/bash-functions/writeDockerKey.adoc[]

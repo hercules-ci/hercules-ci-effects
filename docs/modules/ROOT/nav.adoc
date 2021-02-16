@@ -1,0 +1,28 @@
+
+* ⚠ NOTE ⚠
+* Effects are in beta and require a recent `hercules-ci-agent` from the `master` branch.
+
+* xref:index.adoc[Introduction]
+* Guides
+** xref:guide/deploy-a-nixos-machine.adoc[Deploy a NixOS machine]
+** xref:guide/deploy-a-nixops-network.adoc[Deploy a NixOps network]
+** xref:guide/install-the-hci-command.adoc[Install the `hci` command]
+** xref:guide/write-a-custom-effect.adoc[Write a Custom Effect]
+* Nix Functions Reference
+** _Generic Functions_
+** xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]
+** xref:reference/nix-functions/runIf.adoc[`runIf`]
+** _Deployment Functions_
+** xref:reference/nix-functions/runArion.adoc[`runArion`]
+** xref:reference/nix-functions/runNixDarwin.adoc[`runNixDarwin`]
+** xref:reference/nix-functions/runNixOps.adoc[`runNixOps`]
+** xref:reference/nix-functions/runNixOS.adoc[`runNixOS`]
+* Bash Functions Reference
+** xref:reference/bash-functions/getStateFile.adoc[`getStateFile`]
+** xref:reference/bash-functions/putStateFile.adoc[`putStateFile`]
+** xref:reference/bash-functions/readSecretJSON.adoc[`readSecretJSON`]
+** xref:reference/bash-functions/readSecretString.adoc[`readSecretString`]
+** xref:reference/bash-functions/useDockerHost.adoc[`useDockerHost`]
+** xref:reference/bash-functions/writeAWSSecret.adoc[`writeAWSSecret`]
+** xref:reference/bash-functions/writeDockerKey.adoc[`writeDockerKey`]
+** xref:reference/bash-functions/writeSSHKey.adoc[`writeSSHKey`]
