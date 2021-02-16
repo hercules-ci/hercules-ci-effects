@@ -5,6 +5,8 @@
 * xref:index.adoc[Introduction]
 * Guides
 ** xref:guide/deploy-a-nixos-machine.adoc[Deploy a NixOS machine]
+** xref:guide/deploy-a-nixops-network.adoc[Deploy a NixOps network]
+** xref:guide/install-the-hci-command.adoc[Install the `hci` command]
 ** xref:guide/write-a-custom-effect.adoc[Write a Custom Effect]
 * Nix Functions Reference
 ** _Generic Functions_
@@ -19,5 +21,6 @@
 ** xref:reference/bash-functions/readSecretJSON.adoc[`readSecretJSON`]
 ** xref:reference/bash-functions/readSecretString.adoc[`readSecretString`]
 ** xref:reference/bash-functions/useDockerHost.adoc[`useDockerHost`]
+** xref:reference/bash-functions/writeAWSSecret.adoc[`writeAWSSecret`]
 ** xref:reference/bash-functions/writeDockerKey.adoc[`writeDockerKey`]
 ** xref:reference/bash-functions/writeSSHKey.adoc[`writeSSHKey`]
