@@ -1,9 +1,9 @@
-{ gnused, lib, mkEffect, nix, nixops, path, system, runCommand }:
+nixpkgsArgs@{ gnused, lib, mkEffect, nix, path, system, runCommand }:
 
 let
   # This shouldn't be necessary after flakes.
   # We don't use this for the actual deployment.
-  nixFiles = runCommand "${nixops.name}-nix-files" {
+  getNixFiles = nixops: runCommand "${nixops.name}-nix-files" {
     inherit (nixops) plugins;
   } ''
     mkdir $out
@@ -37,7 +37,8 @@ let
 
   '';
 
-  prebuilt = args@{name, networkArgs, networkFiles, src}: let
+  prebuilt = args@{name, networkArgs, networkFiles, src, nixops}: let
+      nixFiles = getNixFiles nixops;
       origSrc = src.origSrc or src;
       machineInfo = import "${nixFiles}/eval-machine-info.nix" {
         inherit system;
@@ -99,6 +100,8 @@ args@{
   # Defaults to pkgs.path
   NIX_PATH ? "nixpkgs=${path}",
 
+  nixops,
+
   # Other variables are passed to mkEffect, which is similar to mkDerivation.
   ...
 }:
@@ -106,7 +109,7 @@ mkEffect (
     lib.filterAttrs (k: v: k != "networkArgs" && k != "prebuildOnlyNetworkFiles") args
     // lib.optionalAttrs prebuild {
         prebuilt = prebuilt { 
-          inherit name networkArgs src;
+          inherit name networkArgs src nixops;
           networkFiles = networkFiles ++ prebuildOnlyNetworkFiles;
         };
       }
