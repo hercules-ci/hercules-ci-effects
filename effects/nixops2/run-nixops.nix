@@ -1,4 +1,4 @@
-nixpkgsArgs@{ gnused, lib, mkEffect, nix, path, system, runCommand }:
+nixpkgsArgs@{ gnused, lib, mkEffect, nix, path, system, runCommand, openssh }:
 
 let
   # This shouldn't be necessary after flakes.
@@ -115,7 +115,7 @@ mkEffect (
       }
     // {
   name = "nixops-${name}";
-  inputs = [ nix nixops ];
+  inputs = [ nix nixops openssh ];
 
   # Like `args // `, but also sets the defaults
   inherit deployOnlyNetworkFiles networkFiles stateName knownHostsName NIX_PATH;
