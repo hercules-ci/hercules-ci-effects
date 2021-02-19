@@ -155,8 +155,7 @@ mkEffect (
     nixops --version
     nixops deploy \
       --confirm \
-      --allow-reboot \
-      --allow-recreate \
+      ;
   '';
 
   prePutState = ''
