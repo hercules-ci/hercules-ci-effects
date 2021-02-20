@@ -47,7 +47,7 @@ some packages can't be built.
 
 Default: `[]`
 
-Prebuild runs outside of NixOps, which means that some info may be missing.
+xref:param-prebuild[Prebuild] runs outside of NixOps, which means that some info may be missing.
 Specify extra network expressions here to fill in or override the missing definitions.
 
 [[param-deployOnlyNetworkFiles]]
