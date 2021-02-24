@@ -81,7 +81,7 @@ args@{
   ...
 }:
 let
-  dryRunFlag = if isDryRun then "--dry-run" else "";
+  dryRunFlag = lib.optionalString isDryRun "--dry-run";
 in
 mkEffect (
     lib.filterAttrs (k: v: k != "networkArgs" && k != "prebuildOnlyNetworkFiles") args
