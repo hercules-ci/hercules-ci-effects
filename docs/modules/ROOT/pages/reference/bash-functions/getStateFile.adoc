@@ -3,7 +3,7 @@
 
 `getStateFile $stateName $fileName`
 
-Download a state file and write to a local file in the effect sandbox.
+Download a state file and write to a local file in the effect sandbox. If the state file does not exist, the file at `$fileName` is removed.
 
 [[parameters]]
 == Parameters
@@ -18,7 +18,7 @@ You can find existing state files in the dashboard by navigating to your project
 [[param-fileName]]
 === `$fileName`
 
-Local file to write to.
+Local file to write to, or remove if the remote state file does not exist.
 
 == See also
 
