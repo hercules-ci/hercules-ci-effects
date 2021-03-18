@@ -6,6 +6,7 @@
 * Guides
 ** xref:guide/deploy-a-nixos-machine.adoc[Deploy a NixOS machine]
 ** xref:guide/deploy-a-nixops-network.adoc[Deploy a NixOps network]
+** xref:guide/configure-git-crypt.adoc[Configure git-crypt]
 ** xref:guide/write-a-custom-effect.adoc[Write a Custom Effect]
 * Nix Functions Reference
 ** _Generic Functions_
@@ -16,6 +17,8 @@
 ** xref:reference/nix-functions/runNixDarwin.adoc[`runNixDarwin`]
 ** xref:reference/nix-functions/runNixOps.adoc[`runNixOps`]
 ** xref:reference/nix-functions/runNixOS.adoc[`runNixOS`]
+* Hooks Reference
+** xref:reference/hooks/git-crypt-hook.adoc[`git-crypt-hook`]
 * Bash Functions Reference
 ** xref:reference/bash-functions/getStateFile.adoc[`getStateFile`]
 ** xref:reference/bash-functions/putStateFile.adoc[`putStateFile`]
@@ -24,4 +27,5 @@
 ** xref:reference/bash-functions/useDockerHost.adoc[`useDockerHost`]
 ** xref:reference/bash-functions/writeAWSSecret.adoc[`writeAWSSecret`]
 ** xref:reference/bash-functions/writeDockerKey.adoc[`writeDockerKey`]
+** xref:reference/bash-functions/writeGPGKey.adoc[`writeGPGKey`]
 ** xref:reference/bash-functions/writeSSHKey.adoc[`writeSSHKey`]

@@ -1,0 +1,78 @@
+
+= Configure `git-crypt`
+
+This guide will show you how to configure your agent and your effects to decrypt `git-crypt`-encrypted files.
+
+`git-crypt` is a tool that hooks into git to provide per-file encryption.
+Hercules CI does not decrypt these files before evaluation, so you do not have to worry about accidentally adding secrets to the (system-wide readable) Nix store, or transparently uploading secrets to a binary cache.
+
+WARNING: `hci effect run` *will* add decrypted secrets to the store. This will be resolved in https://github.com/hercules-ci/hercules-ci-effects/issues/20[hercules-ci-effects#20]. Hercules CI Agent does not experience this problem.
+
+Prerequisites:
+
+* You have xref:master@hercules-ci:ROOT:getting-started/index.adoc[set up an agent] for the account that owns the repository
+* You have added a repository to your Hercules CI installation
+* You are configuring an effect that needs to access decrypted files
+
+== Add a private key
+
+With `git-crypt`, you can give access to the per-repo encryption key via GPG. This means that you can configure your agent(s) with a single private key and then give access to the agents with the `git crypt` command.
+
+First, generate a key for the agent(s).
+
+```console
+$ keyId='Hercules CI Agent <hercules-ci-agent@example.com>' # replace example.com
+$ gpg --quick-generate-key "$keyId"
+```
+
+GPG will ask for a passphrase. If you choose not to use a passphrase, remember to delete the private key at the end of this section.
+
+Add the public and private key to your local `secrets.json`.
+
+```console
+hci secret add default-gpg \
+  --string-file privateKey <(gpg --armor --export-secret-key "$keyId") \
+  --string-file publicKey <(gpg --armor --export "$keyId")
+```
+
+Copy the new secret to your agent's `secrets.json` as well.
+
+Remove the local copy of the private key.
+
+```console
+$ gpg --delete-secret-key "$keyId"
+```
+
+== Share the key with your agents
+
+You can now share the repository key with your agents.
+
+```console
+~/my-repo$ git crypt add-gpg-user "$keyId"
+```
+
+== Add decryption to your effect
+
+Add or modify your effect to include the following attributes:
+
+```nix
+  src = lib.cleanSource ./.;
+  inputs = [ effects.git-crypt-hook ];
+  preUnpack = ''
+    writeGPGKey git-crypt
+  '';
+  secretsMap.git-crypt = "default-gpg";
+```
+
+The `src` attribute must include:
+
+* the `.git-crypt` directory at the root
+* the `.gitattributes` files
+
+
+[discrete]
+== Further reading
+
+* xref:reference/hooks/git-crypt-hook.adoc[`git-crypt-hook` hook reference]
+* xref:reference/bash-functions/writeGPGKey.adoc[`writeGPGKey` bash function reference]
+* https://github.com/AGWA/git-crypt[`git-crypt` on GitHub]
