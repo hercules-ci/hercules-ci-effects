@@ -1,0 +1,37 @@
+
+= `writeGPGKey`
+
+`writeGPGKey $secretName`
+
+Write a PGP private key using GnuPG.
+
+`secrets.json` example:
+
+```json
+  "default-gpg": {
+    "kind": "Secret",
+    "data": {
+      "privateKey":
+         "-----BEGIN PGP PRIVATE KEY BLOCK-----\n...",
+      "publicKey":
+         "-----BEGIN PGP PUBLIC KEY BLOCK-----\n..."
+    }
+  }
+```
+
+`hci secret add` example:
+
+```console
+hci secret add default-gpg \
+  --string-file privateKey <(gpg --armor --export-secret-key "$keyId") \
+  --string-file publicKey <(gpg --armor --export "$keyId")
+```
+
+== Parameters
+
+[[param-secretName]]
+=== `$secretName`
+
+_Optional._ Default: `gpg`
+
+The name of the secret to read. Must match the attribute name of a xref:reference/nix-functions/mkEffect.adoc#secretsMap[`secretsMap`] entry.

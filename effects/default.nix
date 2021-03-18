@@ -33,4 +33,6 @@ in {
   # A simple example
   runPutUrl = callPackage ./run-put-url.nix { inherit (self) mkEffect; };
 
+  git-crypt-hook = callPackage ./git-crypt-hook/default.nix { };
+
 }

@@ -1,0 +1,29 @@
+
+= `git-crypt-hook`
+
+Decrypts `git-crypt`-encrypted sources as part of `postUnpack`.
+
+NOTE: `userSetupScript` runs after unpacking, so you have to use `preUnpack`
+to write the private key.
+
+Example:
+
+```nix
+effects.mkEffect {
+  src = lib.cleanSource ./.;
+  inputs = [ effects.git-crypt-hook ];
+  preUnpack = ''
+    writeGPGKey git-crypt
+  '';
+  secretsMap.git-crypt = "default-gpg";
+```
+
+The `src` attribute must include:
+
+* the `.git-crypt` at the root
+* the `.gitattributes` files
+
+[discrete]
+== See also
+
+* xref:reference/bash-functions/writeGPGKey.adoc[`writeGPGKey`]

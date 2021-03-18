@@ -173,3 +173,16 @@ useDockerHost() {
   export DOCKER_HOST=tcp://$host:$port
   export DOCKER_TLS_VERIFY=1
 }
+
+gpgFingerprints() {
+  gpg --with-colons --import-options show-only --import --fingerprint | awk -F: '$1 == "fpr" {print $10;}'
+}
+gpgTrust() {
+  gpgFingerprints | sed -e 's/$/:6/' | gpg --import-ownertrust
+}
+
+writeGPGKey() {
+  local secretName="${1:-gpg}"
+  readSecretString "$secretName" .privateKey | gpg --import
+  readSecretString "$secretName" .privateKey | gpgTrust
+}
