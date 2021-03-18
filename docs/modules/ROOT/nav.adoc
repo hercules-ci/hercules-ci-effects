@@ -6,7 +6,6 @@
 * Guides
 ** xref:guide/deploy-a-nixos-machine.adoc[Deploy a NixOS machine]
 ** xref:guide/deploy-a-nixops-network.adoc[Deploy a NixOps network]
-** xref:guide/install-the-hci-command.adoc[Install the `hci` command]
 ** xref:guide/write-a-custom-effect.adoc[Write a Custom Effect]
 * Nix Functions Reference
 ** _Generic Functions_

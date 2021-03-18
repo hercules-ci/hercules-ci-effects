@@ -12,7 +12,7 @@ Prerequisites:
  - You have xref:master@hercules-ci:ROOT:getting-started/index.adoc[set up an agent] for the account that owns the repository
  - You have deployed a NixOps network before
  - You have added a repository to your Hercules CI installation
- - You have xref:guide/install-the-hci-command.adoc[added the `hci` command] to your shell or user profile
+ - You have xref:hercules-ci-agent:hci:installation.adoc[added the `hci` command]
 
 == Import state file (optional)
 
