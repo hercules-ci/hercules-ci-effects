@@ -73,15 +73,24 @@ args@{
   # Defaults to pkgs.path
   NIX_PATH ? "nixpkgs=${path}",
 
-  # run this deployment with nixops deploy --dry-run flag.
-  # eval only, don't do the deploy
-  isDryRun ? false,
-
+  # specify an action for the deploy which are mutually exclusive,
+  # options: activate, evaluate, plan, build, create, copy, dry-activiate, test, boot
+  action ? "activate",
   # Other variables are passed to mkEffect, which is similar to mkDerivation.
   ...
 }:
 let
-  dryRunFlag = lib.optionalString isDryRun "--dry-run";
+  actionFlag = {
+    activate = "";
+    evaluate = "--evaluate-only";
+    plan = "--plan-only";
+    build = "--build-only";
+    create = "--create-only";
+    copy= "--copy-only";
+    dry-activiate = "--dry-activate";
+    test = "--test";
+    boot = "--boot";
+  }."${action}";
 in
 mkEffect (
     lib.filterAttrs (k: v: k != "networkArgs" && k != "prebuildOnlyNetworkFiles") args
@@ -135,7 +144,7 @@ mkEffect (
       --confirm \
       --allow-reboot \
       --allow-recreate \
-      ${dryRunFlag} \
+      ${actionFlag} \
   '';
 
   prePutState = ''
