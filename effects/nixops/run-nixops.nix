@@ -81,7 +81,7 @@ args@{
 }:
 let
   actionFlag = {
-    activate = "";
+    switch = "";
     evaluate = "--evaluate-only";
     plan = "--plan-only";
     build = "--build-only";
