@@ -87,7 +87,7 @@ let
     build = "--build-only";
     create = "--create-only";
     copy= "--copy-only";
-    dry-activiate = "--dry-activate";
+    dry-activate = "--dry-activate";
     test = "--test";
     boot = "--boot";
   }."${action}";
