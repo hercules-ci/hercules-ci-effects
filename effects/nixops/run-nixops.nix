@@ -75,7 +75,7 @@ args@{
 
   # specify an action for the deploy which are mutually exclusive,
   # options: switch, evaluate, plan, build, create, copy, dry-activate, test, boot
-  action ? "activate",
+  action ? "switch",
   # Other variables are passed to mkEffect, which is similar to mkDerivation.
   ...
 }:
