@@ -74,7 +74,7 @@ args@{
   NIX_PATH ? "nixpkgs=${path}",
 
   # specify an action for the deploy which are mutually exclusive,
-  # options: activate, evaluate, plan, build, create, copy, dry-activiate, test, boot
+  # options: switch, evaluate, plan, build, create, copy, dry-activate, test, boot
   action ? "activate",
   # Other variables are passed to mkEffect, which is similar to mkDerivation.
   ...
