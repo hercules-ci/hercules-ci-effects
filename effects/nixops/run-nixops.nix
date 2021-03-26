@@ -1,4 +1,4 @@
-{ gnused, lib, mkEffect, nix, nixops, path, system }:
+{ gnused, lib, mkEffect, nix, nixops, path, system, git }:
 
 let
   # This shouldn't be necessary after flakes.
@@ -102,7 +102,7 @@ mkEffect (
       }
     // {
   name = "nixops-${name}";
-  inputs = [ nix nixops ];
+  inputs = [ nix nixops git ];
 
   # Like `args // `, but also sets the defaults
   inherit deployOnlyNetworkFiles networkFiles stateName knownHostsName NIX_PATH;
