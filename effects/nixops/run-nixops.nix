@@ -113,6 +113,7 @@ mkEffect (
     getStateFile "$stateName" "$stateFileName"
     mkdir -p ~/.ssh
     getStateFile "$knownHostsName" ~/.ssh/known_hosts
+    touch ~/.ssh/known_hosts
   '';
 
   postGetState = ''
