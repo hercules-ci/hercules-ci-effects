@@ -74,7 +74,7 @@ args@{
   NIX_PATH ? "nixpkgs=${path}",
 
   # specify an action for the deploy which are mutually exclusive,
-  # options: switch, evaluate, plan, build, create, copy, dry-activate, test, boot
+  # options: switch, dry-run, plan, build, create, copy, dry-activate, test, boot
   action ? "switch",
   # Other variables are passed to mkEffect, which is similar to mkDerivation.
   ...
@@ -82,7 +82,7 @@ args@{
 let
   actionFlag = {
     switch = "";
-    evaluate = "--evaluate-only";
+    dry-run = "--dry-run";
     plan = "--plan-only";
     build = "--build-only";
     create = "--create-only";
