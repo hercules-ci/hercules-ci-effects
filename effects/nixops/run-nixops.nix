@@ -166,7 +166,7 @@ mkEffect (
   # To quote the NixOps help:
   #   check the state of the machines in the network (note that this might alter
   #   the internal nixops state to consolidate with the real state of the resource)
-  effectCheckScript = ''
+  effectCheckScript = lib.optionalString (action != "dry-run") ''
     nixops check
   '';
 
