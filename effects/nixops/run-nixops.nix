@@ -1,4 +1,4 @@
-{ gnused, lib, mkEffect, nix, nixops, path, system }:
+{ gnused, lib, mkEffect, nix, nixops, path, system, git }:
 
 let
   # This shouldn't be necessary after flakes.
@@ -73,9 +73,25 @@ args@{
   # Defaults to pkgs.path
   NIX_PATH ? "nixpkgs=${path}",
 
+  # specify an action for the deploy which are mutually exclusive,
+  # options: switch, dry-run, plan, build, create, copy, dry-activate, test, boot
+  action ? "switch",
   # Other variables are passed to mkEffect, which is similar to mkDerivation.
   ...
 }:
+let
+  actionFlag = {
+    switch = "";
+    dry-run = "--dry-run";
+    plan = "--plan-only";
+    build = "--build-only";
+    create = "--create-only";
+    copy= "--copy-only";
+    dry-activate = "--dry-activate";
+    test = "--test";
+    boot = "--boot";
+  }."${action}";
+in
 mkEffect (
     lib.filterAttrs (k: v: k != "networkArgs" && k != "prebuildOnlyNetworkFiles") args
     // lib.optionalAttrs prebuild {
@@ -86,7 +102,7 @@ mkEffect (
       }
     // {
   name = "nixops-${name}";
-  inputs = [ nix nixops ];
+  inputs = [ nix nixops git ];
 
   # Like `args // `, but also sets the defaults
   inherit deployOnlyNetworkFiles networkFiles stateName knownHostsName NIX_PATH;
@@ -97,6 +113,7 @@ mkEffect (
     getStateFile "$stateName" "$stateFileName"
     mkdir -p ~/.ssh
     getStateFile "$knownHostsName" ~/.ssh/known_hosts
+    touch ~/.ssh/known_hosts
   '';
 
   postGetState = ''
@@ -128,6 +145,7 @@ mkEffect (
       --confirm \
       --allow-reboot \
       --allow-recreate \
+      ${actionFlag} \
   '';
 
   prePutState = ''
@@ -148,7 +166,7 @@ mkEffect (
   # To quote the NixOps help:
   #   check the state of the machines in the network (note that this might alter
   #   the internal nixops state to consolidate with the real state of the resource)
-  effectCheckScript = ''
+  effectCheckScript = lib.optionalString (action != "dry-run") ''
     nixops check
   '';
 
