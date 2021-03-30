@@ -91,6 +91,7 @@ let
     test = "--test";
     boot = "--boot";
   }."${action}";
+  isStatefull = (action != "dry-run");
 in
 mkEffect (
     lib.filterAttrs (k: v: k != "networkArgs" && k != "prebuildOnlyNetworkFiles") args
@@ -110,6 +111,8 @@ mkEffect (
 
   getStateScript = ''
     stateFileName="$PWD/nixops-state.json"
+    '' +
+    lib.optionalString isStatefull ''
     getStateFile "$stateName" "$stateFileName"
     mkdir -p ~/.ssh
     getStateFile "$knownHostsName" ~/.ssh/known_hosts
@@ -148,7 +151,7 @@ mkEffect (
       ${actionFlag} \
   '';
 
-  prePutState = ''
+  prePutState = lib.optionalString isStatefull ''
     nixops export >"$stateFileName"
     if [[ ! -s "$stateFileName" ]]; then
       echo 1>&2 "NixOps state export was empty. Upload cancelled."
@@ -157,7 +160,7 @@ mkEffect (
     fi
   '';
 
-  putStateScript = ''
+  putStateScript = lib.optionalString isStatefull ''
     putStateFile "$stateName" "$stateFileName"
     putStateFile "$knownHostsName" ~/.ssh/known_hosts
   '';
@@ -166,7 +169,7 @@ mkEffect (
   # To quote the NixOps help:
   #   check the state of the machines in the network (note that this might alter
   #   the internal nixops state to consolidate with the real state of the resource)
-  effectCheckScript = lib.optionalString (action != "dry-run") ''
+  effectCheckScript = lib.optionalString isStatefull ''
     nixops check
   '';
 
