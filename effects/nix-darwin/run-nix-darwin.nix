@@ -42,7 +42,7 @@ let
     then ""
     else "-${conf.config.networking.hostName}";
 in
-mkEffect (args // {
+mkEffect (removeAttrs args ["configuration"] // {
   name = "nix-darwin${suffix}";
   inputs = [ openssh nix ];
   dontUnpack = true;
