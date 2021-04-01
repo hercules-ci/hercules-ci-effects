@@ -130,6 +130,38 @@ See xref:reference/nix-functions/mkEffect.adoc#param-userSetupScript[`userSetupS
 
 Other attributes are passed to xref:reference/nix-functions/mkEffect.adoc[mkEffect], which passes its remaining arguments to `mkDerivation`.
 
+
+[[return-value]]
+== Return value
+
+An effect that updates the Arion project as configured.
+
+The effect has the following attributes in addition to the attributes returned
+by xref:reference/nix-functions/mkEffect.adoc#return-value[`mkEffect`].
+
+[[attr-config]]
+=== `config`
+
+The `config` parameter of the module system. This can be used to inspect the
+system configuration before committing it. For example:
+
+```
+nix repl ci.nix
+nix-repl> my-arion.config.services.web.image.name
+"my-web"
+```
+
+[[attr-prebuilt]]
+=== `prebuilt`
+
+A derivation representing the built configuration file.
+
+[[attr-prebuilt.config]]
+==== `prebuilt.config`
+
+Same as <<attr-config>>.
+
+
 [discrete]
 == See also
 

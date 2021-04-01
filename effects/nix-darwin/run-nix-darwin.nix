@@ -42,12 +42,13 @@ let
     then ""
     else "-${conf.config.networking.hostName}";
 in
-mkEffect (args // {
+mkEffect (removeAttrs args ["configuration"] // {
   name = "nix-darwin${suffix}";
   inputs = [ openssh nix ];
   dontUnpack = true;
   passthru = passthru // {
-    prebuilt = conf.system;
+    prebuilt = conf.system // { inherit (conf) config; };
+    inherit (conf) config;
   };
   systemConfig = conf.system;
   effectScript = ''

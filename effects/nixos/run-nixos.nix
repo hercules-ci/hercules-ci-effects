@@ -31,7 +31,7 @@ args@{
       else x: x;
     inherit (config.system.build) toplevel;
   in
-  checked (mkEffect (args // {
+  checked (mkEffect (removeAttrs args ["configuration" "system" "nixpkgs"] // {
     inherit sshDestination;
     name = "nixos-${sshDestination}";
     inputs = (args.inputs or []) ++ [ openssh nix ];
@@ -47,7 +47,8 @@ args@{
       ${toplevel}/bin/switch-to-configuration switch
     '';
     passthru = {
-      prebuilt = toplevel;
+      prebuilt = toplevel // { inherit config; };
+      inherit config;
     } // passthru;
     dontUnpack = args.dontUnpack or true;
   }))

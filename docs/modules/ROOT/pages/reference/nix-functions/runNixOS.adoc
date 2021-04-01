@@ -94,6 +94,37 @@ See:
 * xref:reference/nix-functions/mkEffect.adoc#param-userSetupScript[`userSetupScript` in `mkEffect`]
 
 
+[[return-value]]
+== Return value
+
+An effect that switches the NixOS system as configured.
+
+The effect has the following attributes in addition to the attributes returned
+by xref:reference/nix-functions/mkEffect.adoc#return-value[`mkEffect`].
+
+[[attr-config]]
+=== `config`
+
+The `config` parameter of the module system. This can be used to inspect the
+system configuration before committing it. For example:
+
+```
+nix repl ci.nix
+nix-repl> my-host.prebuilt.config.services.postgresql.enable
+false
+```
+
+[[attr-prebuilt]]
+=== `prebuilt`
+
+A derivation representing the built system configuration.
+
+[[attr-prebuilt.config]]
+==== `prebuilt.config`
+
+Same as <<attr-config>>.
+
+
 [discrete]
 == See also
 
