@@ -47,7 +47,8 @@ args@{
       ${toplevel}/bin/switch-to-configuration switch
     '';
     passthru = {
-      prebuilt = toplevel;
+      prebuilt = toplevel // { inherit config; };
+      inherit config;
     } // passthru;
     dontUnpack = args.dontUnpack or true;
   }))

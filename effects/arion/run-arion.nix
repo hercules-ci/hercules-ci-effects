@@ -34,9 +34,10 @@ args@{
 
 }:
 let
-  prebuilt = arion.build {
+  composition = arion.eval {
     inherit modules pkgs uid hostNixStorePrefix;
   };
+  prebuilt = composition.config.out.dockerComposeYaml;
 in
 mkEffect (
     lib.filterAttrs (k: v: k != "modules" && k != "uid" && k != "pkgs") args
@@ -46,7 +47,8 @@ mkEffect (
   dontUnpack = true;
   inherit prebuilt;
   passthru = (args.passthru or {}) // {
-    inherit prebuilt;
+    prebuilt = prebuilt // { inherit (composition) config; };
+    inherit (composition) config;
   };
   projectName = name;
   # TODO: make project name explicit in arion, remove pushd, popd, cp

@@ -47,7 +47,8 @@ mkEffect (args // {
   inputs = [ openssh nix ];
   dontUnpack = true;
   passthru = passthru // {
-    prebuilt = conf.system;
+    prebuilt = conf.system // { inherit (conf) config; };
+    inherit (conf) config;
   };
   systemConfig = conf.system;
   effectScript = ''
