@@ -7,6 +7,10 @@
 
   outputs = { self, nixpkgs, ... }: {
 
+    lib.withPkgs = pkgs:
+      let effects = import ./effects/default.nix effects pkgs;
+      in effects;
+
     overlay = final: prev: {
       effects = import ./effects/default.nix final.effects final;
     };

@@ -4,6 +4,7 @@
 
 * xref:index.adoc[Introduction]
 * Guides
+** xref:guide/import-or-pin.adoc[Import `hercules-ci-effects`]
 ** xref:guide/deploy-a-nixos-machine.adoc[Deploy a NixOS machine]
 ** xref:guide/deploy-a-nixops-network.adoc[Deploy a NixOps network]
 ** xref:guide/configure-git-crypt.adoc[Configure git-crypt]
