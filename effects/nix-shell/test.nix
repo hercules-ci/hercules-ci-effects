@@ -26,10 +26,12 @@ lib.recurseIntoAttrs {
     dontUnpack = true;
     effectScript = ''
       ${nix-shell { inherit shell; } ''
+        set -euo pipefail
         hello \
           | figlet
       ''} | grep ' '
       ${nix-shell { inherit shell; } ''
+        set -euo pipefail
         echo 'hello' | cowsay
       ''} | grep hello
     '';

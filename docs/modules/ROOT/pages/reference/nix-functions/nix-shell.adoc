@@ -30,6 +30,16 @@ not need the flags for build and evaluation.
 
 The bash command to run; `nix-shell --run`.
 
+Note that this creates a new shell process with default settings. You may
+want to run
+
+```bash
+set -euo pipefail
+```
+
+This will make failing statements and missing variables exit the shell.
+A failing processes feeding into a pipe will cause the whole pipe statement to exit.
+
 [[param-shell]]
 === `shell`
 
