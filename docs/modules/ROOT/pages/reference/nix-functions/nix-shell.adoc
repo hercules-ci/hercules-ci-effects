@@ -35,20 +35,13 @@ The bash command to run; `nix-shell --run`.
 
 The derivation that represents the `nix-shell` environment to run.
 
-A basic example would be:
-
-```nix
-nix-shell { shell = pkgs.mkShell { /* ... */ }; } ""
-```
-
-or in a flake:
+In a flake, this may look like:
 
 ```nix
 nix-shell { shell = self.devShell.${system}; } ""
 ```
 
-Often, the shell will be in a separate file. If you don't mind evaluating the
-same sub-expressions twice:
+The shell may be in a separate file. If you don't mind evaluating packages twice:
 
 ```nix
 nix-shell { shell = import ./shell.nix; } ""
