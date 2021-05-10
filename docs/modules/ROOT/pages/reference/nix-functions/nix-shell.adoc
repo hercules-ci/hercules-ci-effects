@@ -1,0 +1,95 @@
+
+= `nix-shell`
+
+_nix-shell {two-colons} { shell } -> String -> String_
+
+A `nix-shell` invocation with pre-built environment.
+
+Pre-building the environment has the following advantages:
+
+* Build failures will cancel the effect before it starts.
+* Dependencies will be cached and metadata is available in the dashboard.
+* You don't have to worry about bringing Nix files into the sandbox.
+* You can reference any variables you have defined in your Nix file.
+* In-effect execution is instant.
+
+Example:
+
+[source,nix]
+----
+include::example$nix-shell.nix[]
+----
+
+The `effects.nix-shell` interface is simpler than `nix-shell`, because it does
+not need the flags for build and evaluation.
+
+== Parameters
+
+[[param-run]]
+=== `run`
+
+The bash command to run; `nix-shell --run`.
+
+[[param-shell]]
+=== `shell`
+
+The derivation that represents the `nix-shell` environment to run.
+
+A basic example would be:
+
+```nix
+nix-shell { shell = pkgs.mkShell { /* ... */ }; } ""
+```
+
+or in a flake:
+
+```nix
+nix-shell { shell = self.devShell.${system}; } ""
+```
+
+Often, the shell will be in a separate file. If you don't mind evaluating the
+same sub-expressions twice:
+
+```nix
+nix-shell { shell = import ./shell.nix; } ""
+```
+
+For more efficient evaluation, you can share the Nixpkgs invocation.
+
+Suppose your `shell.nix` looks like:
+
+```nix
+let
+  config = { };
+  pkgs = import ./nixpkgs { inherit config; };
+in
+  pkgs.mkShell { /* ... */ }
+```
+
+You can change `shell.nix` to:
+
+```nix
+let
+  config = { };
+in
+{ pkgs ? import ./nixpkgs { inherit config; } }:
+  pkgs.mkShell { /* ... */ }
+```
+
+And reuse `pkgs` in the invocation:
+
+```nix
+nix-shell { shell = import ./shell.nix { inherit pkgs; }; } ""
+```
+
+[[return-value]]
+== Return value
+
+A string containing a bash statement.
+
+The string context will refer to `nix`, the built shell dependencies and the shell derivation.
+
+[discrete]
+== See also
+
+* xref:reference/mkEffect.adoc[`mkEffect`]
