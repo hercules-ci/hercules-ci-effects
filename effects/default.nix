@@ -35,4 +35,6 @@ in {
 
   git-crypt-hook = callPackage ./git-crypt-hook/default.nix { };
 
+  nix-shell = callPackage ./nix-shell/default.nix { };
+
 }

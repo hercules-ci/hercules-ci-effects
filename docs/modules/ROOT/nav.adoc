@@ -11,6 +11,7 @@
 * Nix Functions Reference
 ** _Generic Functions_
 ** xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]
+** xref:reference/nix-functions/nix-shell.adoc[`nix-shell`]
 ** xref:reference/nix-functions/runIf.adoc[`runIf`]
 ** _Deployment Functions_
 ** xref:reference/nix-functions/runArion.adoc[`runArion`]
