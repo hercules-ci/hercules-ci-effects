@@ -95,4 +95,4 @@ The string context will refer to `nix`, the built shell dependencies and the she
 [discrete]
 == See also
 
-* xref:reference/mkEffect.adoc[`mkEffect`]
+* xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]
