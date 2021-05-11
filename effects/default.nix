@@ -1,4 +1,4 @@
-# The resulting attribute set. E.g. let effects = import ./default.nix effects pkgs
+# The resulting attribute set. See ../default.nix.
 self:
 
 # Nixpkgs
