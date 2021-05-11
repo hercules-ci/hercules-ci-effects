@@ -63,7 +63,16 @@ Add as a source
 niv add hercules-ci/hercules-ci-effects
 ```
 
-Either add the overlay
+Add
+
+```nix
+let
+  inherit (import sources.hercules-ci-effects { inherit pkgs; }) effects;
+in
+  /* ... */
+```
+
+or if you prefer to use the overlay:
 
 ```nix
 let
@@ -75,15 +84,7 @@ let
     ];
     system = /* ... */;
   }
-in /* ... */
-```
-
-or if you prefer not to use the overlay, use:
-
-```nix
-let
-  effects = import (sources.hercules-ci-effects + "/effects") effects pkgs;
-in /* ... */
+in /* use pkgs.effects */
 ```
 
 == Other methods
