@@ -113,7 +113,7 @@ in
       '';
 
       # replace with hostname or ip address for ssh
-      sshDestination = "203.0.113.2";
+      ssh.destination = "203.0.113.2";
 
     });
 }

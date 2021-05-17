@@ -1,4 +1,5 @@
 { nixos
+, effects
 , lib
 , mkEffect
 , openssh
@@ -20,7 +21,7 @@ args@{
         }
       ).config,
     profile ? "/nix/var/nix/profiles/system",
-    sshDestination,
+    ssh,
     passthru ? {},
     ...
   }:
@@ -31,20 +32,21 @@ args@{
       else x: x;
     inherit (config.system.build) toplevel;
   in
-  checked (mkEffect (removeAttrs args ["configuration" "system" "nixpkgs"] // {
-    inherit sshDestination;
-    name = "nixos-${sshDestination}";
-    inputs = (args.inputs or []) ++ [ openssh nix ];
+  checked (mkEffect (removeAttrs args ["configuration" "system" "nixpkgs" "ssh"] // {
+    name = "nixos-${ssh.destination}";
+    inputs = [
+      # For user setup
+      openssh
+    ];
     effectScript = ''
       ${args.effectScript or ""}
-      nix-copy-closure --use-substitutes --to "$sshDestination" ${toplevel}
-      ssh "$sshDestination" "$remoteScript"
-    '';
-    remoteScript = ''
-      ${args.remoteScript or ""}
-      set -euo pipefail
-      nix-env -p ${profile} --set ${toplevel}
-      ${toplevel}/bin/switch-to-configuration switch
+      ${effects.ssh ssh ''
+        set -euo pipefail
+        echo >&2 "remote nix version:"
+        nix-env --version >&2
+        nix-env -p ${profile} --set ${toplevel}
+        ${toplevel}/bin/switch-to-configuration switch
+      ''}
     '';
     passthru = {
       prebuilt = toplevel // { inherit config; };

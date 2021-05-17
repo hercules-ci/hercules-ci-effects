@@ -45,15 +45,14 @@ Example:
 ```
 
 
-[[param-sshDestination]]
-=== `sshDestination`
+[[param-ssh]]
+=== `ssh`
 
-Hostname to SSH to.
+See the named arguments in xref:reference/nix-functions/ssh.adoc[]. Example:
 
-[quote, `man 1 ssh`]
-"destination, which may be specified as either [user@]hostname or a URI of
- the form ssh://[user@]hostname[:port.]"
-
+```nix
+  ssh.destination = "root@example.com";
+```
 
 [[param-system]]
 === `system`
