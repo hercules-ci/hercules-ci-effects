@@ -37,4 +37,6 @@ in {
 
   nix-shell = callPackage ./nix-shell/default.nix { };
 
+  ssh = callPackage ./ssh/call-ssh.nix { };
+
 }

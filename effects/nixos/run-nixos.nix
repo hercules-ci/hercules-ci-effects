@@ -1,4 +1,5 @@
 { nixos
+, effects
 , lib
 , mkEffect
 , openssh
@@ -34,17 +35,19 @@ args@{
   checked (mkEffect (removeAttrs args ["configuration" "system" "nixpkgs"] // {
     inherit sshDestination;
     name = "nixos-${sshDestination}";
-    inputs = (args.inputs or []) ++ [ openssh nix ];
+    inputs = [
+      # For user setup
+      openssh
+    ];
     effectScript = ''
       ${args.effectScript or ""}
-      nix-copy-closure --use-substitutes --to "$sshDestination" ${toplevel}
-      ssh "$sshDestination" "$remoteScript"
-    '';
-    remoteScript = ''
-      ${args.remoteScript or ""}
-      set -euo pipefail
-      nix-env -p ${profile} --set ${toplevel}
-      ${toplevel}/bin/switch-to-configuration switch
+      ${effects.ssh { destination = sshDestination; } ''
+        set -euo pipefail
+        echo >&2 "remote nix version:"
+        nix-env --version >&2
+        nix-env -p ${profile} --set ${toplevel}
+        ${toplevel}/bin/switch-to-configuration switch
+      ''}
     '';
     passthru = {
       prebuilt = toplevel // { inherit config; };

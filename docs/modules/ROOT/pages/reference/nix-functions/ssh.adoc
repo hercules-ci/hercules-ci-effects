@@ -1,0 +1,138 @@
+
+= `ssh`
+
+_ssh {two-colons} { destination, useSubstitutes, ... } -> String -> String_
+
+A `ssh` invocation with automatic copying of command dependencies.
+
+For example, this copies `hello` to a remote host and runs it:
+
+[source,nix]
+----
+mkEffect {
+  effectScript = ''
+    echo "log from effect sandbox"
+    ${effects.ssh { destination = "my-host"; } ''
+      set -euo pipefail
+      echo "log from remote host"
+      ${hello}/bin/hello -g 'Hello from a remote host'
+    ''}
+  '';
+}
+----
+
+== Essential Parameters
+
+[[param-2]]
+=== Remote commands (positional argument 2)
+
+A string containing the commands to execute on the remote host. Its dependencies
+are automatically copied to the remote host.
+
+Make sure to reference packages that match the remote host architecture. For example:
+
+[source,nix]
+----
+let
+  nixpkgs = /* ... */;
+  aarch64Pkgs = import nixpkgs { system = "aarch64-linux"; config = {}; overlays = [] };
+in
+mkEffect {
+  effectScript = ''
+    echo "log from effect sandbox"
+    ${effects.ssh { destination = "my-aarch64-host"; } ''
+      set -euo pipefail
+      echo "log from remote host"
+      ${aarch64Pkgs.hello}/bin/hello -g 'Hello from a remote host'
+    ''}
+  '';
+}
+----
+
+[[param-destination]]
+=== `destination`
+
+Hostname to SSH to. This is inserted as an unquoted argument, so you can use
+bash variables.
+
+[quote, `man 1 ssh`]
+"destination, which may be specified as either [user@]hostname or a URI of
+ the form ssh://[user@]hostname[:port.]"
+
+[[param-compress]]
+=== `compress`
+
+Default: `false`. When set to `true`, apply gzip compression. Compression may
+be a bottleneck on fast networks.
+
+[[param-inheritVariables]]
+=== `inheritVariables`
+
+A list of strings representing the bash variables and environment variables will
+be copied from the client before running the remote command.
+
+This is similar to the `SendEnv` option in `ssh`, but does not rely on the server's
+`AcceptEnv` configuration. Furthermore, it can copy bash variables that have
+not been `export`-ed. Such variables remain un-`export`-ed.
+
+== Parameters
+
+[[param-compressClosure]]
+=== `compressClosure`
+
+Default: value of xref:param-compress[]. Whether to compress the store paths.
+
+[[param-compressSession]]
+=== `compressSession`
+
+Default: value of xref:param-compress[]. Whether to compress the SSH session
+after copying store paths.
+
+[[param-sshOptions]]
+=== `sshOptions`
+
+Default: `""`. Extra options to pass to the `ssh` invocations, which includes child processes of `nix-copy-closure`. Will be split and interpolated by bash.
+
+[[param-ssh]]
+=== `ssh`
+
+Default: `pkgs.openssh`. Which SSH package to use. The default comes from the `pkgs` argument that
+was passed to the `hercules-ci-effects` call, or `self` where the overlay was inserted.
+
+[[param-nix]]
+=== `nix`
+
+Default: `pkgs.nix`. Which Nix package to use for `nix-copy-closure`. The default comes from the `pkgs` argument that
+was passed to the `hercules-ci-effects` call, or `self` where the overlay was inserted.
+
+
+[[param-nix-copy-closureOptions]]
+=== `nix-copy-closureOptions`
+
+Default: `""`. Extra options to pass to the `nix-copy-closure` invocation. Will be split and interpolated by bash.
+
+See xref:param-useSubstitutes[].
+
+[[param-useSubstitutes]]
+=== `useSubstitutes`
+
+Default: `true`. Whether to use substition (binary caches) on the remote host.
+
+Using substitutes on the remote host is usually faster because the store paths
+on the substituter have been compressed (and decompression is fast) and/or
+the remote host has a better connection to the substituter than to the client.
+
+You can choose to disable this if your agent runs in the network you deploy.
+
+[[return-value]]
+== Return value
+
+A string containing a single bash statement that connects to the remote host, etc.
+
+The string context will include dependencies used on the remote host and, by
+default, includes references to the `nix` and `openssh` packages.
+
+[discrete]
+== See also
+
+* xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]
