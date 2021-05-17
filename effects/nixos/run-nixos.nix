@@ -21,7 +21,7 @@ args@{
         }
       ).config,
     profile ? "/nix/var/nix/profiles/system",
-    sshDestination,
+    ssh,
     passthru ? {},
     ...
   }:
@@ -32,16 +32,15 @@ args@{
       else x: x;
     inherit (config.system.build) toplevel;
   in
-  checked (mkEffect (removeAttrs args ["configuration" "system" "nixpkgs"] // {
-    inherit sshDestination;
-    name = "nixos-${sshDestination}";
+  checked (mkEffect (removeAttrs args ["configuration" "system" "nixpkgs" "ssh"] // {
+    name = "nixos-${ssh.destination}";
     inputs = [
       # For user setup
       openssh
     ];
     effectScript = ''
       ${args.effectScript or ""}
-      ${effects.ssh { destination = sshDestination; } ''
+      ${effects.ssh ssh ''
         set -euo pipefail
         echo >&2 "remote nix version:"
         nix-env --version >&2
