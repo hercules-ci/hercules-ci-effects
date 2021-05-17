@@ -5,7 +5,7 @@ self:
 pkgs:
 
 let
-  inherit (pkgs) callPackage;
+  callPackage = pkgs.newScope self;
   inherit (pkgs.lib) recurseIntoAttrs optionalAttrs;
 
 in {
@@ -22,16 +22,16 @@ in {
       }
     );
 
-  runArion = callPackage ./arion/run-arion.nix { inherit (self) mkEffect; };
+  runArion = callPackage ./arion/run-arion.nix { };
 
-  runNixDarwin = callPackage ./nix-darwin/run-nix-darwin.nix { inherit (self) mkEffect; };
+  runNixDarwin = callPackage ./nix-darwin/run-nix-darwin.nix { };
 
-  runNixOps = callPackage ./nixops/run-nixops.nix { inherit (self) mkEffect; };
+  runNixOps = callPackage ./nixops/run-nixops.nix { };
 
-  runNixOS = callPackage ./nixos/run-nixos.nix { inherit (self) mkEffect; };
+  runNixOS = callPackage ./nixos/run-nixos.nix { };
 
   # A simple example
-  runPutUrl = callPackage ./run-put-url.nix { inherit (self) mkEffect; };
+  runPutUrl = callPackage ./run-put-url.nix { };
 
   git-crypt-hook = callPackage ./git-crypt-hook/default.nix { };
 
