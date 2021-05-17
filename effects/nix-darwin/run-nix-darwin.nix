@@ -1,4 +1,4 @@
-{ mkEffect, openssh, nix, path }:
+{ effects, mkEffect, openssh, path }:
 
 # Update a macOS machine with nix-darwin
 #
@@ -9,10 +9,8 @@ args@{
   # Source of nix-darwin
   nix-darwin,
 
-  # Hostname to SSH to, to quote man 1 ssh:
-  #   "destination, which may be specified as either [user@]hostname or a URI of
-  #   the form ssh://[user@]hostname[:port.]"
-  sshDestination,
+  # Named parameters for call-ssh.nix
+  ssh,
 
   # Configuration module; file path or module expression
   # Start with a copy of ~/.nixpkgs/darwin-configuration.nix
@@ -42,17 +40,17 @@ let
     then ""
     else "-${conf.config.networking.hostName}";
 in
-mkEffect (removeAttrs args ["configuration"] // {
+mkEffect (removeAttrs args ["configuration" "ssh"] // {
   name = "nix-darwin${suffix}";
-  inputs = [ openssh nix ];
+  inputs = [ openssh ];
   dontUnpack = true;
   passthru = passthru // {
     prebuilt = conf.system // { inherit (conf) config; };
     inherit (conf) config;
   };
-  systemConfig = conf.system;
   effectScript = ''
-    nix-copy-closure --to "$sshDestination" "$systemConfig"
-    ssh "$sshDestination" "$systemConfig/sw/bin/darwin-rebuild activate"
+    ${effects.ssh ssh ''
+      ${conf.system}/sw/bin/darwin-rebuild activate
+    ''}
   '';
 })
