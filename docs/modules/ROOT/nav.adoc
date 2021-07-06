@@ -1,6 +1,5 @@
 
-* ⚠ NOTE ⚠
-* Effects are in beta and require a recent `hercules-ci-agent` from the `master` branch.
+* ⚠ NOTE ⚠ Effects are in beta.
 
 * xref:index.adoc[Introduction]
 * Guides
