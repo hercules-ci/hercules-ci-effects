@@ -46,3 +46,55 @@ in
 
 When it works, consider making a pull request to `hercules-ci-effects` for the
 opportunity of review and improvements.
+
+## Integrating a new deployment tool
+
+While it is possible to run Nix evaluations and builds inside the effects sandbox, it is best to build the deployment configuration before running effects. That way you get the most out of Hercules CI: automatic uploading to your cache and if you run multiple effects, it prevents the partial deployment of commits with bad configuration.
+
+### Static deployments
+
+Ideally, the deployment tool in your new effect function can be split into two steps; build and deployment.
+
+As a console invocation, this would look like:
+
+```console
+# not optimal yet!
+$ neat-tool deploy --config $(
+    nix-build ${neat_tool}/nix/eval-configs.nix \
+      --arg config ./my-config.nix
+  )
+```
+
+While you can run `nix-build` inside effects, it's not ideal, because you don't want to run a single effect when any of their builds fail, and `nix-build` doesn't distribute builds, deduplicate builds, or upload to the cache. Instead, you can replace the `$(nix-build ...)` subshell expression by an equivalent Nix string interpolation, for example:
+```nix
+effectScript = ''
+  neat-tool deploy --config ${
+    import (neat-tool) + "/nix/eval-configs.nix" {
+      config = ./my-config.nix;
+    }
+  }
+'';
+```
+
+This makes the configuration part of the effect's closure, so it will be built and cached beforehand.
+
+### Dynamic input
+
+If your deployment tool does depend on input that is not statically known, your options depend on how this dynamic information is used.
+
+When you need to use it in a NixOS option for example, you're usually required to evaluate inside the effect. NixOps is an example of this, because IP addresses and resource attributes aren't statically known.
+
+A notable exception is where you can provide a static file _path_ that won't be read by the Nix evaluator, as is the case with "secret" or "key" files.
+
+If you do need to evaluate inside an effect, you may still be able to pre-build with dummy values, so that almost all of your deployment is still built and cached before you run your effects. xref:reference/nix-functions/runNixOps.adoc[`runNixOps`] is an example of this.
+
+## NixOS
+
+A plain NixOS deployment is characterized by its `toplevel` derivation, which is to be stored in its profile in `/nix/var/nix/profiles/system`.
+
+In the simplest case, a deployment tool simply takes this derivation. This is the case with xref:reference/nix-functions/runNixOS.adoc[`runNixOS`] and some simple tools.
+
+The top-level derivation can be retrieved from NixOS' `config.system.build.toplevel` attribute. You can create `config` by invoking
+ - `nixpkgs.lib.nixosSystem { system = x; modules = [ y ]; }`: flakes only
+ - `pkgs.nixos y`: reusing `pkgs`, flake or non-flake
+ - or `import (pkgs.path + "/nixos/lib/eval-config.nix") { system = x; modules = [ y ]; }`: closest to traditional `nixos-rebuild`
