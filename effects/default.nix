@@ -28,6 +28,8 @@ in {
 
   runNixOps = callPackage ./nixops/run-nixops.nix { };
 
+  runNixOps2 = callPackage ./nixops2/run-nixops2.nix { };
+
   runNixOS = callPackage ./nixos/run-nixos.nix { };
 
   # A simple example
