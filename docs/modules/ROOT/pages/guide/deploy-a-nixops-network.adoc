@@ -110,6 +110,7 @@ and add to `secrets.json` on your agents:
   }
 ```
 
+[[prebuild]]
 == Prebuild the network
 
 To make sure all packages are cached, create a network file to replace any

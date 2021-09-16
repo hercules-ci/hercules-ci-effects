@@ -91,6 +91,15 @@ Default: `"nixpkgs=${pkgs.path}"`, where `pkgs` is the Nixpkgs invocation that i
 
 Necessary for looking up `<nixpkgs>` or potentially other locations using angle bracket syntax.
 
+[[param-action]]
+=== `action`
+
+Default: `"switch"`; performing a full deployment, analogous to `nixos-rebuild switch` but on all nodes and including resources.
+
+Other valid values besides `"switch"` are `"dry-run"`, `"plan"`, `"build"`*, `"create"`, `"copy"`, `"dry-activate"`, `"test"`, `"boot"`.
+
+Note that your agent will not automatically push to the cache for `build`. <<param-prebuild>> (enabled by default) does take care of this. See also xref:guide/deploy-a-nixops-network.adoc#prebuild[the NixOps deployment guide] on prebuilding.
+
 [[extra-params]]
 === `...` -- remaining arguments
 
