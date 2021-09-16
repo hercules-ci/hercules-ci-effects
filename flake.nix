@@ -19,6 +19,7 @@
 
     tests = {
       git-crypt-hook = nixpkgs.legacyPackages.x86_64-linux.callPackage ./effects/git-crypt-hook/test.nix {};
+      nixops = nixpkgs.legacyPackages.x86_64-linux.callPackage ./effects/nixops/test/default.nix {};
       nix-shell = nixpkgs.legacyPackages.x86_64-linux.callPackage ./effects/nix-shell/test.nix {};
     };
 

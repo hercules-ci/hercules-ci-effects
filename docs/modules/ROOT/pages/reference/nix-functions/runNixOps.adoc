@@ -96,6 +96,34 @@ Necessary for looking up `<nixpkgs>` or potentially other locations using angle 
 
 Other attributes are passed to xref:reference/nix-functions/mkEffect.adoc[mkEffect], which passes its remaining arguments to `mkDerivation`.
 
+[[return-value]]
+== Return value
+
+An effect that performs the specified action on the NixOps deployment.
+
+The effect has the following attributes in addition to the attributes returned
+by xref:reference/nix-functions/mkEffect.adoc#return-value[`mkEffect`].
+
+
+[[attr-prebuilt]]
+=== `prebuilt`
+
+A derivation representing the built system configuration.
+
+[[attr-prebuilt.nodes]]
+==== `prebuilt.nodes`
+
+An attribute set containing the NixOS configurations of the prebuilt `nodes`.
+
+This is primarily useful for inspection with `nix repl`.
+
+[[attr-prebuilt.machineInfo]]
+==== `prebuilt.machineInfo`
+
+An attribute set with various attributes, including `resources`.
+
+This is primarily useful for inspection with `nix repl`.
+
 [discrete]
 == See also
 

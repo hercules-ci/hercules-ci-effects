@@ -22,7 +22,10 @@ let
         args = networkArgs;
       };
     in
-      machineInfo.machines { names = lib.attrNames machineInfo.nodes; };
+      machineInfo.machines { names = lib.attrNames machineInfo.nodes; } // {
+        inherit machineInfo;
+        inherit (machineInfo) network nodes;
+      };
 
   # Turn a value into a string that evaluates to that value in the Nix language.
   # Not currently in normal form.
