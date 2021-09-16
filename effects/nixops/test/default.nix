@@ -2,11 +2,10 @@
 let
   effects = import ../../default.nix effects pkgs;
 in
-lib.recurseIntoAttrs {
-  inherit (effects.runNixOps {
-    src = ./.; # use cleanSourceWith!
-    name = "deployment";
-    networkFiles = [ "network.nix" ];
-    prebuildOnlyNetworkFiles = [ "stub.nix" ];
-  }) prebuilt;
+effects.runNixOps {
+  src = ./.; # use cleanSourceWith!
+  name = "deployment";
+  networkFiles = [ "network.nix" ];
+  prebuildOnlyNetworkFiles = [ "stub.nix" ];
+  action = "dry-run";
 }

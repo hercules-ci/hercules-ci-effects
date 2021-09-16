@@ -3,7 +3,7 @@ let
 in {
   network.description = "test-description";
 
-  backend = { config, resources, pkgs, ... }: {
+  backend = { config, lib, resources, pkgs, ... }: {
     config = {
       deployment.targetEnv = "ec2";
       deployment.ec2 = {
@@ -15,6 +15,9 @@ in {
           resources.ec2SecurityGroups.ec2SecurityGroups-ssh
         ];
       };
+      # turns out publicIPv4 is not available on a fresh --dry-run either, so
+      # we add one here. This shouldn't be necessary for real world deployments.
+      networking.publicIPv4 = lib.mkForce "203.0.113.1";
 
       services.nginx.enable = true;
       services.nginx.virtualHosts."${config.networking.publicIPv4}".root = "${pkgs.nix.doc}/share/doc/nix/manual";
