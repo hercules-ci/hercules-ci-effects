@@ -134,7 +134,7 @@ mkEffect (
     // {
   name = "nixops-${name}";
   inherit src;
-  inputs = [ nix nixops openssh rsync hci ];
+  inputs = [ nix nixops openssh rsync hci ] ++ (args.inputs or []);
 
   NIXOPS_DEPLOYMENT = args.NIXOPS_DEPLOYMENT or name;
 
