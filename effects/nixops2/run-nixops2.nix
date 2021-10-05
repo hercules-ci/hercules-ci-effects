@@ -1,4 +1,4 @@
-{ gnused, lib, mkEffect, nixUnstable, nixopsUnstable, path, system, runCommand, openssh, rsync, hci }:
+packageArgs@{ gnused, lib, mkEffect, nix, nixopsUnstable, path, system, runCommand, openssh, rsync, hci }:
 
 let
   # We don't use this for the actual deployment.
@@ -104,7 +104,7 @@ args@{
   nixops ? nixopsUnstable,
 
   # nix package to use during effect execution
-  nix ? nixUnstable,
+  nix ? packageArgs.nix,
 
   prebuild ? true,
 
