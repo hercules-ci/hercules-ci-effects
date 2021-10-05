@@ -1,4 +1,4 @@
-packageArgs@{ gnused, lib, mkEffect, nix, nixopsUnstable, path, system, runCommand, openssh, rsync, hci }:
+packageArgs@{ gnused, lib, mkEffect, nix, nixopsUnstable, path, system, runCommand, openssh, rsync, hci, git }:
 
 let
   # We don't use this for the actual deployment.
@@ -134,7 +134,11 @@ mkEffect (
     // {
   name = "nixops-${name}";
   inherit src;
-  inputs = [ nix nixops openssh rsync hci ] ++ (args.inputs or []);
+  inputs = [
+    nix nixops openssh rsync hci
+    # dependency of nix
+    git
+  ] ++ (args.inputs or []);
 
   NIXOPS_DEPLOYMENT = args.NIXOPS_DEPLOYMENT or name;
 
