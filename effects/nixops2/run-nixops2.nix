@@ -37,23 +37,28 @@ let
 
   '';
 
-  prebuilt = {name, networkArgs, flake, nixops, prebuildOnlyNetworkFiles}: let
+  prebuilt = {name, networkArgs, flake, nixops, src, networkFiles, prebuildOnlyNetworkFiles, forgetState}: let
     nixFiles = getNixFiles nixops;
-    machineInfo = import "${nixFiles}/eval-machine-info.nix" {
+    origSrc = src.origSrc or src;
+    machineInfo = import "${nixFiles}/eval-machine-info.nix" ({
       inherit system;
-      networkExprs = [ ./prebuild-stub.nix ] ++ prebuildOnlyNetworkFiles;
-      flakeExpr = flake.nixopsConfigurations.default;
-      flakeUri = flake.outPath;
       uuid = "00000000-0000-0000-0000-000000000000";
       deploymentName = name;
       args = networkArgs;
       pluginNixExprs = import "${nixFiles}/all-plugins.nix";
-    };
+    } // (if flake == null then {
+      networkExprs = [ ./prebuild-stub.nix ] ++ map (v: origSrc + "/${v}") (networkFiles ++ prebuildOnlyNetworkFiles);
+    } else {
+      networkExprs = [ ./prebuild-stub.nix ] ++ prebuildOnlyNetworkFiles;
+      flakeExpr = flake.nixopsConfigurations.default;
+      flakeUri = flake.outPath;
+    }));
     inherit (machineInfo) info;
     errorIf = c: e: if c then throw e else x: x;
-    withChecks = x:
+    withChecks = if forgetState then x: x else withChecks';
+    withChecks' = x:
       errorIf (! info?network.storage || info?network.storage.legacy)
-        "Your deployment must specify a remote storage solution, such as network.storage.hercules-ci." (
+        "Your deployment must specify a remote storage solution, such as network.storage.hercules-ci. If you know for sure that your deployment is stateless, pass forgetState = true to runNixOps2." (
         lib.warnIf
           (! info?network.lock || info.network.lock == {} || info?network.lock.noop)
           "Your deployment does not specify remote lock driver, such as network.lock.hercules-ci. Concurrent use will result in lost state, misconfigured and/or redundant cloud resources and unexpectedly high expenses."
@@ -74,7 +79,16 @@ args@{
   name ? "default",
 
   # NixOps network expressions and other files required for the deployment
-  flake,
+  flake ? null,
+
+  # Path containing the network expressions.
+  # Must be set when flake is not set.
+  src ? flake.outPath,
+
+  # Whether it's ok to delete the state. Only use this on stateless deployments;
+  # not on deployments that need the state file to remember IP addresses,
+  # cloud resource ids, etc.
+  forgetState ? false,
 
   # Nix values to pass as NixOps network arguments. Only serializable values are
   # supported. Support for functions could be added, but they'll have to be
@@ -98,9 +112,15 @@ args@{
   # Specify extra network expressions here to fill in the missing definitions.
   prebuildOnlyNetworkFiles ? [],
 
+  # Network files that are only used when deploy, so not when prebuilding.
+  # Mutually exclusive with `flake`.
+  networkFiles ? null,
+
   # Other variables are passed to mkEffect, which is similar to mkDerivation.
   ...
 }:
+# Either flake or networkFiles must be set.
+assert ((flake == null) != (networkFiles == null));
 mkEffect (
   {
     NIX_PATH="nixpkgs=${path}";
@@ -108,12 +128,12 @@ mkEffect (
   //  lib.filterAttrs (k: v: k != "networkArgs" && k != "flake") args
     // lib.optionalAttrs prebuild {
         prebuilt = prebuilt { 
-          inherit name networkArgs flake nixops prebuildOnlyNetworkFiles;
+          inherit name networkArgs flake nixops src networkFiles prebuildOnlyNetworkFiles forgetState;
         };
       }
     // {
   name = "nixops-${name}";
-  src = flake.outPath;
+  inherit src;
   inputs = [ nix nixops openssh rsync hci ];
 
   NIXOPS_DEPLOYMENT = args.NIXOPS_DEPLOYMENT or name;
