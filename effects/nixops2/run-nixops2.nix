@@ -76,63 +76,24 @@ let
 
 in
 
+# Docs: runNixOps2.adoc
 args@{
-
-  # Name of the deployment.
-  #
-  # Do not set, or set to null when your state file contains a single
-  # deployment and you want to select it automatically.
   name ? null,
-
-  # NixOps network expressions and other files required for the deployment
   flake ? null,
-
-  # Path containing the network expressions.
-  # Must be set when flake is not set.
   src ? flake.outPath,
-
-  # Whether it's ok to delete the state. Only use this on stateless deployments;
-  # not on deployments that need the state file to remember IP addresses,
-  # cloud resource ids, etc.
   forgetState ? false,
-
-  # Nix values to pass as NixOps network arguments. Only serializable values are
-  # supported. Support for functions could be added, but they'll have to be
-  # passed as strings in Nix syntax.
+  # TODO: pass to deploy command? doc?
   networkArgs ? {},
-
-  # Specify which secrets are to be loaded into the Effect sandbox.
-  # For example { aws = "${env}-aws"; } will make the production-aws secret
-  # available when env is "production"
   secretsMap ? {},
-
-  # nixops package to use for prebuild expressions and effect execution
   nixops ? nixopsUnstable,
-
-  # nix package to use during effect execution
   nix ? packageArgs.nix,
-
   prebuild ? true,
-
-  # Prebuild runs outside of NixOps, which means that some info may be missing.
-  # Specify extra network expressions here to fill in the missing definitions.
   prebuildOnlyNetworkFiles ? [],
-
-  # Network files that are only used when deploy, so not when prebuilding.
-  # Mutually exclusive with `flake`.
   networkFiles ? null,
-
-  # specify an action for the deploy which are mutually exclusive,
-  # options: switch, dry-run, plan, build, create, copy, dry-activate, test, boot
   action ? "switch",
-
   allowReboot ? true,
-
   allowRecreate ? true,
-
   extraDeployArgs ? [],
-
-  # Other variables are passed to mkEffect, which is similar to mkDerivation.
   ...
 }:
 let

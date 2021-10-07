@@ -1,7 +1,7 @@
 
-= Deploy a NixOps Network
+= Deploy a NixOps 1.x Network
 
-This guide will show you how you can roll out a NixOps configuration when a branch is updated.
+This guide will show you how you can roll out a NixOps 1.x configuration when a branch is updated.
 
 WARNING: When an agent deploys itself, it interrupts its deployment. This is might cause issues with NixOps' state file, so using NixOps to deploy your agents is not recommended for now. This will be https://github.com/hercules-ci/hercules-ci-agent/issues/273[improved.]
 
