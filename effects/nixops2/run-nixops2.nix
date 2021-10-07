@@ -78,8 +78,11 @@ in
 
 args@{
 
-  # Name of the deployment
-  name ? "default",
+  # Name of the deployment.
+  #
+  # Do not set, or set to null when your state file contains a single
+  # deployment and you want to select it automatically.
+  name ? null,
 
   # NixOps network expressions and other files required for the deployment
   flake ? null,
@@ -164,11 +167,12 @@ mkEffect (
   //  lib.filterAttrs (k: v: k != "networkArgs" && k != "flake") args
     // lib.optionalAttrs prebuild {
         prebuilt = prebuilt { 
-          inherit name networkArgs flake nixops src networkFiles prebuildOnlyNetworkFiles forgetState;
+          inherit networkArgs flake nixops src networkFiles prebuildOnlyNetworkFiles forgetState;
+          name = name2;
         };
       }
     // {
-  name = "nixops-${name}";
+  name = "nixops-${name2}";
   inherit src;
   inputs = [
     nix nixops openssh rsync hci
