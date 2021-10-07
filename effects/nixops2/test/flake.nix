@@ -2,16 +2,18 @@
   description = "Deploy with NixOps and Hercules CI";
 
   inputs = {
-    nixpkgs.url = "github:hercules-ci/nixpkgs/init-nixops-hercules-ci"; # TODO change when merged
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # TODO change when merged
     flake-compat.url = "github:edolstra/flake-compat";
     flake-compat.flake = false;
-    hercules-ci-effects.url = "path:${toString ../..}";
+    # !!!: This isn't supported yet, so constructing the effect is done outside this flake.
+    #      It is not representative of how you would wire it up normally.
+    # hercules-ci-effects.url = "path:../..";
     hercules-ci-agent.url = "github:hercules-ci/hercules-ci-agent"; # TODO remove after hci release is in Nixpkgs
     flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-compat-ci, flake-utils, hercules-ci-agent, hercules-ci-effects, ... }:
+  outputs = { self, nixpkgs, flake-compat-ci, flake-utils, hercules-ci-agent, ... }:
     let
       inherit (nixpkgs) lib;
 
@@ -22,7 +24,6 @@
             config = {
             };
             overlays = [
-              hercules-ci-effects.overlay
               (final: prev: {
                 hci = hercules-ci-agent.packages.${system}.hercules-ci-cli;
               })
@@ -71,46 +72,7 @@
             } >$out/index.html
           '';
         };
-
-        # TODO: move this into hercules-ci-effects
-        effects = prev.effects // {
-          runNixOps2 = prev.callPackage ./hercules-ci-effects-wip/run-nixops.nix {
-            inherit (final.effects) mkEffect;
-          };
-        };
       };
-
-      ciNix = { src }: 
-        flake-compat-ci.lib.recurseIntoFlakeWith {
-          flake = self;
-          systems = ["x86_64-linux"];
-        } // {
-          deployments = lib.recurseIntoAttrs {
-            production =
-              perSystem.pkgs.x86_64-linux.effects.runIf (src.ref == "refs/heads/main") (
-                perSystem.pkgs.x86_64-linux.effects.runNixOps2 {
-                  flake = self;
-                  nixops = perSystem.pkgs.x86_64-linux.nixopsUnstable;
-
-                  # Override dynamic options for CI
-                  prebuildOnlyNetworkFiles = [(perSystem.pkgs.x86_64-linux.writeText "stub.nix" ''
-                    { defaults = { lib, ... }: { networking.publicIPv4 = lib.mkForce "0.0.0.0"; }; }
-                  '')];
-                  preUserSetup = ''
-                    mkdir -p ~/.config/nix/
-                    echo experimental-features = nix-command flakes >>~/.config/nix/nix.conf
-                  '';
-                  effectScript = ''
-                    nixops deploy
-                  '';
-                  userSetupScript = ''
-                    writeAWSSecret nixops-example nixops-example
-                  '';
-                  secretsMap.nixops-example = "nixops-example-aws";
-                }
-              );
-          };
-        };
 
       nixopsConfigurations = {
         default = {
@@ -120,8 +82,8 @@
 
           network.description = "hercules-ci/nixops-example";
 
-          network.storage.hercules-ci.stateName = "nixops-default.json"; # FIXME rename
-          network.lock.hercules-ci.stateName = "nixops-default.json";
+          network.storage.hercules-ci.stateName = "runNixOps2-test.nixops";
+          network.lock.hercules-ci.stateName = "runNixOps2-test.nixops";
 
           backend = { config, resources, pkgs, ... }: {
             config = {
@@ -137,7 +99,7 @@
               };
 
               services.nginx.enable = true;
-              services.nginx.virtualHosts."${config.networking.publicIPv4}".root = pkgs.myPkgs.my-web-root;
+              services.nginx.virtualHosts."${if config.networking.publicIPv4 == null then "ip-unknown" else config.networking.publicIPv4}".root = pkgs.myPkgs.my-web-root;
               networking.firewall.allowedTCPPorts = [80 443];
             };
           };

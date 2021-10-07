@@ -8,7 +8,7 @@ let
   fakeFlake = let
       ec2Defaults = { region = "us-east-1"; accessKeyId = "foo-bar-test-profile"; };
   in {
-    outPath = pkgs.path;
+    outPath = pkgs.lib.cleanSource ./.;
     nixopsConfigurations = {
       default = {
 
@@ -68,7 +68,7 @@ let
   deploy = effects.runNixOps2 {
     flake = fakeFlake;
     nixops = pkgs.nixopsUnstable;
-    name = "deployment";
+    nix = pkgs.nixUnstable;
 
     # Override dynamic options for CI
     prebuildOnlyNetworkFiles = [
@@ -80,13 +80,13 @@ let
       mkdir -p ~/.config/nix/
       echo experimental-features = nix-command flakes >>~/.config/nix/nix.conf
     '';
-    effectScript = ''
-      nixops deploy
-    '';
+    action = "dry-run";
     userSetupScript = ''
       writeAWSSecret nixops-example nixops-example
     '';
+    priorCheckScript = "";
+    effectCheckScript = "";
     secretsMap.nixops-example = "nixops-example-aws";
   };
 in
-deploy.prebuilt
+deploy
