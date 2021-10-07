@@ -40,14 +40,14 @@ let
 
   '';
 
-  prebuilt = {name, networkArgs, flake, nixops, src, networkFiles, prebuildOnlyNetworkFiles, forgetState}: let
+  prebuilt = {name, prebuildNetworkArgs, flake, nixops, src, networkFiles, prebuildOnlyNetworkFiles, forgetState}: let
     nixFiles = getNixFiles nixops;
     origSrc = src.origSrc or src;
     machineInfo = import "${nixFiles}/eval-machine-info.nix" ({
       inherit system;
       uuid = "00000000-0000-0000-0000-000000000000";
       deploymentName = name;
-      args = networkArgs;
+      args = prebuildNetworkArgs;
       pluginNixExprs = import "${nixFiles}/all-plugins.nix";
     } // (if flake == null then {
       networkExprs = [ ./prebuild-stub.nix ] ++ map (v: origSrc + "/${v}") (networkFiles ++ prebuildOnlyNetworkFiles);
@@ -82,8 +82,7 @@ args@{
   flake ? null,
   src ? flake.outPath,
   forgetState ? false,
-  # TODO: pass to deploy command? doc?
-  networkArgs ? {},
+  prebuildNetworkArgs ? {},
   secretsMap ? {},
   nixops ? nixopsUnstable,
   nix ? packageArgs.nix,
@@ -125,10 +124,10 @@ mkEffect (
   {
     NIX_PATH="nixpkgs=${path}";
   }
-  //  lib.filterAttrs (k: v: k != "networkArgs" && k != "flake") args
+  //  lib.filterAttrs (k: v: k != "prebuildNetworkArgs" && k != "flake") args
     // lib.optionalAttrs prebuild {
         prebuilt = prebuilt { 
-          inherit networkArgs flake nixops src networkFiles prebuildOnlyNetworkFiles forgetState;
+          inherit prebuildNetworkArgs flake nixops src networkFiles prebuildOnlyNetworkFiles forgetState;
           name = name2;
         };
       }
