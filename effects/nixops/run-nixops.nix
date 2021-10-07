@@ -106,7 +106,7 @@ mkEffect (
       }
     // {
   name = "nixops-${name}";
-  inputs = [ nix nixops git ];
+  inputs = [ nix nixops git ] ++ (args.inputs or []);
 
   # Like `args // `, but also sets the defaults
   inherit deployOnlyNetworkFiles networkFiles stateName knownHostsName NIX_PATH;

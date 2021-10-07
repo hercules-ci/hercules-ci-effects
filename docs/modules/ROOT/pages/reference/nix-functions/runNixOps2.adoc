@@ -1,26 +1,41 @@
 
-= `runNixOps`
+= `runNixOps2`
 
-_runNixOps {two-colons} AttrSet -> Effect_
+_runNixOps2 {two-colons} AttrSet -> Effect_
 
 Provision interrelated machine configurations and other cloud resources.
 
-For a practical introduction, check out the guide xref:guide/deploy-a-nixops-network.adoc[].
-
+NOTE: NixOps 2 is pre-release software, so this function is also subject to change.
 
 [[parameters]]
 == `Parameters`
 
+[[param-flake]]
+=== `flake`
+
+Optional flake (outputs) containing `nixopsConfigurations.default`.
+
+If you do not use a flake to specify the deployment, set <<param-src>> instead.
+
+If `nix` is older than `2.4`, set <<param-nix>> to a `nix` package with flake support.
+
 [[param-name]]
 === `name`
 
-The NixOps deployment name.
+Optional NixOps deployment name.
+
+If your NixOps state file contains a single deployment and you want to select
+it automatically, you should leave this unset or `null`.
 
 [[param-src]]
 === `src`
 
-NixOps network expressions and other files required for the deployment.
-Unlike some other deployment methods, NixOps needs access to the actual expression files.
+Use when <<param-flake>> is not set.
+
+This should contain the NixOps network expressions and other files required for
+the deployment. Unlike some other deployment methods, NixOps needs access to
+the actual expression files, because it needs to evaluate with non-static
+arguments like secrets and IP adresses.
 
 Confidential information should not be committed and included here, but inserted via
 `secrets.json` and xref:reference/nix-functions/mkEffect.adoc#param-userSetupScript[`userSetupScript`].
@@ -28,9 +43,13 @@ Confidential information should not be committed and included here, but inserted
 [[param-networkFiles]]
 === `networkFiles`
 
-Default: `["network.nix"]`
+Use when <<param-flake>> is not set.
 
-Files in `src` that are always used as network expressions.
+A list of relative file path strings in `src` that are used as network expressions.
+
+Default: `null`
+
+Example: `["nixops.nix"]`
 
 [[param-prebuild]]
 === `prebuild`
@@ -50,29 +69,14 @@ Default: `[]`
 xref:param-prebuild[Prebuild] runs outside of NixOps, which means that some info may be missing.
 Specify extra network expressions here to fill in or override the missing definitions.
 
-[[param-deployOnlyNetworkFiles]]
-=== `deployOnlyNetworkFiles`
+[[param-prebuildNetworkArgs]]
+=== `prebuildNetworkArgs`
 
 Default: `[]`
 
-Network files that are only used when deploying; not when prebuilding.
+xref:param-prebuild[Prebuild] runs outside of NixOps, which means that some info may be missing.
 
-[[param-stateName]]
-=== `stateName`
-
-Default: `"nixops-$\{name}.json"`
-
-Override the Hercules CI state file name, in case it's necessary.
-
-The state file only contains a single deployment.
-
-[[param-knownHostsName]]
-=== `knownHostsName`
-
-Default: `"nixops-$\{name}.known_hosts"`
-
-Some NixOps backends do not update the `~/.ssh/known_hosts` file. `runNixOps`
-will persist this file as a state file with the name set here.
+This lets you fill in arguments like those set witih `nixops set-args`.
 
 [[param-secretsMap]]
 === `secretsMap`
@@ -99,6 +103,52 @@ Default: `"switch"`; performing a full deployment, analogous to `nixos-rebuild s
 Other valid values besides `"switch"` are `"dry-run"`, `"plan"`, `"build"`*, `"create"`, `"copy"`, `"dry-activate"`, `"test"`, `"boot"`.
 
 Note that your agent will not automatically push to the cache for `build`. <<param-prebuild>> (enabled by default) does take care of this. See also xref:guide/deploy-a-nixops-network.adoc#prebuild[the NixOps deployment guide] on prebuilding.
+
+[[param-allowReboot]]
+=== `allowReboot`
+
+Default: `true`.
+
+Set to `false` to make the `deploy` command fail when a reboot is necessary.
+
+[[param-allowRecreate]]
+=== `allowRecreate`
+
+Default: `true`.
+
+Whether to create cloud resources when they appear to have gone missing.
+
+[[param-extraDeployArgs]]
+=== `extraDeployArgs`
+
+Default: `[]`
+
+A list of strings that will be passed as extra arguments to `nixops deploy`.
+
+[[param-nix]]
+=== `nix`
+
+Default: `pkgs.nix`
+
+The Nix package to use.
+
+[[param-nixops]]
+=== `nixops`
+
+Default: `pkgs.nixopsUnstable`
+
+The NixOps package to use.
+
+[[param-forgetState]]
+=== `forgetState`
+
+Default: false
+
+Whether it's ok to delete the state. Only use this on stateless deployments;
+not on deployments that need the state file to remember IP addresses,
+cloud resource ids, etc.
+
+This disables an assertion intended to prevent mistakes with cloud deployments.
 
 [[extra-params]]
 === `...` -- remaining arguments
@@ -136,7 +186,7 @@ This is primarily useful for inspection with `nix repl`.
 [discrete]
 == See also
 
-* xref:reference/nix-functions/runNixOps2.adoc[`runNixOps2`] -- similar function for NixOps 2
+* xref:reference/nix-functions/runNixOps.adoc[`runNixOps`] -- similar function for NixOps 1.x
 
 * xref:reference/nix-functions/runNixOS.adoc[`runNixOS`] -- a simpler solution for single pre-existing machines
 
