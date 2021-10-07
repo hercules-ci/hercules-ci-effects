@@ -178,7 +178,7 @@ mkEffect (
 
   NIXOPS_DEPLOYMENT = args.NIXOPS_DEPLOYMENT or name;
 
-  effectScript = ''
+  effectScript = args.effectScript or ''
     nixops deploy \
       --confirm \
       ${escapeShellArgs deployArgs} \
@@ -189,11 +189,11 @@ mkEffect (
   # To quote the NixOps help:
   #   check the state of the machines in the network (note that this might alter
   #   the internal nixops state to consolidate with the real state of the resource)
-  effectCheckScript = ''
+  effectCheckScript = args.effectCheckScript or ''
     nixops check
   '';
 
-  priorCheckScript = ''
+  priorCheckScript = args.priorCheckScript or ''
     nixops check
   '';
 
