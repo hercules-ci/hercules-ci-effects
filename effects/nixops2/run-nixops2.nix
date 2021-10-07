@@ -1,6 +1,9 @@
 packageArgs@{ gnused, lib, mkEffect, nix, nixopsUnstable, path, system, runCommand, openssh, rsync, hci, git }:
 
 let
+  inherit (lib)
+    escapeShellArgs optionals;
+
   # We don't use this for the actual deployment.
   getNixFiles = nixops: runCommand "${nixops.name}-nix-files" {
     inherit (nixops) plugins;
@@ -116,9 +119,42 @@ args@{
   # Mutually exclusive with `flake`.
   networkFiles ? null,
 
+  # specify an action for the deploy which are mutually exclusive,
+  # options: switch, dry-run, plan, build, create, copy, dry-activate, test, boot
+  action ? "switch",
+
+  allowReboot ? true,
+
+  allowRecreate ? true,
+
+  extraDeployArgs ? [],
+
   # Other variables are passed to mkEffect, which is similar to mkDerivation.
   ...
 }:
+let
+  actionFlag = {
+    switch = [];
+    dry-run = ["--dry-run"];
+    plan = ["--plan-only"];
+    build = ["--build-only"];
+    create = ["--create-only"];
+    copy = ["--copy-only"];
+    dry-activate = ["--dry-activate"];
+    test = ["--test"];
+    boot = ["--boot"];
+  }."${action}";
+
+  deployArgs =
+    actionFlag
+    ++ optionals allowReboot ["--allow-reboot"]
+    ++ optionals allowRecreate ["--allow-recreate"]
+    ++ extraDeployArgs
+    ;
+
+  name2 = if name != null then name else "nixops";
+
+in
 # Either flake or networkFiles must be set.
 assert ((flake == null) != (networkFiles == null));
 mkEffect (
@@ -145,6 +181,7 @@ mkEffect (
   effectScript = ''
     nixops deploy \
       --confirm \
+      ${escapeShellArgs deployArgs} \
       ;
   '';
 
