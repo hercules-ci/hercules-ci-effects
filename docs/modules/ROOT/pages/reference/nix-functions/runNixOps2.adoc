@@ -5,6 +5,7 @@ _runNixOps2 {two-colons} AttrSet -> Effect_
 
 Provision interrelated machine configurations and other cloud resources.
 
+NOTE: NixOps 2 is pre-release software, so this function is also subject to change.
 
 [[parameters]]
 == `Parameters`
