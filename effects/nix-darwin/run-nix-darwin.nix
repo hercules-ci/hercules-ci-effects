@@ -50,6 +50,9 @@ mkEffect (removeAttrs args ["configuration" "ssh"] // {
   };
   effectScript = ''
     ${effects.ssh ssh ''
+      echo >&2 "remote nix version:"
+      nix-env --version >&2
+      nix-env -p ${conf.config.system.profile} --set ${conf.system}
       ${conf.system}/sw/bin/darwin-rebuild activate
     ''}
   '';
