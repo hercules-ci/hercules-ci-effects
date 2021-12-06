@@ -21,7 +21,7 @@ In your outputs section, call Nixpkgs with the overlay:
       system = /* ... */;  # or however you bring system into scope
       pkgs = import nixpkgs {
         overlays = [
-          hercules-ci-effects
+          hercules-ci-effects.overlay
         ];
       };
       inherit (pkgs) effects; # optional
