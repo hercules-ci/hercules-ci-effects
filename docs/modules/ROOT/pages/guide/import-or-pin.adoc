@@ -35,13 +35,13 @@ In your outputs section, call Nixpkgs with the overlay:
 Although overlays are a convenient way to make definitions available to all
 your expressions, they aren't necessary for `hercules-ci-effects`.
 
-Add the input.
+Add the input:
 
 ```nix
   hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
 ```
 
-Call `hercules-ci-effects`.
+Call `hercules-ci-effects`:
 
 ```nix
   outputs = { hercules-ci-effects, ... }:
@@ -57,7 +57,7 @@ Call `hercules-ci-effects`.
 
 https://github.com/nmattia/niv#readme[Niv] is a simple tool that maintains references to dependencies in a JSON file and accompanying Nix file.
 
-Add as a source
+Add as a source:
 
 ```nix
 niv add hercules-ci/hercules-ci-effects
