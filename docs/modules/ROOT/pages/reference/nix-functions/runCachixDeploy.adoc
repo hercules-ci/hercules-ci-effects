@@ -1,0 +1,109 @@
+
+= `runCachixDeploy`
+
+_runCachixDeploy {two-colons} AttrSet -> Effect_
+
+Pushes a https://docs.cachix.org/deploy/reference#deploy-json[deploy.json] to Cachix Deploy, which is a pull-based deployment service. It mediates two programs: `cachix deploy activate` which updates the store paths to be pulled and run by `cachix deploy agent`.
+
+`runCachixDeploy` is a convenience function to invoke `cachix deploy activate`.
+
+The `cachix push <store-path>` part is taken care of by configuring a cachix build cache in xref:hercules-ci-agent:ROOT:binary-caches-json.adoc[binary-caches.json].
+
+Example:
+
+```nix
+runCachixDeploy {
+  deploy.agents."machine1" = (pkgs.nixos ./configuration.nix).toplevel;
+}
+```
+
+`secrets.json`:
+```json
+  "default-cachix-activate": {
+    "kind": "Secret",
+    "data": {
+      "cachixActivateToken": "....."
+    }
+  },
+```
+
+[[parameters]]
+== Parameters
+
+[[param-deploy]]
+=== `deploy`
+
+The https://docs.cachix.org/deploy/reference#deploy-json[deploy.json] contents as a Nix attribute set.
+
+Example:
+
+```nix
+runCachixDeploy {
+  deploy.agents = {
+    "machine1" = (pkgs.nixos { ... }).toplevel;
+    "machine2" = (lib.nixosSystem { ... }).config.system.build.toplevel;
+  };
+}
+```
+
+NOTE: Make sure to set the correct `system` parameter when creating `pkgs` or invoking `lib.nixosSystem`.
+
+[[param-secretsMap-activate]]
+=== `secretsMap.activate`
+
+Default: `"default-cachix-activate"`
+
+Name of a secret containing the `cachixActivateToken` field.
+
+For example:
+
+```nix
+runCachixDeploy {
+  # ...
+  secretsMap.activate = "default-cachix-activate";
+}
+```
+
+Get a Cachix Deploy activation token and replace _ACTIVATION-TOKEN_ with it.
+
+```console
+cd myproject
+hci secret add default-cachix-activate --string cachixActivateToken ACTIVATION-TOKEN
+```
+
+And then copy the secret over to your Hercules CI agent `secrets.json`.
+
+```json
+  "default-cachix-activate": {
+    "kind": "Secret",
+    "data": {
+      "cachixActivateToken": "ACTIVATION-TOKEN"
+    }
+  },
+```
+
+You can generate a value for _ACTIVATION-TOKEN_ by navigating to https://app.cachix.org/deploy[Cachix Deploy], creating a workspace if you haven't already done so and clicking btn:[Start Deployment].
+
+[[param-cachix]]
+=== `cachix`
+
+Default: `pkgs.cachix`
+
+The cachix package to use.
+
+[[param-deployJsonFile]]
+=== `deployJsonFile`
+
+_(Advanced use case)_
+
+The path to a https://docs.cachix.org/deploy/reference#deploy-json[deploy.json] file, in case the shape of the file is not known during evaluation. Usually, <<param-deploy>> will suffice.
+
+[[extra-params]]
+=== `...` -- remaining arguments
+
+Other attributes are passed to xref:reference/nix-functions/mkEffect.adoc[mkEffect], which passes its remaining arguments to `mkDerivation`.
+
+[[return-value]]
+== Return value
+
+An effect that activates the configured Cachix Deploy agents.
