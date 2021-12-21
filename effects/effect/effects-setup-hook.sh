@@ -93,6 +93,21 @@ unpackCmdHooks+=(simpleCopyUnpack)
 
 
 # ----------------------------------------------------------------------------
+# only show phase headers when debugging
+
+overrideShowPhaseHeader(){
+  if [[ -z "${NIX_DEBUG:-}" ]]; then
+    # override it
+    showPhaseHeader() {
+      :
+    }
+  fi
+}
+
+postHooks+=(overrideShowPhaseHeader)
+
+
+# ----------------------------------------------------------------------------
 # warn if run in wrong environment
 
 
