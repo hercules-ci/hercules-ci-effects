@@ -12,7 +12,7 @@ let
 
     phases = args.phases or "initPhase unpackPhase patchPhase ${args.preGetStatePhases or ""} getStatePhase userSetupPhase ${args.preEffectPhases or ""} effectPhase putStatePhase ${args.postEffectPhases or ""}";
 
-    name = lib.strings.sanitizeDerivationName ("effect-" + args.name);
+    name = lib.strings.sanitizeDerivationName (if args?name then "effect-${args.name}" else "effect");
 
     # nativeBuildInputs normally corresponds to what the building machine can
     # execute. Likewise, effects are executed on the machine type that would
