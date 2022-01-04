@@ -27,6 +27,8 @@ runCachixDeploy {
   },
 ```
 
+NOTE: As Cachix Deploy is a new feature, make sure to use a `cachix` package that includes it. You can set it in an overlay or pass the package as the <<param-cachix>> parameter.
+
 [[parameters]]
 == Parameters
 
