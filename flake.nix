@@ -25,6 +25,7 @@
       nixops = nixpkgs-nixops.legacyPackages.x86_64-linux.callPackage ./effects/nixops/test/default.nix {};
       nix-shell = nixpkgs.legacyPackages.x86_64-linux.callPackage ./effects/nix-shell/test.nix {};
       nixops2 = (nixpkgs.legacyPackages.x86_64-linux.extend (self: super: { hci = hercules-ci-agent.packages.x86_64-linux.hercules-ci-cli; }) ).callPackage ./effects/nixops2/test/default.nix { nixpkgsFlake = nixpkgs; };
+      cachix-deploy = nixpkgs.legacyPackages.x86_64-linux.callPackage ./effects/cachix-deploy/test.nix {};
     };
 
   };

@@ -24,6 +24,8 @@ in {
 
   runArion = callPackage ./arion/run-arion.nix { };
 
+  runCachixDeploy = callPackage ./cachix-deploy/run-cachix-deploy.nix { };
+
   runNixDarwin = callPackage ./nix-darwin/run-nix-darwin.nix { };
 
   runNixOps = callPackage ./nixops/run-nixops.nix { };

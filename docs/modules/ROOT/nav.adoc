@@ -17,6 +17,7 @@
 ** xref:reference/nix-functions/ssh.adoc[`ssh`]
 ** _Deployment Functions_
 ** xref:reference/nix-functions/runArion.adoc[`runArion`]
+** xref:reference/nix-functions/runCachixDeploy.adoc[`runCachixDeploy`]
 ** xref:reference/nix-functions/runNixDarwin.adoc[`runNixDarwin`]
 ** xref:reference/nix-functions/runNixOps.adoc[`runNixOps`]
 ** xref:reference/nix-functions/runNixOps2.adoc[`runNixOps2`]
