@@ -31,14 +31,18 @@ See the Nix Functions Reference and Bash Functions Reference on the [documentati
 Here's an example:
 
 ```nix
+#ci.nix
+{ src ? { ref = null; } }: {
+
   production = runIf (src.ref == "refs/heads/master") (
     effects.runNixOps {
       name = "production";
-      src = pkgs.lib.cleanSource ./.;
+      src = pkgs.lib.cleanSource ./.; # NixOps reads your Nix files
       networkFiles = ["network.nix"];
       secretsMap.aws = "production-aws";
     }
   );
+}
 ```
 
 # License
