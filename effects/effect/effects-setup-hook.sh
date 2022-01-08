@@ -136,7 +136,9 @@ readSecretString() {
   local secretName="$1"
   local dataPath="$2"
   if ! jq -e -r <"$HERCULES_CI_SECRETS_JSON" '.[$secretName].data | '"$dataPath" --arg secretName "$secretName"
-  then echo 1>&2 "Could not find path $dataPath in secret $secretName"
+  then
+    echo 1>&2 "Could not find path $dataPath in secret $secretName"
+    return 1
   fi
 }
 
