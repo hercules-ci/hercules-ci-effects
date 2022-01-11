@@ -124,7 +124,7 @@ in
 assert ((flake == null) != (networkFiles == null));
 
 throwIfNot
-  ("action" == "switch" || (args?makeAnException && args.makeAnException == "I know this can corrupt the state, until https://github.com/NixOS/nixops/issues/1499 is resolved."))
+  (action == "switch" || (args?makeAnException && args.makeAnException == "I know this can corrupt the state, until https://github.com/NixOS/nixops/issues/1499 is resolved."))
   "The runNixOps2 action parameter is disabled until https://github.com/NixOS/nixops/issues/1499 is resolved."
 
 mkEffect (
