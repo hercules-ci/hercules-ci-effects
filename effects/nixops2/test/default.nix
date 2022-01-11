@@ -81,6 +81,7 @@ let
       echo experimental-features = nix-command flakes >>~/.config/nix/nix.conf
     '';
     action = "dry-run";
+    makeAnException = "I know this can corrupt the state, until https://github.com/NixOS/nixops/issues/1499 is resolved.";
     userSetupScript = ''
       writeAWSSecret nixops-example nixops-example
     '';
