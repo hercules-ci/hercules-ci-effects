@@ -117,9 +117,16 @@ let
 
   name2 = if name != null then name else "nixops";
 
+  throwIfNot = c: msg: if !c then throw msg else x: x;
+
 in
 # Either flake or networkFiles must be set.
 assert ((flake == null) != (networkFiles == null));
+
+throwIfNot
+  ("action" == "switch" || (args?makeAnException && args.makeAnException == "I know this can corrupt the state, until https://github.com/NixOS/nixops/issues/1499 is resolved."))
+  "The runNixOps2 action parameter is disabled until https://github.com/NixOS/nixops/issues/1499 is resolved."
+
 mkEffect (
   {
     NIX_PATH="nixpkgs=${path}";
