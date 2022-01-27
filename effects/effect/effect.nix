@@ -28,6 +28,8 @@ let
     # TODO: Use structured attrs instead
     secretsMap = builtins.toJSON (args.secretsMap or {});
 
+    dontUnpack = args.dontUnpack or (!(args?src || args?srcs));
+
   });
 
   invokeOverride = f: defaults: (lib.makeOverridable f defaults).override;
