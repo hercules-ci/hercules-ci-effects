@@ -16,7 +16,7 @@ in {
       (
         if condition
         then { run = v; }
-        else { dependencies = v // { isEffect = false; buildDependenciesOnly = true; }; }
+        else { dependencies = v.inputDerivation // { isEffect = false; buildDependenciesOnly = true; }; }
       ) // optionalAttrs (v ? prebuilt) {
         inherit (v) prebuilt;
       }
