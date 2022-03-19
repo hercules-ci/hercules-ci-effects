@@ -1,9 +1,7 @@
 let
-  lock = builtins.fromJSON (builtins.readFile ../flake.lock);
-  inherit (lock.nodes.flake-compat.locked) owner repo rev narHash;
   flake-compat = builtins.fetchTarball {
-    url = "https://github.com/${owner}/${repo}/archive/${rev}.tar.gz";
-    sha256 = narHash;
+    url = "https://github.com/edolstra/flake-compat/archive/99f1c2157fba4bfe6211a321fd0ee43199025dbf.tar.gz";
+    sha256 = "sha256-oq8d4//CJOrVj+EcOaSXvMebvuTkmBJuT5tzlfewUnQ=";
   };
 in
 import flake-compat { src = ../.; }
