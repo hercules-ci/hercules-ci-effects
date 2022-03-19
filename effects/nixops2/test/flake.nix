@@ -55,7 +55,6 @@
         # NOTE: this option can be used to select a profile as well.
         accessKeyId = "nixops-example";
         region = "us-east-1";
-        tags = {};
       };
     in
     lib.filterAttrs (k: v: k != "pkgs") perSystem // {
@@ -114,7 +113,7 @@
             rules = [
               { fromPort = 22; toPort = 22; sourceIp = "0.0.0.0/0"; }
             ];
-            inherit (ec2Defaults) region tags accessKeyId;
+            inherit (ec2Defaults) region accessKeyId;
           };
 
           resources.ec2SecurityGroups.ec2SecurityGroups-web = { resources, ... }: {
@@ -124,7 +123,7 @@
               { fromPort = 80; toPort = 80; sourceIp = "0.0.0.0/0"; }
               { fromPort = 443; toPort = 443; sourceIp = "0.0.0.0/0"; }
             ];
-            inherit (ec2Defaults) region tags accessKeyId;
+            inherit (ec2Defaults) region accessKeyId;
           };
         };
       };
