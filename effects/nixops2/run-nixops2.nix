@@ -40,7 +40,17 @@ let
 
   '';
 
-  prebuilt = {name, prebuildNetworkArgs, flake, nixops, src, networkFiles, prebuildOnlyNetworkFiles, forgetState}: let
+  prebuilt = {
+    name,
+    prebuildNetworkArgs,
+    flake,
+    nixops,
+    src,
+    networkFiles,
+    prebuildOnlyNetworkFiles,
+    prebuildOnlyModules,
+    forgetState,
+  }: let
     nixFiles = getNixFiles nixops;
     origSrc = src.origSrc or src;
     machineInfo = import "${nixFiles}/eval-machine-info.nix" ({
@@ -50,9 +60,9 @@ let
       args = prebuildNetworkArgs;
       pluginNixExprs = import "${nixFiles}/all-plugins.nix";
     } // (if flake == null then {
-      networkExprs = [ ./prebuild-stub.nix ] ++ map (v: origSrc + "/${v}") (networkFiles ++ prebuildOnlyNetworkFiles);
+      networkExprs = [ ./prebuild-stub.nix ] ++ map (v: origSrc + "/${v}") (networkFiles ++ prebuildOnlyNetworkFiles) ++ prebuildOnlyModules;
     } else {
-      networkExprs = [ ./prebuild-stub.nix ] ++ prebuildOnlyNetworkFiles;
+      networkExprs = [ ./prebuild-stub.nix ] ++ prebuildOnlyNetworkFiles ++ prebuildOnlyModules;
       flakeExpr = flake.nixopsConfigurations.default;
       flakeUri = flake.outPath;
     }));
@@ -88,6 +98,7 @@ args@{
   nix ? packageArgs.nix,
   prebuild ? true,
   prebuildOnlyNetworkFiles ? [],
+  prebuildOnlyModules ? [],
   networkFiles ? null,
   action ? "switch",
   allowReboot ? true,
@@ -134,7 +145,15 @@ mkEffect (
   //  lib.filterAttrs (k: v: k != "prebuildNetworkArgs" && k != "flake") args
     // lib.optionalAttrs prebuild {
         prebuilt = prebuilt { 
-          inherit prebuildNetworkArgs flake nixops src networkFiles prebuildOnlyNetworkFiles forgetState;
+          inherit
+            prebuildNetworkArgs
+            flake
+            nixops
+            src
+            networkFiles
+            prebuildOnlyNetworkFiles
+            prebuildOnlyModules
+            forgetState;
           name = name2;
         };
       }
