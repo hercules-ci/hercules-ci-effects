@@ -76,6 +76,10 @@ let
         { defaults = { lib, ... }: { networking.publicIPv4 = lib.mkForce "0.0.0.0"; }; }
       '')
     ];
+    # Needs nixopsUnstable update for improved exprs
+    # prebuildOnlyModules = [
+    #   ({ }: { })
+    # ];
     preUserSetup = ''
       mkdir -p ~/.config/nix/
       echo experimental-features = nix-command flakes >>~/.config/nix/nix.conf

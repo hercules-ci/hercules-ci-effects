@@ -145,7 +145,7 @@ mkEffect (
   {
     NIX_PATH="nixpkgs=${path}";
   }
-  //  lib.filterAttrs (k: v: k != "prebuildNetworkArgs" && k != "flake") args
+  // lib.filterAttrs (k: v: k != "prebuildNetworkArgs" && k != "prebuildOnlyModules" && k != "flake") args
     // lib.optionalAttrs prebuild {
         prebuilt = prebuilt { 
           inherit
