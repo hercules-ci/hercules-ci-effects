@@ -36,7 +36,10 @@ let
     sed -e 's^<nixops\([^>]*\)>^'$out'\1^g' -i $(find $out -type f -name "*\.nix")
     sed -e 's^<nixpkgs\([^>]*\)>^${path}\1^g' -i $(find $out -type f -name "*\.nix")
 
-    (cd $out; patch --strip 2 <${./nixops.diff})
+    (cd $out; patch --strip 2 <${./nixops.diff}) || {
+      echo >&2 "Ignoring failed patch"
+      echo >&2 "Assuming nixops is new enough"
+    }
 
   '';
 
