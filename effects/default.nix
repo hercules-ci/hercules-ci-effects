@@ -8,7 +8,8 @@ let
   callPackage = pkgs.newScope self;
   inherit (pkgs.lib) recurseIntoAttrs optionalAttrs;
 
-in {
+in
+{
   mkEffect = callPackage ./effect/effect.nix { };
 
   runIf = condition: v:
@@ -21,6 +22,8 @@ in {
         inherit (v) prebuilt;
       }
     );
+
+  netlifyDeploy = callPackage ./netlify { };
 
   runArion = callPackage ./arion/run-arion.nix { };
 
