@@ -37,6 +37,8 @@ in {
   # A simple example
   runPutUrl = callPackage ./run-put-url.nix { };
 
+  mkGitBranch = callPackage ./mk-git-branch.nix { };
+
   git-crypt-hook = callPackage ./git-crypt-hook/default.nix { };
 
   nix-shell = callPackage ./nix-shell/default.nix { };
