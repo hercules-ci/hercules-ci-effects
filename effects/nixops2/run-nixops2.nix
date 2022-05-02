@@ -85,7 +85,10 @@ let
       inherit machineInfo;
       inherit (machineInfo) network nodes;
     }
-  );
+  ) // lib.optionalAttrs (machineInfo?net) {
+    inherit (machineInfo.net) config;
+    inherit (machineInfo) debug;
+  };
 
 in
 
