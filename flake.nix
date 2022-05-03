@@ -15,7 +15,9 @@
 
     # TODO: add tests as checks by flattening
     tests =
-      let pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      let
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        effects = self.lib.withPkgs pkgs;
       in {
         git-crypt-hook = pkgs.callPackage ./effects/git-crypt-hook/test.nix {};
         nixops = pkgs.callPackage ./effects/nixops/test/default.nix {};
@@ -23,6 +25,7 @@
         nixops2 = pkgs.callPackage ./effects/nixops2/test/default.nix { nixpkgsFlake = nixpkgs; };
         cachix-deploy = pkgs.callPackage ./effects/cachix-deploy/test.nix {};
         mkEffect = pkgs.callPackage ./effects/effect/test.nix {};
+        ssh = effects.callPackage ./effects/ssh/test.nix {};
       };
 
     herculesCI = {
@@ -30,6 +33,13 @@
         outputs.effects = { inherit (self) tests; };
       };
     };
+
+    devShells.x86_64-linux.default =
+      let pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      in
+      pkgs.mkShell {
+        nativeBuildInputs = [ pkgs.nixpkgs-fmt ];
+      };
 
   };
 }
