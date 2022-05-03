@@ -7,6 +7,8 @@ Create offline tests for effect functions.
 
 This returns a derivation that tests an effect using QEMU and `nixosTest`.
 
+Full example: https://github.com/hercules-ci/hercules-ci-effects/blob/master/effects/ssh/test.nix[test for the `ssh` function]
+
 [[parameters]]
 == Parameters
 
