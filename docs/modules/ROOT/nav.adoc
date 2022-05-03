@@ -22,6 +22,8 @@
 ** xref:reference/nix-functions/runNixOps.adoc[`runNixOps`]
 ** xref:reference/nix-functions/runNixOps2.adoc[`runNixOps2`]
 ** xref:reference/nix-functions/runNixOS.adoc[`runNixOS`]
+** _Developing Effects_
+** xref:reference/nix-functions/effectVMTest.adoc[`effectVMTest`]
 * Hooks Reference
 ** xref:reference/hooks/git-crypt-hook.adoc[`git-crypt-hook`]
 * Bash Functions Reference
