@@ -172,10 +172,14 @@ EOF
 writeSSHKey() {
   local secretName="${1:-ssh}"
   local privateName="${2:-$HOME/.ssh/id_rsa}"
+  local publicName="${privateName}.pub"
   mkdir -p "$(dirname "$privateName")"
   readSecretString "$secretName" .privateKey >"$privateName"
   chmod 0400 "$privateName"
-  ssh-keygen -y -f "$privateName" >"$privateName.pub"
+  test -r "$publicName" \
+    || readSecretString "$secretName" .publicKey >"$publicName" \
+    || ssh-keygen -y -f "$privateName" >"$publicName" \
+    || { echo >&2 "warning: could not write ${publicName}. do we need it?"; rm "$publicName"; }
 }
 
 writeDockerKey() {
