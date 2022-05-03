@@ -113,6 +113,13 @@ postHooks+=(overrideShowPhaseHeader)
 
 if [[ "true" != ${IN_HERCULES_CI_EFFECT:-} ]]; then
 
+  # makeNixSandboxBuildSucceed: Introduced to work around a Nix bug.
+  # Effects aren't intended to be buildable. Used by `effect-vm-test.nix``.
+  if [[ 1 = ${makeNixSandboxBuildSucceed:-} ]]; then
+    touch $out
+    exit 0
+  fi
+
   if [[ -n ${NIX_LOG_FD:-} ]]; then
     cat 1>&2 <<EOF
 WARNING: You are running a Hercules CI Effect in the Nix sandbox. This is very

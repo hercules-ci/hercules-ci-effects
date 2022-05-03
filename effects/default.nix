@@ -43,4 +43,9 @@ in {
 
   ssh = callPackage ./ssh/call-ssh.nix { };
 
+  effectVMTest = callPackage ./effect-vm-test { };
+
+  effects = self;
+
+  inherit callPackage;
 }
