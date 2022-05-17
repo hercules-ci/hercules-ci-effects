@@ -18,6 +18,7 @@
      };
 */
 {
+  lib,
   mkEffect,
   git,
   openssh,
@@ -39,11 +40,11 @@ args@{
 mkEffect {
   inputs = [ openssh git ];
   secretsMap = {
-    "ssh" = ${sshSecretName};
+    "ssh" = sshSecretName;
   };
   effectScript = ''
     writeSSHKey
-    echo ${hostKey} >> ~/.ssh/known_hosts
+    echo ${lib.escapeShellArg hostKey} >> ~/.ssh/known_hosts
     export GIT_AUTHOR_NAME="${authorName}"
     export GIT_COMMITTER_NAME="${committerName}"
     export EMAIL="${committerEmail}"
