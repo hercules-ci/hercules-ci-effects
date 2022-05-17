@@ -195,12 +195,6 @@ effectVMTest {
         git clone /home/git/gitfan42/cats.git tmp1 --branch my-branch
         pushd tmp1
 
-        # FIXME: removal
-        # [[ -e extra-file ]] || {
-        #   echo extra-file should be gone 1>&2
-        #   false
-        # }
-
         [[ -e executable ]] || {
           echo executable gone? 1>&2
           false
