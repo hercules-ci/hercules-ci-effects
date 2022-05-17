@@ -146,11 +146,10 @@ effectVMTest {
           false
         }
 
-        # FIXME: executable bit
-        # [[ -x executable ]] || {
-        #  echo executable should be executable
-        #  false
-        #}
+        [[ -x executable ]] || {
+          echo executable should be executable
+          false
+        }
 
         rm extra-file
         rm -rf .git
@@ -174,11 +173,10 @@ effectVMTest {
           false
         }
 
-        # FIXME: executable bit
-        # [[ -x executable ]] || {
-        #   echo executable should be executable 1>&2
-        #   false
-        # }
+        [[ -x executable ]] || {
+          echo executable should be executable 1>&2
+          false
+        }
 
         rm extra-file
         rm -rf .git
@@ -203,15 +201,14 @@ effectVMTest {
         #   false
         # }
 
-        # FIXME: executable bit
-        # [[ -e executable ]] || {
-        #   echo executable gone? 1>&2
-        #   false
-        # }
-        # [[ ! -x executable ]] || {
-        #   echo executable should not be executable
-        #   false
-        # }
+        [[ -e executable ]] || {
+          echo executable gone? 1>&2
+          false
+        }
+        [[ ! -x executable ]] || {
+          echo executable should not be executable
+          false
+        }
 
         rm -rf .git
         diff -r . ${contents2}

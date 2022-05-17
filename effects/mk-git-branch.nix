@@ -48,7 +48,9 @@ mkEffect {
     export GIT_AUTHOR_NAME="${authorName}"
     export GIT_COMMITTER_NAME="${committerName}"
     export EMAIL="${committerEmail}"
-    cp -r --no-preserve=mode ${branchRoot} ./${pushToBranch} && cd ${pushToBranch}
+    cp -r ${branchRoot} ./${pushToBranch}
+    cd ${pushToBranch}
+    chmod -R u+w .
     ${preGitInit}
     git init -b ${pushToBranch}
     git remote add origin ${gitRemote}:${owner}/${repo}.git
