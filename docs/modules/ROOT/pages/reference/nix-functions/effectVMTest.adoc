@@ -1,0 +1,80 @@
+
+= `effectVMTest`
+
+_effectVMTest {two-colons} AttrSet -> Derivation_
+
+Create offline tests for effect functions.
+
+This returns a derivation that tests an effect using QEMU and `nixosTest`.
+
+Full example: https://github.com/hercules-ci/hercules-ci-effects/blob/master/effects/ssh/test.nix[test for the `ssh` function]
+
+[[parameters]]
+== Parameters
+
+[[param-name]]
+=== `name`
+
+Name of the test. Appears in the store path and in the dashboard page with the log.
+
+Default: `"unnamed"`
+
+[[param-effects]]
+=== `effects`
+
+An attribute set of effects. These can be run with
+
+Example:
+```nix
+effectVMTest {
+
+  effects = {
+    hello = mkEffect { /* ... */ };
+  };
+
+  testScript = ''
+
+    # ... setup ...
+
+    agent.succeed("effect-hello")
+
+    # ... assertions ...
+
+  '';
+}
+```
+
+[[param-nodes]]
+=== `nodes`
+
+An attribute set of NixOS configurations. Merged into this is a node named `agent`, which is responsible for running the effects.
+
+See https://nixos.org/manual/nixos/stable/index.html#sec-writing-nixos-tests[NixOS manual: Writing Tests].
+
+[[param-secrets]]
+=== `secrets`
+
+Secrets data that is made available to the effects.
+
+Example:
+
+```nix
+effectVMTest {
+  secrets.deploykey.data = {
+    publicKey = builtins.readFile ./test/id.pub;
+    privateKey = builtins.readFile ./test/id;
+  };
+  effects.deploy = mkEffect {
+    secretsMap.ssh = "deploykey";
+    # ...
+  };
+  nodes.target = { ... }: {
+    users.users.root.openssh.authorizedKeys.keyFiles = [ ./test/id.pub ];
+  };
+}
+```
+
+[[param-testScript]]
+=== `testScript`
+
+Function to python statements. See https://nixos.org/manual/nixos/stable/index.html#sec-writing-nixos-tests[NixOS manual: Writing Tests].

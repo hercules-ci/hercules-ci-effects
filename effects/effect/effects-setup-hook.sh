@@ -113,6 +113,13 @@ postHooks+=(overrideShowPhaseHeader)
 
 if [[ "true" != ${IN_HERCULES_CI_EFFECT:-} ]]; then
 
+  # makeNixSandboxBuildSucceed: Introduced to work around a Nix bug.
+  # Effects aren't intended to be buildable. Used by `effect-vm-test.nix``.
+  if [[ 1 = ${makeNixSandboxBuildSucceed:-} ]]; then
+    touch $out
+    exit 0
+  fi
+
   if [[ -n ${NIX_LOG_FD:-} ]]; then
     cat 1>&2 <<EOF
 WARNING: You are running a Hercules CI Effect in the Nix sandbox. This is very
@@ -165,10 +172,14 @@ EOF
 writeSSHKey() {
   local secretName="${1:-ssh}"
   local privateName="${2:-$HOME/.ssh/id_rsa}"
+  local publicName="${privateName}.pub"
   mkdir -p "$(dirname "$privateName")"
   readSecretString "$secretName" .privateKey >"$privateName"
   chmod 0400 "$privateName"
-  ssh-keygen -y -f "$privateName" >"$privateName.pub"
+  test -r "$publicName" \
+    || readSecretString "$secretName" .publicKey >"$publicName" \
+    || ssh-keygen -y -f "$privateName" >"$publicName" \
+    || { echo >&2 "warning: could not write ${publicName}. do we need it?"; rm "$publicName"; }
 }
 
 writeDockerKey() {
