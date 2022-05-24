@@ -18,6 +18,7 @@ let
   ] ++ lib.optionals productionDeployment [ "--prod" ];
 in
 lib.warnIf (args?websitePackage) "effects.netlify: Use the `content` parameter instead of `websitePackage`."
+lib.warnIf (args?secretData) ''effects.netlify: Use the `secretField` parameter instead of `secretData`, or rely on the default field name: "token".''
 mkEffect {
   inputs = [ netlify-cli ];
   secretsMap."netlify" = secretName;
