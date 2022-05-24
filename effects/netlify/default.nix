@@ -4,11 +4,11 @@
 }:
 args@
 { content ? websitePackage
-, websitePackage ? throw "effects.netlify: You must provide the content parameter, a directory to deploy."
-, secretName ? throw ''effects.netlify: You must provide the name of the secret which holds the "${secretField}" field.''
+, websitePackage ? throw "effects.netlify: You must provide the `content` parameter, which is a directory to deploy."
+, secretName ? throw ''effects.netlify: You must provide `secretName` the name of the secret which holds the "${secretField}" field.''
 , secretData ? "token"
 , secretField ? secretData
-, siteId ? throw "effects.netlify: You must provide a Netlify site ID"
+, siteId
 , productionDeployment ? false
 }:
 let
