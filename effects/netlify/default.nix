@@ -3,8 +3,9 @@
 , netlify-cli
 }:
 args@{ websitePackage ? throw "effects.netlify: You must provide website package to deploy"
-, secretName ? throw "effects.netlify: You must provide the name of the secret which holds the appropriate data field"
-, secretData ? throw "effects.netlify: You must provide the name of the secret data field which holds the Netlify auth token"
+, secretName ? throw ''effects.netlify: You must provide the name of the secret which holds the "${secretField}" field.''
+, secretData ? "token"
+, secretField ? secretData
 , siteId ? throw "effects.netlify: You must provide a Netlify site ID"
 , productionDeployment ? false
 }:
@@ -19,7 +20,7 @@ mkEffect {
   secretsMap."netlify" = secretName;
   effectScript = ''
     netlify deploy \
-      --auth=$(readSecretString netlify .${secretData}) \
+      --auth=$(readSecretString netlify .${secretField}) \
       ${lib.escapeShellArgs deployArgs}
   '';
 }
