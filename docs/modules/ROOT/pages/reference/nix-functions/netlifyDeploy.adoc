@@ -69,3 +69,38 @@ Path to the site content, also known as the _Publish directory_.
 This includes files such as `netlify.toml`, `_redirects`, and all web resources, like `index.html`, style sheets, etc.
 
 You'll typically put a derivation here.
+
+[[param-productionDeployment]]
+=== `productionDeployment`
+
+Whether this is a production deployment. Default: `false`.
+
+You can use the `herculesCI` attribute xref:hercules-ci-agent:ROOT:evaluation.adoc#params-herculesCI-commit[parameters] to make this conditional on the branch name.
+
+In a flake:
+
+```nix
+effects = { branch, ... }: {
+  netlify = netlifyDeploy {
+    # ...
+    productionDeployment = branch == "main";
+  };
+};
+```
+
+In a `ci.nix`, `default.nix` or flake:
+
+```nix
+herculesCI = { branch }: {
+  onPush.default =
+  # let netlifyDeploy = ...; in
+  {
+    outputs = {
+      effects.netlify = netlifyDeploy {
+        # ...
+        productionDeployment = branch == "main";
+      };
+    };
+  };
+};
+```
