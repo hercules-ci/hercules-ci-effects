@@ -2,7 +2,9 @@
 , mkEffect
 , netlify-cli
 }:
-{ websitePackage ? throw "effects.netlify: You must provide website package to deploy"
+args@
+{ content ? websitePackage
+, websitePackage ? throw "effects.netlify: You must provide the content parameter, a directory to deploy."
 , secretName ? throw ''effects.netlify: You must provide the name of the secret which holds the "${secretField}" field.''
 , secretData ? "token"
 , secretField ? secretData
@@ -11,10 +13,11 @@
 }:
 let
   deployArgs = [
-    "--dir=${websitePackage}"
+    "--dir=${content}"
     "--site=${siteId}"
   ] ++ lib.optionals productionDeployment [ "--prod" ];
 in
+lib.warnIf (args?websitePackage) "effects.netlify: Use the `content` parameter instead of `websitePackage`."
 mkEffect {
   inputs = [ netlify-cli ];
   secretsMap."netlify" = secretName;
