@@ -2,7 +2,7 @@
 , mkEffect
 , netlify-cli
 }:
-args@{ websitePackage ? throw "effects.netlify: You must provide website package to deploy"
+{ websitePackage ? throw "effects.netlify: You must provide website package to deploy"
 , secretName ? throw ''effects.netlify: You must provide the name of the secret which holds the "${secretField}" field.''
 , secretData ? "token"
 , secretField ? secretData
