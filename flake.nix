@@ -28,9 +28,15 @@
         ssh = effects.callPackage ./effects/ssh/test.nix {};
       };
 
-    herculesCI = {
+    herculesCI = { rev, branch, ... }: {
       onPush.default = {
-        outputs.effects = { inherit (self) tests; };
+        outputs.effects = let
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        in {
+          tests = self.tests // {
+            netlifyDeploy = pkgs.callPackage ./effects/netlify/test/default.nix { inherit rev; };
+          };
+        };
       };
     };
 
