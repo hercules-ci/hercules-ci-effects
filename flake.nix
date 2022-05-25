@@ -26,6 +26,7 @@
         cachix-deploy = pkgs.callPackage ./effects/cachix-deploy/test.nix {};
         mkEffect = pkgs.callPackage ./effects/effect/test.nix {};
         ssh = effects.callPackage ./effects/ssh/test.nix {};
+        nixos = effects.callPackage ./effects/nixos/test.nix {};
       };
 
     herculesCI = { rev, branch, ... }: {
