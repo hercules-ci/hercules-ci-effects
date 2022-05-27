@@ -5,6 +5,8 @@
 
   outputs = { self, nixpkgs, ... }: {
 
+    flakeModule = ./flake-module.nix;
+
     lib.withPkgs = pkgs:
       let effects = import ./effects/default.nix effects pkgs;
       in effects;
