@@ -50,5 +50,15 @@
         nativeBuildInputs = [ pkgs.nixpkgs-fmt ];
       };
 
+    templates = rec {
+      default = flake-parts;
+      flake-parts = {
+        path = ./templates/flake-parts;
+        description = ''
+          A demonstration of how to integrate effects with https://flake.parts.
+        '';
+      };
+    };
+
   };
 }
