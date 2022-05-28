@@ -5,6 +5,8 @@
 
   outputs = { self, nixpkgs, ... }: {
 
+    flakeModule = ./flake-module.nix;
+
     lib.withPkgs = pkgs:
       let effects = import ./effects/default.nix effects pkgs;
       in effects;
@@ -47,6 +49,16 @@
       pkgs.mkShell {
         nativeBuildInputs = [ pkgs.nixpkgs-fmt ];
       };
+
+    templates = rec {
+      default = flake-parts;
+      flake-parts = {
+        path = ./templates/flake-parts;
+        description = ''
+          A demonstration of how to integrate effects with https://flake.parts.
+        '';
+      };
+    };
 
   };
 }
