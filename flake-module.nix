@@ -9,7 +9,6 @@ let
     ;
 in
 {
-  _file = ./flake-module.nix;
   options = {
     perSystem = mkPerSystemOption ({ config, pkgs, ... }: {
       _file = ./flake-module.nix;
