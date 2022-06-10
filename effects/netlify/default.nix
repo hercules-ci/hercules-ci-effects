@@ -14,6 +14,7 @@ let
   deployArgs = [
     "--dir=${content}"
     "--site=${siteId}"
+    "--json"
   ] ++ lib.optionals productionDeployment [ "--prod" ];
 in
 mkEffect (args // {
@@ -21,8 +22,9 @@ mkEffect (args // {
   secretsMap."netlify" = secretName;
   effectScript = ''
     netlify deploy \
-      --json \
       --auth=$(readSecretString netlify .${secretField}) \
-      ${lib.escapeShellArgs deployArgs}
+      ${lib.escapeShellArgs deployArgs} | tee netlify-result.json
+    # netlify does not print a newline after the json output, so we add it to keep the log tidy
+    echo
   '';
 })
