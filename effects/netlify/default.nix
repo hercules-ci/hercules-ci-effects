@@ -21,6 +21,7 @@ mkEffect (args // {
   secretsMap."netlify" = secretName;
   effectScript = ''
     netlify deploy \
+      --json \
       --auth=$(readSecretString netlify .${secretField}) \
       ${lib.escapeShellArgs deployArgs}
   '';
