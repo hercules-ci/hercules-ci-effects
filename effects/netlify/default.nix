@@ -3,11 +3,12 @@
 , netlify-cli
 }:
 
-{ content
+args@{ content
 , secretName ? throw ''effects.netlify: You must provide `secretName`, the name of the secret which holds the "${secretField}" field.''
 , secretField ? "token"
 , siteId
 , productionDeployment ? false
+, ...
 }:
 let
   deployArgs = [
@@ -15,7 +16,7 @@ let
     "--site=${siteId}"
   ] ++ lib.optionals productionDeployment [ "--prod" ];
 in
-mkEffect {
+mkEffect (args // {
   inputs = [ netlify-cli ];
   secretsMap."netlify" = secretName;
   effectScript = ''
@@ -23,4 +24,4 @@ mkEffect {
       --auth=$(readSecretString netlify .${secretField}) \
       ${lib.escapeShellArgs deployArgs}
   '';
-}
+})
