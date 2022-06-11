@@ -8,6 +8,7 @@ args@{ content
 , secretField ? "token"
 , siteId
 , productionDeployment ? false
+, secretsMap ? {}
 , ...
 }:
 let
@@ -18,7 +19,7 @@ let
 in
 mkEffect (args // {
   inputs = [ netlify-cli ];
-  secretsMap."netlify" = secretName;
+  secretsMap = secretsMap // { "netlify" = secretName; };
   effectScript = ''
     netlify deploy \
       --auth=$(readSecretString netlify .${secretField}) \
