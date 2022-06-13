@@ -19,7 +19,7 @@ let
 in
 mkEffect (args // {
   inputs = [ netlify-cli ];
-  secretsMap = secretsMap // { "netlify" = secretName; };
+  secretsMap = { "netlify" = secretName; } // secretsMap;
   effectScript = ''
     netlify deploy \
       --auth=$(readSecretString netlify .${secretField}) \
