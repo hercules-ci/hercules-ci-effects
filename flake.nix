@@ -1,7 +1,7 @@
 {
   description = "Hercules CI Effects";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs";
 
   outputs = { self, nixpkgs, ... }: {
 
