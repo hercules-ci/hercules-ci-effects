@@ -20,7 +20,7 @@ effectVMTest {
           . IN NS ns.
           ${concatMapStringsSep
             "\n"
-            (node: "${node.config.networking.hostName}. IN A ${node.config.networking.primaryIPAddress}")
+            (node: "${node.networking.hostName}. IN A ${node.networking.primaryIPAddress}")
             (builtins.attrValues nodes)
           }
         '';
@@ -29,7 +29,7 @@ effectVMTest {
     agent = { nodes, ... }: {
       networking.dhcpcd.enable = false;
       environment.etc."resolv.conf".text = ''
-        nameserver ${nodes.ns.config.networking.primaryIPAddress}
+        nameserver ${nodes.ns.networking.primaryIPAddress}
       '';
     };
     target = { ... }: {
@@ -82,7 +82,7 @@ effectVMTest {
 
     agent.succeed("cat /etc/hosts >/dev/console")
     agent.succeed("cat /etc/resolv.conf >/dev/console")
-    agent.succeed("host target ${nodes.ns.config.networking.primaryIPAddress}")
+    agent.succeed("host target ${nodes.ns.networking.primaryIPAddress}")
     agent.succeed("host target")
     agent.succeed("effect-ssh1")
     target.succeed("""[[ "$(cat ~/it-worked)" == it\ worked ]]""")
