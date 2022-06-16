@@ -22,7 +22,8 @@
         effects = self.lib.withPkgs pkgs;
       in {
         git-crypt-hook = pkgs.callPackage ./effects/git-crypt-hook/test.nix {};
-        nixops = pkgs.callPackage ./effects/nixops/test/default.nix {};
+        # pyjwt is marked insecure; skip
+        # nixops = pkgs.callPackage ./effects/nixops/test/default.nix {};
         nix-shell = pkgs.callPackage ./effects/nix-shell/test.nix {};
         nixops2 = pkgs.callPackage ./effects/nixops2/test/default.nix { nixpkgsFlake = nixpkgs; };
         cachix-deploy = pkgs.callPackage ./effects/cachix-deploy/test.nix {};
