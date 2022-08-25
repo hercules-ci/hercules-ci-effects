@@ -22,8 +22,36 @@ mkEffect (args // {
   inputs = [ netlify-cli ];
   secretsMap = { "netlify" = secretName; } // secretsMap;
   effectScript = ''
+
+    # Install the token
+    #
+    # Netlify does not offer (or perhaps not document)
+    # an alternate method of passing the token other than
+    # the --auth flag, which is insecure. So we reverse
+    # engineer the config file.
+    # This effect can be tested with
+    #
+    #     nix develop
+    #     hci effect run default.effects.tests.netlifyDeploy
+    #
+    mkdir -p ~/.config/netlify
+    cat >~/.config/netlify/config.json <<EOF
+    { "userId": "effects-netlifyDeploy-unknown-user-id"
+    , "users": {
+        "effects-netlifyDeploy-unknown-user-id": {
+          "id": "effects-netlifyDeploy-unknown-user-id",
+          "name": "effects.netlifyDeploy",
+          "email": "effects.netlifyDeploy@example.com",
+          "auth": {
+            "token": "$(readSecretString netlify .${secretField})",
+            "github": {}
+          }
+        }
+      }
+    }
+    EOF
+
     netlify deploy \
-      --auth=$(readSecretString netlify .${secretField}) \
       ${lib.escapeShellArgs deployArgs} | tee netlify-result.json
     # netlify does not print a newline after the json output, so we add it to keep the log tidy
     echo
