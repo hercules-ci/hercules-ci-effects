@@ -47,7 +47,7 @@
       let pkgs = nixpkgs.legacyPackages.x86_64-linux;
       in
       pkgs.mkShell {
-        nativeBuildInputs = [ pkgs.nixpkgs-fmt ];
+        nativeBuildInputs = [ pkgs.nixpkgs-fmt pkgs.hci ];
       };
 
     templates = rec {
