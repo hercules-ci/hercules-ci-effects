@@ -1,4 +1,4 @@
-{ cacert, curl, jq, lib, runCommandNoCC, stdenvNoCC }:
+{ cacert, curl, jq, lib, runCommand, stdenvNoCC }:
 let
 
   defaultInputs = [
@@ -34,7 +34,7 @@ let
 
   invokeOverride = f: defaults: (lib.makeOverridable f defaults).override;
 
-  effectSetupHook = runCommandNoCC "hercules-ci-effect-sh" {} ''
+  effectSetupHook = runCommand "hercules-ci-effect-sh" {} ''
     mkdir -p $out/nix-support
     cp ${./effects-setup-hook.sh} $out/nix-support/setup-hook
   '';
