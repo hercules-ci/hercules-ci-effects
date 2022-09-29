@@ -1,0 +1,6 @@
+status = [
+  "ci/hercules/onPush/default",
+  "ci/hercules/evaluation",
+]
+use_codeowners = true
+delete_merged_branches = true
