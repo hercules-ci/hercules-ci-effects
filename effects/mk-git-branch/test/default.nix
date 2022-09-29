@@ -29,31 +29,10 @@ let
 in
 effectVMTest {
   name = "ssh";
+  imports = [ ../../testsupport/dns.nix ];
   nodes = {
-    ns = { nodes, ... }: {
-      networking.firewall.allowedUDPPorts = [ 53 ];
-      services.bind.enable = true;
-      services.bind.extraOptions = "empty-zones-enable no;";
-      services.bind.zones = [{
-        name = ".";
-        master = true;
-        file = writeText "root.zone" ''
-          $TTL 3600
-          . IN SOA ns. ns. ( 1 8 2 4 1 )
-          . IN NS ns.
-          ${concatMapStringsSep
-            "\n"
-            (node: "${node.config.networking.hostName}. IN A ${node.config.networking.primaryIPAddress}")
-            (builtins.attrValues nodes)
-          }
-        '';
-      }];
-    };
     agent = { nodes, ... }: {
       networking.dhcpcd.enable = false;
-      environment.etc."resolv.conf".text = ''
-        nameserver ${nodes.ns.config.networking.primaryIPAddress}
-      '';
     };
     githost = { pkgs, ... }: {
       environment.etc."unsafe-ssh/host" = {
@@ -114,8 +93,8 @@ effectVMTest {
     # setup
 
     start_all()
-    ns.wait_for_unit("bind.service")
-    ns.wait_for_open_port(53)
+    dns.wait_for_unit("bind.service")
+    dns.wait_for_open_port(53)
     agent.wait_for_unit("multi-user.target")
     githost.wait_for_unit("sshd.service")
     githost.wait_for_open_port(22)
@@ -124,7 +103,7 @@ effectVMTest {
 
     agent.succeed("cat /etc/hosts >/dev/console")
     agent.succeed("cat /etc/resolv.conf >/dev/console")
-    agent.succeed("host githost ${nodes.ns.config.networking.primaryIPAddress}")
+    agent.succeed("host githost ${nodes.dns.networking.primaryIPAddress}")
     agent.succeed("host githost")
 
     with subtest("init with mkGitBranch1"):
