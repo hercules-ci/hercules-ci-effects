@@ -5,6 +5,41 @@ The Nix community does not yet have a standard method for adding dependencies at
 Nix level. Flakes are a good candidate, but as of writing, they require the use
 of unstable versions of Nix, which is not production-ready.
 
+== Flakes with `flake-parts`
+
+Use the template as follows, or make the changes further below.
+
+```console
+nix flake init -t github:hercules-ci/hercules-ci-effects#flake-parts
+```
+
+Add to the flake inputs:
+
+```nix
+  hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+```
+
+In your outputs section:
+
+```nix
+  outputs = { self, flake-parts, hercules-ci-effects, ... }:
+    flake-parts.mkFlake { inherit self; } ({ withSystem, ... }: {
+      imports = [
+        # Add this
+        hercules-ci-effects.flakeModule
+      ];
+
+      effects = { branch, ... }: withSystem "x86_64-linux" (
+        { config, effects, pkgs, inputs', ... }:
+        {
+          deploy = effects.runNixOS {
+            # ...
+          };
+        }
+      );
+    });
+```
+
 == Flakes with overlay
 
 Add to the flake inputs:

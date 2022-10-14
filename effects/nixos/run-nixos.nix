@@ -32,7 +32,7 @@ args@{
       else x: x;
     inherit (config.system.build) toplevel;
   in
-  checked (mkEffect (removeAttrs args ["configuration" "system" "nixpkgs" "ssh"] // {
+  checked (mkEffect (removeAttrs args ["config" "configuration" "system" "nixpkgs" "ssh"] // {
     name = "nixos-${ssh.destination}";
     inputs = [
       # For user setup

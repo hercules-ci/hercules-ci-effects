@@ -16,12 +16,15 @@
 ** xref:reference/nix-functions/nix-shell.adoc[`nix-shell`]
 ** xref:reference/nix-functions/ssh.adoc[`ssh`]
 ** _Deployment Functions_
+** xref:reference/nix-functions/netlifyDeploy.adoc[`netlifyDeploy`]
 ** xref:reference/nix-functions/runArion.adoc[`runArion`]
 ** xref:reference/nix-functions/runCachixDeploy.adoc[`runCachixDeploy`]
 ** xref:reference/nix-functions/runNixDarwin.adoc[`runNixDarwin`]
 ** xref:reference/nix-functions/runNixOps.adoc[`runNixOps`]
 ** xref:reference/nix-functions/runNixOps2.adoc[`runNixOps2`]
 ** xref:reference/nix-functions/runNixOS.adoc[`runNixOS`]
+** _Developing Effects_
+** xref:reference/nix-functions/effectVMTest.adoc[`effectVMTest`]
 * Hooks Reference
 ** xref:reference/hooks/git-crypt-hook.adoc[`git-crypt-hook`]
 * Bash Functions Reference

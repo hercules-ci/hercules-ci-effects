@@ -1,0 +1,85 @@
+
+= `effectVMTest`
+
+_effectVMTest {two-colons} Module -> Derivation_
+
+Create offline tests for effect functions.
+
+This returns a derivation that tests one or more effects using a NixOS VM test.
+
+Full example: https://github.com/hercules-ci/hercules-ci-effects/blob/master/effects/ssh/test.nix[test for the `ssh` function]
+
+[[parameter]]
+== Parameter
+
+The only parameter is a test module. It is mixed in with the https://nixos.org/manual/nixos/unstable/index.html#sec-nixos-tests[NixOS VM test framework] and `hercules-ci-effects`' own options.
+
+[[option-effects]]
+=== `effects.<name>`
+
+An attribute set of effects. These can be run with
+
+Example:
+```nix
+effectVMTest {
+
+  effects = {
+    hello = mkEffect { /* ... */ };
+  };
+
+  nodes.foo = {
+    # ... A NixOS configuration running SSH or
+    #     any other relevant service. ...
+  }
+
+  testScript = ''
+
+    # ... setup ...
+
+    agent.succeed("effect-hello")
+
+    # ... assertions ...
+
+  '';
+}
+```
+
+
+[[option-secrets]]
+=== `secrets.<name>`
+
+Secrets to make available to the effects. These are added to the store, so don't copy real-world secrets into this!
+
+Example:
+
+```nix
+effectVMTest {
+  secrets.deploykey.data = {
+    publicKey = builtins.readFile ./test/id.pub;
+    privateKey = builtins.readFile ./test/id;
+  };
+  effects.deploy = mkEffect {
+    secretsMap.ssh = "deploykey";
+    # ...
+  };
+  nodes.target = { ... }: {
+    users.users.root.openssh.authorizedKeys.keyFiles = [ ./test/id.pub ];
+  };
+}
+```
+
+[[option-nodes-agent]]
+=== `nodes.agent`
+
+The `hercules-ci-effects` framework adds this VM. It is responsible for running the effects.
+You could modify the settings of this node, but most settings have no effect and the effects,
+because effects run in a sandbox.
+
+Other nodes can be defined in `nodes.<name>` as usual.
+
+See the https://nixos.org/manual/nixos/unstable/index.html#sec-nixos-tests[NixOS VM test framework documentation].
+
+[[options]]
+=== `*`
+
+For the other options, refer to the https://nixos.org/manual/nixos/unstable/index.html#sec-nixos-tests[NixOS VM test framework documentation].

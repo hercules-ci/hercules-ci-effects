@@ -1,0 +1,106 @@
+
+= `netlifyDeploy`
+
+_netlifyDeploy {two-colons} AttrSet -> Effect_
+
+Deploys content to https://www.netlify.com[Netlify], the CDN and web platform that coined _JamStack_.
+
+Example:
+
+```nix
+effects.netlifyDeploy {
+  siteId = "...";
+  secretName = "default-netlify";
+  productionDeployment = true;
+  content = runCommand "site" {} ''
+    mkdir $out
+    echo "<h1>Hi!</h1>" >$out/index.html
+  '';
+}
+```
+
+Example secret:
+
+```json
+  "netlify-test-account": {
+    "kind": "Secret",
+    "data": {
+      "token": "..."
+    },
+    "condition": {
+      "and": [
+        { "isOwner": "my-github-org" },
+        { "isRepo": "my-site-repo" }
+      ]
+    }
+  }
+```
+
+[[parameters]]
+== `Parameters`
+
+[[param-name]]
+=== `siteId`
+
+An opaque identifier assigned by Netlify.
+
+You can retrieve this value by logging in to Netlify, creating or navigating to the site you want to deploy, click btn:[Site settings], then copy the value after _Site ID:_ from the _Site information_ box.
+
+==== Disable Netlify's integrated builds
+
+While you're in the _Site settings_, you'll want to make sure Netlify's deployments don't interfere.
+
+Go to btn:[Build & deploy] in the _Site settings_ menu, then click btn:[Edit settings] in the _Build settings_ box. Select btn:[Stop builds] and btn:[Save].
+
+See https://docs.netlify.com/configure-builds/stop-or-activate-builds/#stop-builds[Stop or activate builds] for more details.
+
+[[param-secretName]]
+=== `secretName`
+
+The secret that will be looked up in xref:hercules-ci-agent:ROOT:secrets-json.adoc[`secrets.json`].
+
+The `data` field must contain a `"token"` field, with a string value that is a Netlify personal access token. To make one, navigate to https://app.netlify.com/user/applications#personal-access-tokens[Personal access tokens] and use btn:[New access token].
+
+[[param-content]]
+=== `content`
+
+Path to the site content, also known as the _Publish directory_.
+
+This includes files such as `netlify.toml`, `_redirects`, and all web resources, like `index.html`, style sheets, etc.
+
+You'll typically put a derivation here.
+
+[[param-productionDeployment]]
+=== `productionDeployment`
+
+Whether this is a production deployment. Default: `false`.
+
+You can use the `herculesCI` attribute xref:hercules-ci-agent:ROOT:evaluation.adoc#params-herculesCI-commit[parameters] to make this conditional on the branch name.
+
+In a flake:
+
+```nix
+effects = { branch, ... }: {
+  netlify = netlifyDeploy {
+    # ...
+    productionDeployment = branch == "main";
+  };
+};
+```
+
+In a `ci.nix`, `default.nix` or flake:
+
+```nix
+herculesCI = { branch }: {
+  onPush.default =
+  # let netlifyDeploy = ...; in
+  {
+    outputs = {
+      effects.netlify = netlifyDeploy {
+        # ...
+        productionDeployment = branch == "main";
+      };
+    };
+  };
+};
+```
