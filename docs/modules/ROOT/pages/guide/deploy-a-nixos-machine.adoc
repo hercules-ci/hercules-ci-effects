@@ -39,7 +39,7 @@ NOTE: the ergonomics https://github.com/hercules-ci/hercules-ci-agent/issues/274
 Add the public key to your host `/etc/nixos/configuration.nix`
 
 ```nix
-users.users.root.openssh.authorizedKeys.keyFiles =
+users.users.root.openssh.authorizedKeys.keys =
   ["ssh-rsa ..... default-ssh@hercules-ci"];
 ```
 
