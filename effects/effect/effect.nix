@@ -108,6 +108,7 @@ invokeOverride mkDrv {
     eval "$effectCheckScript"
     runHook postEffectCheck
   '';
+  effectCheckScript = "";
 
   getStatePhase = ''
     runHook preGetState
@@ -115,6 +116,8 @@ invokeOverride mkDrv {
     runHook postGetState
     registerPutStatePhaseOnFailure
   '';
+  getStateScript = "";
+
   putStatePhase = ''
     if [[ -z ''${PUT_STATE_DONE:-} ]]; then
       runHook prePutState
@@ -125,4 +128,5 @@ invokeOverride mkDrv {
       echo 1>&2 "NOTE: State has already been uploaded and was not uploaded again."
     fi
   '';
+  putStateScript = "";
 }
