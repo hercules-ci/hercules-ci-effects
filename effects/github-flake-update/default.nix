@@ -69,8 +69,15 @@ mkEffect ({
             | tee $TMPDIR/pr.err
       then
         # Expect an error if the PR already exists.
-        if ! grep -E 'a pull request for branch .* already exists' <$TMPDIR/pr.err >/dev/null
-        then
+        if grep -E 'a pull request for branch .* already exists' <$TMPDIR/pr.err >/dev/null; then
+          # Self explanatory error
+          :
+        elif grep 'No commits between' <$TMPDIR/pr.err >/dev/null; then
+          # Explain printed error, which is something like 
+          # pull request create failed: GraphQL: No commits between master and flake-update (createPullRequest)
+          echo 1>&2 "No commits to merge, so we're already up to date!"
+        else
+          # A message has already been printed.
           exit 1
         fi
       fi
