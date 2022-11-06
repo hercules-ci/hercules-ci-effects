@@ -49,13 +49,20 @@ mkEffect ({
     else
       git checkout -b "$updateBranch"
     fi
-    nix flake lock \
-      --recreate-lock-file \
-      --extra-experimental-features 'nix-command flakes'
-    git add flake.lock
 
-    if ! git diff --cached --exit-code; then
-      git commit -m "$message"
+    commit0="$(git rev-parse HEAD)"
+
+    echo 1>&2 'Running nix flake update...'
+
+    nix flake update \
+      --commit-lock-file \
+      --extra-experimental-features 'nix-command flakes'
+
+    commit1="$(git rev-parse HEAD)"
+
+    if [[ $commit0 == $commit1 ]]; then
+      echo 1>&2 'No updates to push.'
+    else
       git push origin "$updateBranch"
     fi
 
