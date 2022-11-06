@@ -13,6 +13,7 @@ mkEffect ({
   GIT_COMMITTER_NAME = "Hercules CI Effects";
   EMAIL = "noreply+hercules-ci-effects@hercules-ci.com";
   PAGER = "cat";
+  github = "github.com";
   message = "Update flake.lock";
   title = "Update flake.lock";
   updateBranch = "flake-update";
@@ -34,10 +35,10 @@ mkEffect ({
     pkgs.gh
   ];
   userSetupScript = ''
-    echo "https://git:$(readSecretString token .token)@github.com" >~/.git-credentials
+    echo "https://git:$(readSecretString token .token)@$github" >~/.git-credentials
     git config --global credential.helper store
     mkdir -p ~/.config/gh
-    { echo "github.com:"
+    { echo "$github:"
       echo "  oauth_token: $(readSecretString token .token)"
     } >~/.config/gh/hosts.yml
   '';
