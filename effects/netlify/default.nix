@@ -28,6 +28,7 @@ mkEffect (args // {
   netlifySecretField = secretField;
   NETLIFY_SITE_ID = siteId;
   effectScript = ''
+    echo 1>&2 Running netlify deploy...
     netlify deploy \
       ${lib.escapeShellArgs deployArgs} | tee netlify-result.json
     # netlify does not print a newline after the json output, so we add it to keep the log tidy
