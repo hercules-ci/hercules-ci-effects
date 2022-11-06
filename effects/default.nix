@@ -24,6 +24,10 @@ in
     );
 
   netlifyDeploy = callPackage ./netlify { };
+  netlifySetupHook = pkgs.runCommand "hercules-ci-netlify-setup-hook" {} ''
+    mkdir -p $out/nix-support
+    cp ${./netlify/netlify-setup-hook.sh} $out/nix-support/setup-hook
+  '';
 
   runArion = callPackage ./arion/run-arion.nix { };
 
