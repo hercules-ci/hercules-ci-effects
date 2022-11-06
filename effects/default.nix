@@ -25,6 +25,8 @@ in
 
   netlifyDeploy = callPackage ./netlify { };
 
+  githubFlakeUpdate = callPackage ./github-flake-update { };
+
   runArion = callPackage ./arion/run-arion.nix { };
 
   runCachixDeploy = callPackage ./cachix-deploy/run-cachix-deploy.nix { };
