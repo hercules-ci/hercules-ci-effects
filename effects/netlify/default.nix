@@ -16,7 +16,6 @@ args@{ content
 let
   deployArgs = [
     "--dir=${content}"
-    "--site=${siteId}"
     "--json"
   ] ++ lib.optionals productionDeployment [
     "--prod"
@@ -27,6 +26,7 @@ mkEffect (args // {
   inputs = [ netlify-cli ];
   secretsMap = { "netlify" = secretName; } // secretsMap;
   netlifySecretField = secretField;
+  NETLIFY_SITE_ID = siteId;
   effectScript = ''
     netlify deploy \
       ${lib.escapeShellArgs deployArgs} | tee netlify-result.json
