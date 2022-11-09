@@ -11,7 +11,7 @@ in
 {
   options = {
     perSystem = mkPerSystemOption ({ config, pkgs, ... }: {
-      _file = ./flake-module.nix;
+      _file = ./module-argument.nix;
       options = {
         herculesCIEffects.pkgs = mkOption {
           type = types.raw or types.unspecified;
@@ -26,7 +26,7 @@ in
       };
       config = {
         _module.args.effects =
-          let effects = import ./effects/default.nix effects config.herculesCIEffects.pkgs;
+          let effects = import ../effects/default.nix effects config.herculesCIEffects.pkgs;
           in effects;
       };
     });
