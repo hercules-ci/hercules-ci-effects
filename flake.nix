@@ -37,6 +37,8 @@
         ssh = effects.callPackage ./effects/ssh/test.nix {};
         nixos = effects.callPackage ./effects/nixos/test.nix {};
       };
+    checks.x86_64-linux.evaluation-checks =
+      (import ./flake-modules/derivationTree-type.nix { inherit (nixpkgs) lib; }).tests nixpkgs.legacyPackages.x86_64-linux.emptyFile;
 
     herculesCI = { rev, branch, ... }: {
       onPush.default = {
