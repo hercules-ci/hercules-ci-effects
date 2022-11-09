@@ -6,6 +6,7 @@ let
     ;
 
   default-hci-for-flake = import ../vendor/hercules-ci-agent/default-herculesCI-for-flake.nix;
+  inherit (import ./derivationTree-type.nix { inherit lib; }) derivationTree;
 
   repoModule = {
     options = {
@@ -109,13 +110,10 @@ let
     };
   };
 
-  # FIXME
-  outputsType = types.raw;
-
   outputsModule = { ... }: {
     options = {
       outputs = mkOption {
-        type = outputsType;
+        type = derivationTree;
         description = ''
           A collection of builds and effects. These may be nested recursively into attribute sets.
 
