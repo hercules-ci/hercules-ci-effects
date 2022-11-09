@@ -8,6 +8,8 @@
     flakeModule = {
       imports = [
         ./flake-modules/module-argument.nix
+        ./flake-modules/herculesCI-attribute.nix
+        ./flake-modules/herculesCI-helpers.nix
       ];
     };
 
