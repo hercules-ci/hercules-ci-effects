@@ -10,7 +10,11 @@ let
 in
 {
   options = {
-    perSystem = mkPerSystemOption ({ config, pkgs, ... }: {
+    perSystem = mkPerSystemOption ({ config, pkgs, ... }:
+    let
+      hci-effects = import ../effects/default.nix hci-effects config.herculesCIEffects.pkgs;
+    in
+    {
       _file = ./module-argument.nix;
       options = {
         herculesCIEffects.pkgs = mkOption {
@@ -25,9 +29,8 @@ in
         };
       };
       config = {
-        _module.args.effects =
-          let effects = import ../effects/default.nix effects config.herculesCIEffects.pkgs;
-          in effects;
+        _module.args.effects = lib.warn "The effects module argument has been renamed to hci-effects." hci-effects;
+        _module.args.hci-effects = hci-effects;
       };
     });
   };
