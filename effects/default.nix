@@ -23,6 +23,8 @@ in
       }
     );
 
+  flakeUpdate = callPackage ./flake-update { };
+
   netlifyDeploy = callPackage ./netlify { };
   netlifySetupHook = pkgs.runCommand "hercules-ci-netlify-setup-hook" {} ''
     mkdir -p $out/nix-support
@@ -50,7 +52,7 @@ in
 
   ssh = callPackage ./ssh/call-ssh.nix { };
 
-  effectVMTest = callPackage ./effect-vm-test { };
+  effectVMTest = callPackage ./effect-vm-test { extraModule = { config.hci = pkgs.hci; }; };
 
   effects = self;
 

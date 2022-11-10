@@ -1,0 +1,37 @@
+{ config, lib, flake-parts-lib, self, getSystem, ... }:
+let
+  inherit (lib)
+    mkOption
+    types
+    ;
+  inherit (flake-parts-lib)
+    mkPerSystemOption
+    ;
+in
+{
+  options = {
+    perSystem = mkPerSystemOption ({ config, pkgs, ... }:
+    let
+      hci-effects = import ../effects/default.nix hci-effects config.herculesCIEffects.pkgs;
+    in
+    {
+      _file = ./module-argument.nix;
+      options = {
+        herculesCIEffects.pkgs = mkOption {
+          type = types.raw or types.unspecified;
+          description = ''
+            Nixpkgs instance to use for <literal>hercules-ci-effects</literal>.
+
+            The effects functions, etc, will be provided as the <literal>effects</literal> module argument of <literal>perSystem</literal>.
+          '';
+          default = pkgs;
+          defaultText = lib.literalDocBook "<literal>pkgs</literal> (module argument)";
+        };
+      };
+      config = {
+        _module.args.effects = lib.warn "The effects module argument has been renamed to hci-effects." hci-effects;
+        _module.args.hci-effects = hci-effects;
+      };
+    });
+  };
+}
