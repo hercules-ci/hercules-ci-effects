@@ -58,6 +58,8 @@ let
 
           _Since hercules-ci-agent 0.9.8_
         '';
+        defaultText = lib.literalMD "";
+        default = throw "repo.remoteHttpUrl requires hercules-ci-agent >=0.9.8. If you run hci effect run, make sure your repository remote has an http(s) URL.";
       };
       remoteSshUrl = mkOption {
         type = types.str;
@@ -67,6 +69,8 @@ let
 
           _Since hercules-ci-agent 0.9.8_
         '';
+        defaultText = lib.literalMD "";
+        default = throw "repo.remoteHttpUrl requires hercules-ci-agent >=0.9.8. If you run hci effect run, make sure your repository remote has an ssh URL.";
       };
       webUrl = mkOption {
         type = types.str;
@@ -76,6 +80,8 @@ let
 
           _Since hercules-ci-agent 0.9.8_
         '';
+        defaultText = lib.literalMD "";
+        default = throw "repo.webUrl requires hercules-ci-agent >=0.9.8. If you run hci effect run, make sure your repository remote has an http URL.";
       };
       forgeType = mkOption {
         type = types.str;
@@ -88,6 +94,8 @@ let
           _Since hercules-ci-agent 0.9.8_
         '';
         example = "github";
+        defaultText = lib.literalMD "";
+        default = throw "repo.forgeType requires hercules-ci-agent >=0.9.8.";
       };
       owner = mkOption {
         type = types.str;
@@ -97,6 +105,8 @@ let
           _Since hercules-ci-agent 0.9.8_
         '';
         readOnly = true;
+        defaultText = lib.literalMD "";
+        default = throw "repo.owner requires hercules-ci-agent >=0.9.8.";
       };
       name = mkOption {
         type = types.str;
@@ -106,6 +116,8 @@ let
           _Since hercules-ci-agent 0.9.8_
         '';
         readOnly = true;
+        defaultText = lib.literalMD "";
+        default = throw "repo.name requires hercules-ci-agent >=0.9.8.";
       };
     };
   };
@@ -266,12 +278,12 @@ in
             # Shouldn't be a problem here though.
             repo = lib.filterAttrs (k: v: v != null) {
               inherit (primaryRepo) ref branch tag rev shortRev;
-              remoteHttpUrl = primaryRepo.remoteHttpUrl or (throw "repo.remoteHttpUrl requires hercules-ci-agent >=0.9.8. If you run hci effect run, make sure your repository remote has an http(s) URL.");
-              remoteSshUrl = primaryRepo.remoteSshUrl or (throw "repo.remoteHttpUrl requires hercules-ci-agent >=0.9.8. If you run hci effect run, make sure your repository remote has an ssh URL.");
-              webUrl = primaryRepo.webUrl or (throw "repo.webUrl requires hercules-ci-agent >=0.9.8. If you run hci effect run, make sure your repository remote has an http URL.");
-              forgeType = primaryRepo.forgeType or (throw "repo.forgeType requires hercules-ci-agent >=0.9.8.");
-              owner = primaryRepo.owner or (throw "repo.owner requires hercules-ci-agent >=0.9.8.");
-              name = primaryRepo.name or (throw "repo.name requires hercules-ci-agent >=0.9.8.");
+              remoteHttpUrl = primaryRepo.remoteHttpUrl or null;
+              remoteSshUrl = primaryRepo.remoteSshUrl or null;
+              webUrl = primaryRepo.webUrl or null;
+              forgeType = primaryRepo.forgeType or null;
+              owner = primaryRepo.owner or null;
+              name = primaryRepo.name or null;
             };
           };
         };
