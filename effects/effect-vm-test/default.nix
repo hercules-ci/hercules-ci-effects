@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, extraModule, ... }:
 let
   inherit (lib) isFunction mapAttrsToList;
 
@@ -7,7 +7,7 @@ let
 in
 
 module: nixos-lib.runTest {
-  imports = [ ./effects-module.nix module ];
+  imports = [ ./effects-module.nix module extraModule ];
   config = {
     hostPkgs = pkgs;
   };

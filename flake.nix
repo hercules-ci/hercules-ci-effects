@@ -2,19 +2,21 @@
   description = "Hercules CI Effects";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
+  inputs.hercules-ci-agent.url = "hercules-ci-agent/on-schedule";
 
-  outputs = { self, nixpkgs, ... }: {
+  outputs = { self, nixpkgs, hercules-ci-agent, ... }: {
 
     flakeModule = {
       imports = [
         ./flake-modules/module-argument.nix
         ./flake-modules/herculesCI-attribute.nix
         ./flake-modules/herculesCI-helpers.nix
+        ./effects/flake-update/flake-module.nix
       ];
     };
 
     lib.withPkgs = pkgs:
-      let effects = import ./effects/default.nix effects pkgs;
+      let effects = import ./effects/default.nix effects (pkgs // { hci = hercules-ci-agent.packages.x86_64-linux.hercules-ci-cli; });
       in effects;
 
     overlay = final: prev: {
@@ -27,6 +29,7 @@
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         effects = self.lib.withPkgs pkgs;
       in {
+        flake-update = effects.callPackage ./effects/flake-update/test.nix {};
         git-crypt-hook = pkgs.callPackage ./effects/git-crypt-hook/test.nix {};
         # pyjwt is marked insecure; skip
         # nixops = pkgs.callPackage ./effects/nixops/test/default.nix {};

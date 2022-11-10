@@ -10,11 +10,6 @@ let
 
   nixos-lib = import (pkgs.path + "/nixos/lib") { inherit lib; };
 
-  # TODO: remove when next hci release is in Nixpkgs
-  hci =
-    let flake = builtins.getFlake "git+https://github.com/hercules-ci/hercules-ci-agent?ref=master&rev=6e298a833dc5321f7f9ff25bc243e4d7c65d928d";
-    in flake.packages.x86_64-linux.hercules-ci-cli;
-
   wrapEffect = name: effect:
     let
       eff = effect.overrideAttrs (o: {
@@ -58,6 +53,12 @@ let
 in
 {
   options = {
+    hci = mkOption {
+      type = types.package;
+      description = ''
+        Hercules CI CLI package to use in the test runner.
+      '';
+    };
     effects = mkOption {
       description = ''
         An attribute set of effects.
@@ -81,7 +82,7 @@ in
 
   config = {
     nodes.agent = {
-      environment.systemPackages = [ hci ] ++ mapAttrsToList wrapEffect test.config.effects;
+      environment.systemPackages = [ config.hci ] ++ mapAttrsToList wrapEffect test.config.effects;
       # Might actually want to use `hci secret add` instead?
       # That will support dynamic secrets, like a host key that's
       # generated on the host.
