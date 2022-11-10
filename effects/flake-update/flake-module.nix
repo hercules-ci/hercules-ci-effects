@@ -15,6 +15,12 @@ in
           To which branch to push the updated flake lock.
         '';
       };
+      when = mkOption {
+        type = types.raw;
+        description = lib.mdDoc ''
+          See `herculesCI.onSchedule.<name>.when` for details.
+        '';
+      };
       effect.system = mkOption {
         type = types.str;
         default = config.defaultEffectSystem;
@@ -29,6 +35,7 @@ in
   config = {
     herculesCI = herculesCI@{ config, ... }: optionalAttrs (cfg.enable) {
       onSchedule.flake-update = {
+        inherit (cfg) when;
         outputs = {
           effects = {
             flake-update = withSystem cfg.effect.system ({ config, pkgs, hci-effects, ... }:
