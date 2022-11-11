@@ -1,11 +1,11 @@
 { config, lib, withSystem, ... }:
 let
   inherit (lib) mkOption types optionalAttrs;
-  cfg = config.flake-update;
+  cfg = config.hercules-ci.flake-update;
 in
 {
   options = {
-    flake-update = {
+    hercules-ci.flake-update = {
       enable = lib.mkEnableOption "Scheduled flake update job";
       updateBranch = mkOption {
         type = types.str;
