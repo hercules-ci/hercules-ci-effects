@@ -13,7 +13,7 @@ let
     };
 in
 
-args@{ gitRemote
+{ gitRemote
 , tokenSecret ? { type = "GitToken"; }
 , user ? "git"
 , updateBranch ? "flake-update"
@@ -27,8 +27,7 @@ mkEffect ({
   inherit (url) scheme host path;
 
   name = "flake-update";
-  dontUnpack = true;
-  nativeBuildInputs = args.nativeBuildInputs or [ ] ++ [
+  inputs = [
     pkgs.git
     pkgs.nix
   ];

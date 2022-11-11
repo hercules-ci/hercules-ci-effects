@@ -20,12 +20,12 @@ in
         herculesCIEffects.pkgs = mkOption {
           type = types.raw or types.unspecified;
           description = ''
-            Nixpkgs instance to use for <literal>hercules-ci-effects</literal>.
+            Nixpkgs instance to use for `hercules-ci-effects`.
 
-            The effects functions, etc, will be provided as the <literal>effects</literal> module argument of <literal>perSystem</literal>.
+            The effects functions, etc, will be provided as the `effects` module argument of `perSystem`.
           '';
           default = pkgs;
-          defaultText = lib.literalDocBook "<literal>pkgs</literal> (module argument)";
+          defaultText = lib.literalMD "`pkgs` (module argument)";
         };
       };
       config = {

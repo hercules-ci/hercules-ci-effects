@@ -59,7 +59,6 @@ let
           _Since hercules-ci-agent 0.9.8_
         '';
         defaultText = lib.literalMD "";
-        default = throw "repo.remoteHttpUrl requires hercules-ci-agent >=0.9.8. If you run hci effect run, make sure your repository remote has an http(s) URL.";
       };
       remoteSshUrl = mkOption {
         type = types.str;
@@ -70,7 +69,6 @@ let
           _Since hercules-ci-agent 0.9.8_
         '';
         defaultText = lib.literalMD "";
-        default = throw "repo.remoteHttpUrl requires hercules-ci-agent >=0.9.8. If you run hci effect run, make sure your repository remote has an ssh URL.";
       };
       webUrl = mkOption {
         type = types.str;
@@ -81,7 +79,6 @@ let
           _Since hercules-ci-agent 0.9.8_
         '';
         defaultText = lib.literalMD "";
-        default = throw "repo.webUrl requires hercules-ci-agent >=0.9.8. If you run hci effect run, make sure your repository remote has an http URL.";
       };
       forgeType = mkOption {
         type = types.str;
@@ -95,7 +92,6 @@ let
         '';
         example = "github";
         defaultText = lib.literalMD "";
-        default = throw "repo.forgeType requires hercules-ci-agent >=0.9.8.";
       };
       owner = mkOption {
         type = types.str;
@@ -106,7 +102,6 @@ let
         '';
         readOnly = true;
         defaultText = lib.literalMD "";
-        default = throw "repo.owner requires hercules-ci-agent >=0.9.8.";
       };
       name = mkOption {
         type = types.str;
@@ -117,7 +112,6 @@ let
         '';
         readOnly = true;
         defaultText = lib.literalMD "";
-        default = throw "repo.name requires hercules-ci-agent >=0.9.8.";
       };
     };
   };
@@ -232,7 +226,10 @@ let
       ciSystems = mkOption {
         type = types.listOf types.str;
         default = flakeParts.config.systems;
-        defaultText = lib.literalExpressions "config.systems  # from flake parts";
+        defaultText = lib.literalExpression "config.systems  # from flake parts";
+        description = ''
+          Flake systems for which to generate attributes in `herculesCI.onPush.default.outputs`.
+        '';
       };
     };
     config = {

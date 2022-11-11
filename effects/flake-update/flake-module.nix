@@ -1,23 +1,23 @@
 { config, lib, withSystem, ... }:
 let
   inherit (lib) mkOption types optionalAttrs;
-  cfg = config.flake-update;
+  cfg = config.hercules-ci.flake-update;
 in
 {
   options = {
-    flake-update = {
+    hercules-ci.flake-update = {
       enable = lib.mkEnableOption "Scheduled flake update job";
       updateBranch = mkOption {
         type = types.str;
         default = "flake-update";
         example = "update";
-        description = lib.mdDoc ''
+        description = ''
           To which branch to push the updated flake lock.
         '';
       };
       when = mkOption {
         type = types.raw;
-        description = lib.mdDoc ''
+        description = ''
           See `herculesCI.onSchedule.<name>.when` for details.
         '';
       };
@@ -26,7 +26,7 @@ in
         default = config.defaultEffectSystem;
         defaultText = lib.literalExpression "config.defaultEffectSystem";
         example = "aarch64-linux";
-        description = lib.mdDoc ''
+        description = ''
           The [system](https://nixos.org/manual/nix/stable/command-ref/conf-file.html#conf-system) on which to run the flake update job.
         '';
       };
