@@ -232,7 +232,10 @@ let
       ciSystems = mkOption {
         type = types.listOf types.str;
         default = flakeParts.config.systems;
-        defaultText = lib.literalExpressions "config.systems  # from flake parts";
+        defaultText = lib.literalExpression "config.systems  # from flake parts";
+        description = ''
+          Flake systems for which to generate attributes in `herculesCI.onPush.default.outputs`.
+        '';
       };
     };
     config = {
