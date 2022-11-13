@@ -33,20 +33,20 @@ in
     };
   };
   config = {
+    perSystem = perSystem@{ config, pkgs, hci-effects, ... }: {
+      herculesCI = herculesCI@{ ... }: {
+        onSchedule.effects.flake-update =
+          hci-effects.flakeUpdate {
+            gitRemote = herculesCI.config.repo.remoteHttpUrl;
+            user = "x-access-token";
+            inherit (cfg) updateBranch;
+          };
+      };
+    };
     herculesCI = herculesCI@{ config, ... }: optionalAttrs (cfg.enable) {
       onSchedule.flake-update = {
         inherit (cfg) when;
-        outputs = {
-          effects = {
-            flake-update = withSystem cfg.effect.system ({ config, pkgs, hci-effects, ... }:
-              hci-effects.flakeUpdate {
-                gitRemote = herculesCI.config.repo.remoteHttpUrl;
-                user = "x-access-token";
-                inherit (cfg) updateBranch;
-              }
-            );
-          };
-        };
+        effects.flake-update.enable = true;
       };
     };
   };

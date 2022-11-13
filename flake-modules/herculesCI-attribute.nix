@@ -266,7 +266,7 @@ in
       primaryRepo ? throw "`<flake>.outputs.primaryRepo` requires a `primaryRepo` argument.",
       ... }:
       let
-        paramModule = {
+        paramModule = { config, ... }: {
           _file = "herculesCI parameters";
           config = {
             # Filter out values which are unavailable and therefore null.
@@ -282,9 +282,16 @@ in
               owner = primaryRepo.owner or null;
               name = primaryRepo.name or null;
             };
+            _module.args = {
+              herculesCI = config;
+              repo = config.repo;
+            };
           };
         };
-        eval = lib.evalModules { modules = [ paramModule config.herculesCI ]; };
+        eval = lib.evalModules {
+          modules = [ paramModule config.herculesCI ];
+          prefix = [ "herculesCI" ];
+        };
       in
         eval.config.out;
   };
