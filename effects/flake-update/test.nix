@@ -28,6 +28,8 @@ effectVMTest {
     update = effects.flakeUpdate {
       gitRemote = "http://gitea:3000/test/repo";
       user = "test";
+      forgeType = "gitea";
+      createPullRequest = false; # not supported
     };
   };
   secrets = {

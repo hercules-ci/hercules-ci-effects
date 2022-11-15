@@ -4,6 +4,8 @@
 }:
 
 let
+  inherit (lib) optionals optionalAttrs optionalString;
+
   parseURL = gitRemote:
     let m = builtins.match "([a-z]*)://([^/]*)(/?.*)" gitRemote;
     in if m == null then throw "Could not determine host in gitRemote url ${gitRemote}" else {
@@ -17,9 +19,24 @@ in
 , tokenSecret ? { type = "GitToken"; }
 , user ? "git"
 , updateBranch ? "flake-update"
+, forgeType ? "github"
+, createPullRequest ? true
 }:
+assert createPullRequest -> forgeType == "github";
 let
   url = parseURL gitRemote;
+  githubPR = createPullRequest && forgeType == "github";
+  prAttrs = optionalAttrs createPullRequest {
+    title = "`flake.lock`: Update";
+    body = ''
+      Update `flake.lock`. See the commit message(s) for details.
+
+      You may reset this branch by deleting it and re-running the update job.
+
+          git push origin :${updateBranch}
+    '';
+    github = url.host;
+  };
 in
 mkEffect ({
   secretsMap.token = tokenSecret;
@@ -30,6 +47,8 @@ mkEffect ({
   inputs = [
     pkgs.git
     pkgs.nix
+  ] ++ optionals githubPR [
+    pkgs.gh
   ];
  
   EMAIL = "hercules-ci[bot]@users.noreply.github.com";
@@ -41,7 +60,13 @@ mkEffect ({
     # set -x
     echo "$scheme://$user:$(readSecretString token .token)@$host$path" >~/.git-credentials
     git config --global credential.helper store
+  '' + optionalString githubPR ''
+    mkdir -p ~/.config/gh
+    { echo "$github:"
+      echo "  oauth_token: $(readSecretString token .token)"
+    } >~/.config/gh/hosts.yml
   '';
+
   effectScript = ''
     git clone "$gitRemote" repo
     cd repo
@@ -66,5 +91,29 @@ mkEffect ({
     else
       git push origin "$updateBranch"
     fi
+  '' + optionalString githubPR ''
+    # Too many PRs is better than to few. Ensure that the PR exists
+    if git rev-parse "refs/remotes/origin/$updateBranch" &>/dev/null; then
+      if ! gh pr create \
+                --head "$updateBranch" \
+                --title "$title" \
+                --body "$body" \
+                2>&1 \
+            | tee $TMPDIR/pr.err
+      then
+        # Expect an error if the PR already exists.
+        if grep -E 'a pull request for branch .* already exists' <$TMPDIR/pr.err >/dev/null; then
+          # Self explanatory error
+          :
+        elif grep 'No commits between' <$TMPDIR/pr.err >/dev/null; then
+          # Explain printed error, which is something like
+          # pull request create failed: GraphQL: No commits between master and flake-update (createPullRequest)
+          echo 1>&2 "No commits to merge, so we're already up to date!"
+        else
+          # A message has already been printed.
+          exit 1
+        fi
+      fi
+    fi
   '';
-})
+} // prAttrs)
