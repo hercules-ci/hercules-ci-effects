@@ -12,14 +12,14 @@ in
       default = "flake-update";
       example = "update";
       description = ''
-        To which branch to push the updated flake lock.
+        To which branch to push the updated `flake lock`.
       '';
     };
 
     forgeType = mkOption {
       type = types.str;
       default = "github";
-      example = "gitea";
+      example = "gitlab";
       description = ''
         The type of Git server commited to.
       '';
@@ -29,14 +29,14 @@ in
       type = types.bool;
       default = true;
       description = ''
-        Whether to create a pull request for the updated flake.lock.
+        Whether to create a pull request for the updated `flake.lock`.
       '';
     };
 
     when = mkOption {
       type = types.raw;
       description = ''
-        See `herculesCI.onSchedule.<name>.when` for details.
+        See [`herculesCI.onSchedule.<name>.when`](#opt-herculesCI.onSchedule._name_.when.dayOfMonth) for details.
       '';
     };
 
