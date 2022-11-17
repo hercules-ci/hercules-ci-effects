@@ -1,0 +1,10 @@
+
+= `flakeUpdate`
+
+_flakeUpdate {two-colons} AttrSet -> Effect_
+
+An effect that checks out a repository, updates the `flake.nix` file, creates a branch, creates a PR if there are changes.
+
+The xref:reference/flake-parts/flake-update.adoc[flake-parts module] is the recommended method for using this function, whereas `flakeUpdate` itself may be useful for advanced use cases.
+
+The parameters generally match up with the https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.flake-update.enable[`hercules-ci.flake-update` options].
