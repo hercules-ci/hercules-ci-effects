@@ -5,7 +5,18 @@ let
 in
 {
   options.hercules-ci.flake-update = {
-    enable = lib.mkEnableOption "Scheduled flake update job";
+    enable = mkOption {
+      type = types.bool;
+      default = false;
+      example = true;
+      description = ''
+        Whether to create a scheduled flake update job.
+
+        For a complete example, see [the hercules-ci-effects documentation on `hercules-ci.flake-update`](https://docs.hercules-ci.com/hercules-ci-effects/reference/flake-parts/flake-update/).
+
+        _Requires hercules-ci-agent 0.9.8 or newer._
+      '';
+    };
 
     updateBranch = mkOption {
       type = types.str;
