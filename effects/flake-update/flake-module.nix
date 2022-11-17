@@ -47,7 +47,7 @@ in
     when = mkOption {
       type = types.raw;
       description = ''
-        See [`herculesCI.onSchedule.<name>.when`](#opt-herculesCI.onSchedule._name_.when.dayOfMonth) for details.
+        See [`herculesCI.onSchedule.<name>.when`](#opt-herculesCI.onSchedule._name_.when) for details.
       '';
     };
 
