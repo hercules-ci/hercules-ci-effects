@@ -138,48 +138,9 @@ let
   onScheduleModule = { ... }: {
     imports = [ outputsModule ];
     options = {
-      when = {
-        minute = mkOption {
-          type = types.nullOr (types.ints.between 0 59);
-          default = null;
-          description = ''
-            An optional integer representing the minute mark at which a job should be created.
-            
-            The default value `null` represents an arbitrary minute.
-          '';
-        };
-        hour = mkOption {
-          type = types.nullOr (coercedToList (types.ints.between 0 23));
-          default = null;
-          description = ''
-            An optional integer representing the hours at which a job should be created.
-            
-            The default value `null` represents an arbitrary hour.
-          '';
-        };
-        dayOfWeek = mkOption {
-          type = types.nullOr (types.enum ["Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"]);
-          default = null;
-          description = ''
-            An optional list of week days during which to create a job.
-
-            The default value `null` represents all days.
-          '';
-        };
-        dayOfMonth = mkOption {
-          type = types.nullOr (coercedToList (types.ints.between 0 31));
-          default = null;
-          description = ''
-            An optional list of day of the month during which to create a job.
-
-            The default value `null` represents all days.
-          '';
-        };
-      };
+      when = (import ./types/when.nix { inherit lib; }).option;
     };
   };
-
-  coercedToList = t: types.coercedTo t (x: [x]) (types.listOf t);
 
   herculesCIModule = { config, ... }: {
     options = {
