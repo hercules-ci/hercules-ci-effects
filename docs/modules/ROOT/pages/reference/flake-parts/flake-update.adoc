@@ -1,0 +1,40 @@
+
+# `hercules-ci.flake-update`
+
+The https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.flake-update.enable[options] in `hercules-ci.flake-update` provide update automation for flakes.
+
+In its default configuration, this will create an `onSchedule` job containing an effect that creates or updates the `flake-update` branch, and creates a pull request if the branch contains any changes.
+
+## Complete Example
+
+```nix
+{
+  description = "An auto-updating flake";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+  };
+
+  outputs = inputs@{ self, flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit self; } {
+      imports = [
+        inputs.hercules-ci-effects.flakeModule
+      ];
+      systems = [ "x86_64-linux" ];
+      hercules-ci.flake-update = {
+        enable = true;
+        when = {
+          hour = [ 23 ];
+          dayOfWeek = ["Sun" "Wed"];
+        };
+      };
+    };
+}
+```
+
+See also
+
+* The xref:hercules-ci-agent:ROOT:evaluation.adoc#attributes-herculesCI.onSchedule-when[`when`] configuration
+* https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.flake-update.enable[`hercules-ci.flake-update`] options reference
+* https://flake.parts/getting-started.html[Getting Started] with flake-parts
