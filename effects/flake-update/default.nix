@@ -21,11 +21,15 @@ in
 , updateBranch ? "flake-update"
 , forgeType ? "github"
 , createPullRequest ? true
+, autoMergeMethod ? null
 }:
 assert createPullRequest -> forgeType == "github";
+assert (autoMergeMethod != null) -> forgeType == "github";
+
 let
   url = parseURL gitRemote;
   githubPR = createPullRequest && forgeType == "github";
+  githubAutoMerge = (autoMergeMethod != null) && forgeType == "github";
   prAttrs = optionalAttrs createPullRequest {
     title = "`flake.lock`: Update";
     body = ''
@@ -94,13 +98,16 @@ mkEffect ({
   '' + optionalString githubPR ''
     # Too many PRs is better than to few. Ensure that the PR exists
     if git rev-parse "refs/remotes/origin/$updateBranch" &>/dev/null; then
-      if ! gh pr create \
+      if gh pr create \
                 --head "$updateBranch" \
                 --title "$title" \
                 --body "$body" \
-                2>&1 \
-            | tee $TMPDIR/pr.err
+                2> >(tee $TMPDIR/pr.err) \
+                > $TMPDIR/pr.out
       then
+        cat $TMPDIR/pr.out
+        ${optionalString githubAutoMerge (import ./github-auto-merge.nix { inherit lib autoMergeMethod; })}
+      else
         # Expect an error if the PR already exists.
         if grep -E 'a pull request for branch .* already exists' <$TMPDIR/pr.err >/dev/null; then
           # Self explanatory error
