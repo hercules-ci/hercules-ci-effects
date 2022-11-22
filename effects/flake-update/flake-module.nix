@@ -44,6 +44,16 @@ in
       '';
     };
 
+    autoMergeMethod = mkOption {
+      type = types.enum [ null "merge" "rebase" "squash" ];
+      default = null;
+      description = ''
+        Whether to enable auto-merge on new pull requests, and how to merge it.
+
+        This requires [GitHub branch protection](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches) to be configured for the repository.
+      '';
+    };
+
     when = mkOption {
       type = types.raw;
       description = ''
@@ -72,7 +82,7 @@ in
               hci-effects.flakeUpdate {
                 gitRemote = herculesCI.config.repo.remoteHttpUrl;
                 user = "x-access-token";
-                inherit (cfg) updateBranch forgeType createPullRequest;
+                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod;
               }
             );
           };
