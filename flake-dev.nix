@@ -6,9 +6,15 @@ top@{ withSystem, lib, inputs, config, ... }: {
   systems = [ "x86_64-linux" "aarch64-linux" ];
   flake = {
     # These aren't system dependent so we define them once. x86_64-linux is unrelated.
-    checks.x86_64-linux.evaluation-checks =
-      (import ./flake-modules/derivationTree-type.nix { inherit lib; }).tests
-        inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile;
+    checks.x86_64-linux = {
+      evaluation-checks =
+        (import ./flake-modules/derivationTree-type.nix { inherit lib; }).tests
+          inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile;
+
+      evaluation-herculesCI =
+        let it = (import ./flake-modules/herculesCI-eval-test.nix { inherit inputs; });
+        in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+    };
 
     tests = withSystem "x86_64-linux" ({ hci-effects, pkgs, ... }: {
       git-crypt-hook = pkgs.callPackage ./effects/git-crypt-hook/test.nix { };
