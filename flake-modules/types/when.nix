@@ -40,7 +40,7 @@ let
         '';
       };
       dayOfWeek = mkOption {
-        type = types.nullOr (types.enum [ "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun" ]);
+        type = types.nullOr (coercedToList (types.enum [ "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun" ]));
         default = null;
         description = ''
           An optional list of week days during which to create a job.
