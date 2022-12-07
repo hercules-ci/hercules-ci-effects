@@ -23,7 +23,7 @@ in
       }
     );
 
-  flakeUpdate = callPackage ./flake-update { };
+  flakeUpdate = callPackage ./flake-update/effect-fun.nix { };
 
   netlifyDeploy = callPackage ./netlify { };
   netlifySetupHook = pkgs.runCommand "hercules-ci-netlify-setup-hook" {} ''
