@@ -7,7 +7,7 @@ let
 in
 
 module: nixos-lib.runTest {
-  imports = [ ./effects-module.nix module extraModule ];
+  imports = [ ./optimize.nix ./effects-module.nix module extraModule ];
   config = {
     hostPkgs = pkgs;
   };
