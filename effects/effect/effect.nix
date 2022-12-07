@@ -51,6 +51,7 @@ invokeOverride mkDrv {
   postEffectPhases = "effectCheckPhase";
 
   initPhase = ''
+    set -u
     # eof on stdin
     exec </dev/null
     runHook preInit
