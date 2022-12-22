@@ -11,6 +11,8 @@ let
       Each subattribute represents an equality, all of which will hold at the next planned time. The time zone is UTC.
 
       The `minute` or `hour` attributes can be omitted, in which case Hercules CI will pick an arbitrary time for you.
+      
+      See the `when.*` options below for details.
     '';
     inherit type;
     default = { };
