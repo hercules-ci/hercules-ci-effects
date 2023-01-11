@@ -1,5 +1,5 @@
 { lib
-, mkEffect
+, modularEffect
 , pkgs
 }:
 
@@ -42,10 +42,8 @@ let
     github = url.host;
   };
 in
-mkEffect ({
+modularEffect ({
   secretsMap.token = tokenSecret;
-  inherit gitRemote user updateBranch;
-  inherit (url) scheme host path;
 
   name = "flake-update";
   inputs = [
@@ -54,11 +52,15 @@ mkEffect ({
   ] ++ optionals githubPR [
     pkgs.gh
   ];
- 
-  EMAIL = "hercules-ci[bot]@users.noreply.github.com";
-  GIT_AUTHOR_NAME = "Hercules CI Effects";
-  GIT_COMMITTER_NAME = "Hercules CI Effects";
-  PAGER = "cat";
+
+  env = {
+    inherit gitRemote user updateBranch;
+    inherit (url) scheme host path;
+    EMAIL = "hercules-ci[bot]@users.noreply.github.com";
+    GIT_AUTHOR_NAME = "Hercules CI Effects";
+    GIT_COMMITTER_NAME = "Hercules CI Effects";
+    PAGER = "cat";
+  } // prAttrs;
 
   userSetupScript = ''
     # set -x
@@ -123,4 +125,4 @@ mkEffect ({
       fi
     fi
   '';
-} // prAttrs)
+})
