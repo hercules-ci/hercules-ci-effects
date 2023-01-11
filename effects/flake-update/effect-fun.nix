@@ -5,14 +5,6 @@
 
 let
   inherit (lib) optionals optionalAttrs optionalString;
-
-  parseURL = gitRemote:
-    let m = builtins.match "([a-z]*)://([^/]*)(/?.*)" gitRemote;
-    in if m == null then throw "Could not determine host in gitRemote url ${gitRemote}" else {
-      scheme = lib.elemAt m 0;
-      host = lib.elemAt m 1;
-      path = lib.elemAt m 2;
-    };
 in
 
 { gitRemote
@@ -27,7 +19,6 @@ assert createPullRequest -> forgeType == "github";
 assert (autoMergeMethod != null) -> forgeType == "github";
 
 let
-  url = parseURL gitRemote;
   githubPR = createPullRequest && forgeType == "github";
   githubAutoMerge = (autoMergeMethod != null) && forgeType == "github";
   prAttrs = optionalAttrs createPullRequest {
@@ -39,13 +30,16 @@ let
 
           git push origin :${updateBranch}
     '';
-    github = url.host;
   };
 in
 modularEffect {
-  imports = [ ../modules/git-auth.nix ];
+  imports = [
+    ../modules/git-auth.nix
+    ../modules/git-auth-gh.nix
+  ];
 
   git.checkout.remote.url = gitRemote;
+  git.checkout.forgeType = forgeType;
   git.checkout.user = user;
 
   secretsMap.token = tokenSecret;
@@ -58,16 +52,8 @@ modularEffect {
   ];
 
   env = {
-    inherit gitRemote user updateBranch;
-    inherit (url) scheme host path;
+    inherit gitRemote updateBranch;
   } // prAttrs;
-
-  userSetupScript = optionalString githubPR ''
-    mkdir -p ~/.config/gh
-    { echo "$github:"
-      echo "  oauth_token: $(readSecretString token .token)"
-    } >~/.config/gh/hosts.yml
-  '';
 
   effectScript = ''
     git clone "$gitRemote" repo
