@@ -42,12 +42,13 @@ let
     github = url.host;
   };
 in
-modularEffect ({
+modularEffect {
+  imports = [ ../modules/git.nix ];
+
   secretsMap.token = tokenSecret;
 
   name = "flake-update";
   inputs = [
-    pkgs.git
     pkgs.nix
   ] ++ optionals githubPR [
     pkgs.gh
@@ -56,10 +57,6 @@ modularEffect ({
   env = {
     inherit gitRemote user updateBranch;
     inherit (url) scheme host path;
-    EMAIL = "hercules-ci[bot]@users.noreply.github.com";
-    GIT_AUTHOR_NAME = "Hercules CI Effects";
-    GIT_COMMITTER_NAME = "Hercules CI Effects";
-    PAGER = "cat";
   } // prAttrs;
 
   userSetupScript = ''
@@ -125,4 +122,4 @@ modularEffect ({
       fi
     fi
   '';
-})
+}
