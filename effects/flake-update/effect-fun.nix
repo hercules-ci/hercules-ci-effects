@@ -43,7 +43,10 @@ let
   };
 in
 modularEffect {
-  imports = [ ../modules/git.nix ];
+  imports = [ ../modules/git-auth.nix ];
+
+  git.checkout.remote.url = gitRemote;
+  git.checkout.user = user;
 
   secretsMap.token = tokenSecret;
 
@@ -59,11 +62,7 @@ modularEffect {
     inherit (url) scheme host path;
   } // prAttrs;
 
-  userSetupScript = ''
-    # set -x
-    echo "$scheme://$user:$(readSecretString token .token)@$host$path" >~/.git-credentials
-    git config --global credential.helper store
-  '' + optionalString githubPR ''
+  userSetupScript = optionalString githubPR ''
     mkdir -p ~/.config/gh
     { echo "$github:"
       echo "  oauth_token: $(readSecretString token .token)"
