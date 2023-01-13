@@ -26,6 +26,9 @@ in
       { echo "${config.git.checkout.remote.parsedUrl.host}:"
         echo "  oauth_token: $(readSecretString ${config.git.checkout.tokenSecret} .token)"
       } >~/.config/gh/hosts.yml
+      mkdir -p ~/.config/nix
+      echo "access-tokens = ${config.git.checkout.remote.parsedUrl.host}=$(readSecretString ${config.git.checkout.tokenSecret} .token)" \
+        >>~/.config/nix/nix.conf
     '';
     inputs = [
       pkgs.gh
