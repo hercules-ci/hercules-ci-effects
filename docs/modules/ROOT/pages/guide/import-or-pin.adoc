@@ -22,8 +22,8 @@ Add to the flake inputs:
 In your outputs section:
 
 ```nix
-  outputs = { self, flake-parts, hercules-ci-effects, ... }:
-    flake-parts.mkFlake { inherit self; } ({ withSystem, ... }: {
+  outputs = inputs@{ self, flake-parts, hercules-ci-effects, ... }:
+    flake-parts.mkFlake { inherit inputs; } ({ withSystem, ... }: {
       imports = [
         # Add this
         hercules-ci-effects.flakeModule

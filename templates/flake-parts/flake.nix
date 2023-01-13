@@ -8,8 +8,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { self, flake-parts, hercules-ci-effects, ... }:
-    flake-parts.lib.mkFlake { inherit self; } ({ withSystem, ... }: {
+  outputs = inputs@{ self, flake-parts, hercules-ci-effects, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, ... }: {
       imports = [
         hercules-ci-effects.flakeModule
       ];

@@ -28,6 +28,12 @@ top@{ withSystem, lib, inputs, config, ... }: {
     });
   };
 
+  hercules-ci.flake-update = {
+    enable = true;
+    when.dayOfMonth = 15;
+    autoMergeMethod = "merge";
+  };
+
   herculesCI = { config, ... }: {
 
     # We don't have kvm on arm in CI for now.
