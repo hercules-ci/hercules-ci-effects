@@ -37,6 +37,7 @@ modularEffect {
 
         git push origin :${updateBranch}
   '';
+  git.update.pullRequest.autoMergeMethod = autoMergeMethod;
 
   secretsMap.token = tokenSecret;
 
