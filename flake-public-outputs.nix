@@ -1,5 +1,8 @@
 { withSystem, inputs, ... }: {
-  imports = [ ./flake-module.nix ];
+  imports = [
+    ./flake-module.nix
+    ./flake-docs-render.nix
+  ];
   systems = [ "x86_64-linux" "aarch64-linux" ];
   flake = {
 

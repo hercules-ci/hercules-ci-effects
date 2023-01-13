@@ -6,11 +6,31 @@ pkgs:
 
 let
   callPackage = pkgs.newScope self;
-  inherit (pkgs.lib) recurseIntoAttrs optionalAttrs;
+  inherit (pkgs.lib)
+    recurseIntoAttrs
+    optionalAttrs
+    evalModules
+    mkDefault
+    ;
+
+  evalEffectModules = { modules }: evalModules {
+    modules = [
+      ./effect/effect-module.nix
+      {
+        _file = __curPos.file;
+        _module.args.pkgs = mkDefault pkgs;
+      }
+    ] ++ modules;
+    specialArgs = {
+      hci-effects = self;
+    };
+  };
 
 in
 {
   mkEffect = callPackage ./effect/effect.nix { };
+
+  modularEffect = module: (evalEffectModules { modules = [ module ]; }).config.effectDerivation;
 
   runIf = condition: v:
     recurseIntoAttrs (
@@ -23,7 +43,7 @@ in
       }
     );
 
-  flakeUpdate = callPackage ./flake-update { };
+  flakeUpdate = callPackage ./flake-update/effect-fun.nix { };
 
   netlifyDeploy = callPackage ./netlify { };
   netlifySetupHook = pkgs.runCommand "hercules-ci-netlify-setup-hook" {} ''

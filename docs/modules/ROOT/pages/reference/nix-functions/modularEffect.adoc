@@ -1,0 +1,16 @@
+
+# `modularEffect`
+
+This function is a module system-based wrapper for xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]. The module systemfootnote:[The _module system_ refers to the module system used by NixOS. It does not include anything specific to NixOS, but rather the features such as `imports`, types, `mkForce`, etc.] helps effect logic to be composed, factored out and reused. `hercules-ci-effects` provides a number of modules to be imported.
+
+[[parameter]]
+## Parameter
+
+`modularEffect` takes one parameter, which must be a module.
+
+The module may set xref:reference/effect-modules/core.adoc[Core Options] and/or import other modules using `imports`.
+
+[[return-value]]
+## Return value
+
+`modularEffect` returns an effect derivation, like xref:reference/nix-functions/mkEffect.adoc#return-value[mkEffect] does.

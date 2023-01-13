@@ -63,7 +63,7 @@ in
       description = ''
         An attribute set of effects.
 
-        The attribute name (referred to as `<name>`) translates to a command that is runnable from the {option}`testScript` as
+        The attribute name (referred to as `<name>`) translates to a command that is runnable from the `testScript` as
 
         ```python
             agent.succeed("effect-<name>")

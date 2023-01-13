@@ -1,0 +1,8 @@
+
+# Effect Core Options
+
+The xref:reference/nix-functions/modularEffect.adoc[`modularEffect`] function is a module system-based wrapper for xref:reference/nix-functions/mkEffect.adoc[`mkEffect`].
+
+This page documents the options which are always available. You may add additional options using the module `imports` syntax.
+
+include::partial$options.adoc[leveloffset=0]
