@@ -24,7 +24,7 @@ in
     userSetupScript = ''
       mkdir -p ~/.config/gh
       { echo "${config.git.checkout.remote.parsedUrl.host}:"
-        echo "  oauth_token: $(readSecretString ${config.git.checkout.user} .token)"
+        echo "  oauth_token: $(readSecretString ${config.git.checkout.tokenSecret} .token)"
       } >~/.config/gh/hosts.yml
     '';
     inputs = [
