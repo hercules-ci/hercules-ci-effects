@@ -17,7 +17,7 @@ In its default configuration, this will create an `onSchedule` job containing an
   };
 
   outputs = inputs@{ self, flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit self; } {
+    flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         inputs.hercules-ci-effects.flakeModule
       ];
