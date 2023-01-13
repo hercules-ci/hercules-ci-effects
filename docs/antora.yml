@@ -3,3 +3,5 @@ title: hercules-ci-effects
 version: 'master'
 nav:
 - modules/ROOT/nav.adoc
+
+nix: true

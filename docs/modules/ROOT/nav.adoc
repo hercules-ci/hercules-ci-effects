@@ -8,11 +8,14 @@
 ** xref:guide/deploy-a-nixops-network.adoc[Deploy a NixOps network]
 ** xref:guide/configure-git-crypt.adoc[Configure git-crypt]
 ** xref:guide/write-a-custom-effect.adoc[Write a Custom Effect]
+* Effect Module Reference
+** xref:reference/effect-modules/core.adoc[Core Options]
 * Flake Parts Module Reference
 ** xref:reference/flake-parts/flake-update.adoc[`flake-update`]
 * Nix Functions Reference
 ** _General Functions_
 ** xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]
+** xref:reference/nix-functions/modularEffect.adoc[`modularEffect`]
 ** xref:reference/nix-functions/runIf.adoc[`runIf`]
 ** _Command Functions_
 ** xref:reference/nix-functions/nix-shell.adoc[`nix-shell`]

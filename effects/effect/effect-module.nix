@@ -113,7 +113,7 @@ in
     effectDerivationArgs = mkOption {
       type = types.lazyAttrsOf types.unspecified;
       description = ''
-        The arguments to the `mkEffect` function, producing {option}`effectDerivation`.
+        The arguments to the `mkEffect` function, producing `effectDerivation`.
 
         Generally you won't have to set these, as they are represented by other options, with the added benefit of accurate types and support for the merging of definitions.
       '';
