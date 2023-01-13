@@ -114,7 +114,7 @@ in
                   > $TMPDIR/pr.out
         then
           cat $TMPDIR/pr.out
-          ${optionalString githubAutoMerge (import ./github-auto-merge.nix { inherit lib; inherit (cfg) autoMergeMethod; })}
+          ${optionalString githubAutoMerge (import ./github-auto-merge.nix { inherit lib; inherit (cfg.pullRequest) autoMergeMethod; })}
         else
           # Expect an error if the PR already exists.
           if grep -E 'a pull request for branch .* already exists' <$TMPDIR/pr.err >/dev/null; then
