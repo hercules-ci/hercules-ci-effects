@@ -70,7 +70,6 @@ in
   };
   config = {
     userSetupScript = ''
-      set -x
       echo "${remote.scheme}://${cfg.user}:$(readSecretString ${cfg.tokenSecret} .token)@${remote.host}${remote.path}" >>~/.git-credentials
       git config --global credential.helper store
     '';
