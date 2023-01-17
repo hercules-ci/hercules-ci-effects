@@ -8,3 +8,32 @@ An effect that checks out a repository, updates the `flake.nix` file, creates a 
 The xref:reference/flake-parts/flake-update.adoc[flake-parts module] is the recommended method for using this function, whereas `flakeUpdate` itself may be useful for advanced use cases.
 
 The parameters generally match up with the https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.flake-update.enable[`hercules-ci.flake-update` options].
+
+== Example
+
+Here's an example of the `herculesCI` attribute for a non-flake-parts project.
+
+```nix
+herculesCI = { branch, primaryRepo, ... }: {
+  # If you're switching from a nix-build style job configuration, you'll need
+  # to define `onPush.default.outputs` to substitute for the old behavior.
+  # It is traversed more eagerly, so large structures may need `dontRecurseIntoAttrs`.
+  # onPush.default.outputs = { inherit mypkg; };
+  onSchedule.update = {
+    outputs = {
+      effects = {
+        update = effects.flakeUpdate {
+          gitRemote = primaryRepo.remoteHttpUrl;
+          # tokenSecret = { type = "GitToken"; };
+          createPullRequest = true;
+          autoMergeMethod = "merge";
+        };
+      };
+    };
+    when = {
+      dayOfWeek = [ "Mon" "Wed" ];
+      hour = [ 0 ];
+    };
+  };
+};
+```
