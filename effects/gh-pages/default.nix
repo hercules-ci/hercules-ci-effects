@@ -40,7 +40,6 @@ let inherit (pkgs) lib;
         effectScript =
           ''
             set -e
-            set -x
             TOKEN=`readSecretString git .token`
             ORIGIN=`echo $remoteHttpUrl | sed "s#://#://$owner:$TOKEN@#"`
             echo githubHostKey >> ~/.ssh/known_hosts

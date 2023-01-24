@@ -47,7 +47,7 @@ herculesCI = herculesEnv: {
 
 If you only have recommended `herculesCI.ciSystems = ...;` and wondering what is this `herculesEnv`:
 
-```git
+```diff
 -herculesCI.ciSystems = ...;
 +herculesCI = herculesEnv: {
 +  ciSystems = ...;
