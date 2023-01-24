@@ -67,10 +67,10 @@ import "${hercules-ci-effects}/effects/gh-pages" ::
       -- derivation to build and push
   , branchName :: String ? "gh-pages"
       -- branch to push
-  , condition :: Repo -> Boolean ? { ref, ... }: lib.elem ref ["refs/heads/main" "refs/heads/master"]
-      -- if a repo does not satisfy this condition, the effect will not be run
+  , condition :: Repository -> Boolean ? { ref, ... }: lib.elem ref ["refs/heads/main" "refs/heads/master"]
+      -- if a repository does not satisfy this condition, the effect will not be run
       -- by default it checks that CI is triggered by main branch
-      -- Repo is the type of https://docs.hercules-ci.com/hercules-ci-agent/evaluation#param-herculesCI-primaryRepo
+      -- Repository is the type of https://docs.hercules-ci.com/hercules-ci-agent/evaluation#param-herculesCI-primaryRepo
   , committer :: { name :: String, email :: String } ? <credentials of sincerely yours> }
       -- name and email that will be used as author and committer by Git
       -- you probably want to change these
