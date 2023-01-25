@@ -1,21 +1,21 @@
-{
-  pkgs,
-  runIf,
-  mkEffect
+{ pkgs
+, runIf
+, mkEffect
 }:
 
-let inherit (pkgs) lib;
-    inherit (pkgs.lib) optionalString;
- in
+let
+  inherit (pkgs) lib;
+  inherit (pkgs.lib) optionalString;
+in
 
-{
-  gh-pages,
-  branchName ? "gh-pages",
-  condition ? { ref, ... }: lib.elem ref ["refs/heads/main" "refs/heads/master"],
-  committer ? {
+{ gh-pages
+, branchName ? "gh-pages"
+, condition ? { ref, ... }: lib.elem ref [ "refs/heads/main" "refs/heads/master" ]
+, committer ? {
     name = "Andrey Vlasov";
     email = "andreyvlasov+gh-pages-builder@mlabs.city";
   }
+, rewriteHistory ? true
 }:
 { primaryRepo, ... }:
 {
@@ -36,6 +36,7 @@ let inherit (pkgs) lib;
         GIT_COMMITTER_EMAIL = committer.email;
         GIT_AUTHOR_NAME = committer.name;
         GIT_AUTHOR_EMAIL = committer.email;
+        inherit rewriteHistory;
 
         effectScript =
           ''
@@ -43,11 +44,19 @@ let inherit (pkgs) lib;
             TOKEN=`readSecretString git .token`
             ORIGIN=`echo $remoteHttpUrl | sed "s#://#://$owner:$TOKEN@#"`
             echo githubHostKey >> ~/.ssh/known_hosts
-            cp -r --no-preserve=mode $ghPages ./gh-pages && cd gh-pages
-            git init -b $branchName
-            git remote add origin $ORIGIN
+            if [[ $rewriteHistory -eq 1 ]]
+            then
+              mkdir ./gh-pages
+              cd gh-pages
+              git init --initial-branch $branchName
+              git remote add origin $ORIGIN
+            else
+              git clone --branch $branchName --single-branch $ORIGIN gh-pages
+              cd gh-pages
+            fi
+            cp -r --no-preserve=mode $ghPages .
             git add .
-            git commit -m "Deploy to $branchName"
+            git commit -m "Deploy to $branchName" --allow-empty
             git push -f origin $branchName:$branchName
           '';
       }

@@ -74,6 +74,9 @@ import "${hercules-ci-effects}/effects/gh-pages" ::
   , committer :: { name :: String, email :: String } ? <credentials of sincerely yours> }
       -- name and email that will be used as author and committer by Git
       -- you probably want to change these
+  , rewriteHistory :: Boolean ? true
+      -- if true, script resets history on target branch to a single (newest) commit
+      -- if you need history preserved, change this to false
   } ->
   HerculesCIArgs ->
   { onPush.gh-pages.outputs.effects.default :: Effect }
