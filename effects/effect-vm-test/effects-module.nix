@@ -77,6 +77,7 @@ in
         A collection of secrets available on the mock agent.
       '';
       type = types.lazyAttrsOf (types.lazyAttrsOf types.raw);
+      default = {};
     };
   };
 
