@@ -75,6 +75,7 @@ in
   effectVMTest = callPackage ./effect-vm-test { extraModule = { config.hci = pkgs.hci; }; };
 
   effects = self;
+  hci-effects = self;
 
   inherit callPackage;
 }

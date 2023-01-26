@@ -1,4 +1,4 @@
-{ effectVMTest, effects, hello, lib, mkEffect, runCommand, writeText }:
+{ effectVMTest, hci-effects, hello, lib, mkEffect, runCommand, writeText }:
 
 let
   
@@ -25,7 +25,7 @@ effectVMTest {
     environment.systemPackages = [ pkgs.jq ];
   };
   effects = {
-    update = effects.flakeUpdate {
+    update = hci-effects.flakeUpdate {
       gitRemote = "http://gitea:3000/test/repo";
       user = "test";
       forgeType = "gitea";
