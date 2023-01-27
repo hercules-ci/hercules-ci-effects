@@ -224,7 +224,7 @@ in
       # These are lazy errors in order to allow some exploration in nix repl.
       # hci repl: https://github.com/hercules-ci/hercules-ci-agent/issues/459
       herculesCI ? throw "`<flake>.outputs.herculesCI` requires an `herculesCI` argument.",
-      primaryRepo ? throw "`<flake>.outputs.primaryRepo` requires a `primaryRepo` argument.",
+      primaryRepo ? throw "`<flake>.outputs.herculesCI` requires a `primaryRepo` argument.",
       ... }:
       let
         paramModule = {
