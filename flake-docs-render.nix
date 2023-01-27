@@ -66,6 +66,13 @@
         modules = [ ];
       };
 
+    packages.generated-option-doc-gitWriteBranch =
+      renderModule {
+        sourceName = "write-branch";
+        sourcePath = ./effects/write-branch;
+        modules = [ ./effects/write-branch/effect-module.nix ];
+      };
+
     packages.generated-option-doc-git-auth =
       renderModule {
         sourceName = "git-auth";
@@ -86,6 +93,7 @@
         {
           nativeBuildInputs = [ pkgs.pandoc pkgs.libxslt.bin ];
           modularEffect = config.packages.generated-option-doc-modularEffect;
+          gitWriteBranch = config.packages.generated-option-doc-gitWriteBranch;
           git_auth = config.packages.generated-option-doc-git-auth;
           git_update = config.packages.generated-option-doc-git-update;
         }
@@ -103,6 +111,10 @@
           convert \
             < $modularEffect \
             >$out/modules/ROOT/partials/options.adoc \
+
+          convert \
+            < $gitWriteBranch \
+            > $out/modules/ROOT/partials/options/gitWriteBranch.adoc
 
           convert \
             < $git_auth \

@@ -55,6 +55,7 @@ top@{ withSystem, lib, inputs, config, ... }: {
   perSystem = { pkgs, hci-effects, inputs', ... }: {
     checks = {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
+      write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
     };
     devShells.default = pkgs.mkShell {

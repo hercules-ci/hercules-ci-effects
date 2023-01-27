@@ -14,4 +14,6 @@ include::partial$options/git-update.adoc[leveloffset=0]
 
 ## See also
 
+ - xref:reference/nix-functions/gitWriteBranch.adoc[`gitWriteBranch`] to replace branch contents.
+
  - xref:reference/nix-functions/flakeUpdate.adoc[`flakeUpdate`] to update flake input revisions.
