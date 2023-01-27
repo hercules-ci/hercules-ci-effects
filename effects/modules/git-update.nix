@@ -2,6 +2,7 @@
 let
   inherit (lib)
     mkOption
+    optionalAttrs
     optionals
     optionalString
     types
@@ -79,6 +80,8 @@ in
     env = {
       HCI_GIT_REMOTE_URL = config.git.checkout.remote.url;
       HCI_GIT_UPDATE_BRANCH = cfg.branch;
+    }
+    // optionalAttrs cfg.pullRequest.enable {
       HCI_GIT_UPDATE_PR_TITLE = cfg.pullRequest.title;
       HCI_GIT_UPDATE_PR_BODY = cfg.pullRequest.body;
     };
