@@ -10,6 +10,7 @@
 ** xref:guide/write-a-custom-effect.adoc[Write a Custom Effect]
 * Effect Module Reference
 ** xref:reference/effect-modules/core.adoc[Core Options]
+** xref:reference/effect-modules/git.adoc[Git Options]
 * Flake Parts Module Reference
 ** xref:reference/flake-parts/flake-update.adoc[`flake-update`]
 * Nix Functions Reference
