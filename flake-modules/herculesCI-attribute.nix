@@ -192,11 +192,23 @@ let
           Flake systems for which to generate attributes in `herculesCI.onPush.default.outputs`.
         '';
       };
+      flakeForOnPushDefault = mkOption {
+        type = types.raw;
+        default = self;
+        defaultText = lib.literalExpression "self";
+        description = ''
+          The flake to use when automatically deriving the onPush.default job.
+
+          If you use mkFlake (you should), you have no reason to set this.
+          This is primarily an extension point for `mkHerculesCI`.
+        '';
+        internal = true;
+      };
     };
     config = {
       onPush.default.outputs =
         default-hci-for-flake.flakeToOutputs
-          self
+          { outputs = config.flakeForOnPushDefault; }
           { ciSystems = lib.genAttrs config.ciSystems (system: {}); };
       out = {
         inherit (config) onPush onSchedule ciSystems;
