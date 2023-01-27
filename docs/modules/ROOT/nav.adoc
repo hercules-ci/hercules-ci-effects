@@ -8,6 +8,7 @@
 ** xref:guide/deploy-a-nixops-network.adoc[Deploy a NixOps network]
 ** xref:guide/configure-git-crypt.adoc[Configure git-crypt]
 ** xref:guide/write-a-custom-effect.adoc[Write a Custom Effect]
+** xref:guide/deploy-to-github-pages.adoc[Deploy to GitHub Pages]
 * Effect Module Reference
 ** xref:reference/effect-modules/core.adoc[Core Options]
 ** xref:reference/effect-modules/git.adoc[Git Options]
