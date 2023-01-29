@@ -1,12 +1,12 @@
 
-= Deploy documentation to GitHub Pages with Nix
+= Deploy a static website to GitHub Pages with Nix
 
-This guide will show you how you can deploy packaged documentation when `master` is updated.
+This guide will show you how you can deploy for example packaged documentation whenever the `master` branch is updated.
 
 Prerequisites:
 
  - You have xref:master@hercules-ci:ROOT:getting-started/index.adoc[set up an agent] for the account that owns the repository
- - You have packaged your documentation somewhere in a derivation output
+ - You have packaged a static site or documentation in a derivation output or possibly a subpath of the output
  - You have added the repository to your Hercules CI installation
 
 == With flake-parts
