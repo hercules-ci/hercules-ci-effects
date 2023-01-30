@@ -1,11 +1,13 @@
 # Git-related Modules
 
+[[git-auth]]
 ## `git-auth`
 
 The module provides the basics for working with a git repository.
 
 include::partial$options/git-auth.adoc[leveloffset=0]
 
+[[git-update]]
 ## `git-update`
 
 A module that facilitates the updating of a git repository.
