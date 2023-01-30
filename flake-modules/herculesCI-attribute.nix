@@ -192,11 +192,23 @@ let
           Flake systems for which to generate attributes in `herculesCI.onPush.default.outputs`.
         '';
       };
+      flakeForOnPushDefault = mkOption {
+        type = types.raw;
+        default = self;
+        defaultText = lib.literalExpression "self";
+        description = ''
+          The flake to use when automatically deriving the onPush.default job.
+
+          If you use mkFlake (you should), you have no reason to set this.
+          This is primarily an extension point for `mkHerculesCI`.
+        '';
+        internal = true;
+      };
     };
     config = {
       onPush.default.outputs =
         default-hci-for-flake.flakeToOutputs
-          self
+          config.flakeForOnPushDefault
           { ciSystems = lib.genAttrs config.ciSystems (system: {}); };
       out = {
         inherit (config) onPush onSchedule ciSystems;
@@ -224,7 +236,7 @@ in
       # These are lazy errors in order to allow some exploration in nix repl.
       # hci repl: https://github.com/hercules-ci/hercules-ci-agent/issues/459
       herculesCI ? throw "`<flake>.outputs.herculesCI` requires an `herculesCI` argument.",
-      primaryRepo ? throw "`<flake>.outputs.primaryRepo` requires a `primaryRepo` argument.",
+      primaryRepo ? throw "`<flake>.outputs.herculesCI` requires a `primaryRepo` argument.",
       ... }:
       let
         paramModule = {

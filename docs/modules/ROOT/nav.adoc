@@ -8,10 +8,13 @@
 ** xref:guide/deploy-a-nixops-network.adoc[Deploy a NixOps network]
 ** xref:guide/configure-git-crypt.adoc[Configure git-crypt]
 ** xref:guide/write-a-custom-effect.adoc[Write a Custom Effect]
+** xref:guide/deploy-to-github-pages.adoc[Deploy to GitHub Pages]
 * Effect Module Reference
 ** xref:reference/effect-modules/core.adoc[Core Options]
+** xref:reference/effect-modules/git.adoc[Git Options]
 * Flake Parts Module Reference
 ** xref:reference/flake-parts/flake-update.adoc[`flake-update`]
+** xref:reference/flake-parts/github-pages.adoc[`github-pages`]
 * Nix Functions Reference
 ** _General Functions_
 ** xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]
@@ -22,6 +25,7 @@
 ** xref:reference/nix-functions/ssh.adoc[`ssh`]
 ** _Deployment Functions_
 ** xref:reference/nix-functions/netlifyDeploy.adoc[`netlifyDeploy`]
+** xref:reference/nix-functions/gitWriteBranch.adoc[`gitWriteBranch`]
 ** xref:reference/nix-functions/runArion.adoc[`runArion`]
 ** xref:reference/nix-functions/runCachixDeploy.adoc[`runCachixDeploy`]
 ** xref:reference/nix-functions/runNixDarwin.adoc[`runNixDarwin`]

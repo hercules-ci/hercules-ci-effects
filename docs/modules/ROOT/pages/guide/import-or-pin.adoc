@@ -40,7 +40,83 @@ In your outputs section:
     });
 ```
 
+[[mkHerculesCI]]
+== Flake without `flake-parts`
+
+This is the recommended integration _if migrating to flake-parts is not an option_. Otherwise follow the steps for https://flake.parts/getting-started.html#existing-flake[migrating an existing flake].
+
+Limitations:
+
+* Deployment modules can't set attributes outside the `herculesCI` flake output attribute.
+* The implementation is more complicated than `mkFlake`, in case something breaks.
+
+Benefits:
+
+* You only have to set a single flake output attribute.
+* Make use of high level features like the `flake-update` and `github-pages`
+   options.
+* Merge effects into the `onPush.default` job, so they run after build success.
+* Run checks that are defined by flake-parts modules.
+
+Add to the flake inputs:
+
+```nix
+hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+```
+
+Call the arguments to the flake outputs function `inputs`; add `inputs@` or if it has already been named, adapt the steps after. Example:
+
+```nix
+outputs = inputs@{ nixpkgs, ... }:
+```
+
+Define the `herculesCI` flake output attribute. Here's a complete example:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+  };
+
+  outputs = inputs@{ nixpkgs, ... }:
+    # This attrset might instead  be `flake-utils.forEachSystem` or similar.
+    {
+      packages = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux"] (system: {
+        default = nixpkgs.legacyPackages.${system}.nix.doc;
+      });
+    }
+    // {
+      herculesCI = inputs.hercules-ci-effects.lib.mkHerculesCI { inherit inputs; } {
+        # Values for flake-parts options may be written here, including
+        # non-Hercules-CI options, but those will only take affect in CI and the `hci`
+        # command.
+
+        # Automatic flake updates
+        # hercules-ci.flake-update.enable = true;
+
+        # If your flake already had a `herculesCI` attribute, move it here.
+        herculesCI {
+          # Set this to the systems you want to be checked in CI.
+          ciSystems = [ "x86_64-linux" ... ];
+        };
+
+        # Some modules have options in `perSystem`
+        perSystem = { system, ... } = {
+          # Many flakes call Nixpkgs, to set some `config` or `overlays`.
+          # If yours needs that, it's best to reuse your pkgs here. Example:
+          # _module.args.pkgs = pkgsFor.${system};
+        };
+      };
+    };
+}
+```
+
+Without defining any values in the module (second `mkHerculesCI` argument), the behavior of Hercules CI will be the same, but mediated by the `hercules-ci-effects` flake-parts module.
+
 == Flakes with overlay
+
+This method is not recommended, because it does not support effect definitions via flake options.
 
 Add to the flake inputs:
 
@@ -66,6 +142,8 @@ In your outputs section, call Nixpkgs with the overlay:
 ```
 
 == Flakes without overlay
+
+This method is not recommended, because it does not support effect definitions via flake options.
 
 Although overlays are a convenient way to make definitions available to all
 your expressions, they aren't necessary for `hercules-ci-effects`.

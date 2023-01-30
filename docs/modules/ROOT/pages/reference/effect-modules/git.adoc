@@ -1,0 +1,21 @@
+# Git-related Modules
+
+[[git-auth]]
+## `git-auth`
+
+The module provides the basics for working with a git repository.
+
+include::partial$options/git-auth.adoc[leveloffset=0]
+
+[[git-update]]
+## `git-update`
+
+A module that facilitates the updating of a git repository.
+
+include::partial$options/git-update.adoc[leveloffset=0]
+
+## See also
+
+ - xref:reference/nix-functions/gitWriteBranch.adoc[`gitWriteBranch`] to replace branch contents.
+
+ - xref:reference/nix-functions/flakeUpdate.adoc[`flakeUpdate`] to update flake input revisions.

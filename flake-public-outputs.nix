@@ -12,6 +12,8 @@
       let effects = import ./effects/default.nix effects pkgs;
       in effects;
 
+    lib.mkHerculesCI = import ./lib/mkHerculesCI.nix inputs;
+
     overlay = final: prev: {
       effects = import ./effects/default.nix final.effects final;
     };

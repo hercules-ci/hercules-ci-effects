@@ -1,0 +1,56 @@
+
+[[gitWriteBranch]]
+= `gitWriteBranch`
+
+_gitWriteBranch {two-colons} Module -> Effect_
+
+A xref:reference/nix-functions/modularEffect.adoc[`modularEffect`] effect that checks out a repository, replaces a contents and pushes to a branch. Optionally, it can create a pull request.
+
+[[example]]
+== Example
+
+Here's an example of the `herculesCI` attribute for a non-flake-parts project.
+
+```nix
+let hci-effects = hercules-ci-effects.lib.withPkgs pkgs;
+in
+# ...
+herculesCI = { branch, primaryRepo, ... }: {
+  # If you're switching from a nix-build style job configuration, you'll need
+  # to define `onPush.default.outputs` to substitute for the old behavior.
+  # It is traversed more eagerly, so large structures may need `dontRecurseIntoAttrs`.
+  # onPush.default.outputs = { inherit mypkg; };
+  onPush.doc-branch = {
+    # Branch for which the effect is triggered
+    enable = branch == "master";
+    outputs = {
+      effects = {
+        update = hci-effects.gitWriteBranch {
+          git.checkout.remote.url = primaryRepo.remoteHttpUrl;
+          git.checkout.forgeType = "github";
+          git.checkout.user = "x-access-token";
+          # Branch to write to
+          git.update.branch = "doc";
+          contents = self.packages.x86_64-linux.doc-branch-contents
+        };
+      };
+    };
+  };
+};
+```
+
+[[effect-options]]
+== Effect Options
+
+include::partial$options/gitWriteBranch.adoc[leveloffset=0]
+
+[[associated-options]]
+== Associated Options
+
+Provided by included modules.
+
+ - xref:reference/effect-modules/git.adoc#opt-git.checkout.remote.url[`git.checkout.remote.url`]
+ - xref:reference/effect-modules/git.adoc#opt-git.checkout.forgeType[`git.checkout.forgeType`]
+ - xref:reference/effect-modules/git.adoc#opt-git.checkout.user[`git.checkout.user`]
+ - xref:reference/effect-modules/git.adoc#opt-git.update.branch[`git.update.branch`]
+ - xref:reference/effect-modules/git.adoc#opt-git.update.pullRequest.enable[`git.update.pullRequest.enable`]

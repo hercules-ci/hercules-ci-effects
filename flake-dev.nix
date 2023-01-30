@@ -14,6 +14,10 @@ top@{ withSystem, lib, inputs, config, ... }: {
       evaluation-herculesCI =
         let it = (import ./flake-modules/herculesCI-eval-test.nix { inherit inputs; });
         in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
+      evaluation-mkHerculesCI =
+        let it = (import ./lib/mkHerculesCI-test.nix { inherit inputs; });
+        in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
     };
 
     tests = withSystem "x86_64-linux" ({ hci-effects, pkgs, ... }: {
@@ -55,6 +59,7 @@ top@{ withSystem, lib, inputs, config, ... }: {
   perSystem = { pkgs, hci-effects, inputs', ... }: {
     checks = {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
+      write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
     };
     devShells.default = pkgs.mkShell {

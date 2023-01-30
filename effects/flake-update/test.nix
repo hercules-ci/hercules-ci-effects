@@ -1,58 +1,27 @@
-{ effectVMTest, effects, hello, lib, mkEffect, runCommand, writeText }:
+{ effectVMTest, hci-effects }:
 
 let
-  
+
 in
 effectVMTest {
-  imports = [ ../testsupport/dns.nix ];
+  imports = [
+    ../testsupport/dns.nix
+    ../testsupport/gitea.nix
+    ../testsupport/setup.nix
+  ];
   name = "flake-update";
-  nodes = {
-    gitea = { pkgs, ... }: {
-      services.gitea.enable = true;
-      services.gitea.settings.service.DISABLE_REGISTRATION = true;
-      # services.gitea.settings.log.LEVEL = "Trace";
-      # services.gitea.settings.databas.LOG_SQL = true;
-      services.gitea.settings.log.LEVEL = "Info";
-      services.gitea.settings.database.LOG_SQL = false;
-      networking.firewall.allowedTCPPorts = [ 3000 ];
-      environment.systemPackages = [ pkgs.gitea ];
-    };
-    client = { pkgs, ... }: {
-      environment.systemPackages = [ pkgs.git ];
-    };
-  };
-  defaults = { pkgs, ... }: {
-    environment.systemPackages = [ pkgs.jq ];
-  };
   effects = {
-    update = effects.flakeUpdate {
+    update = hci-effects.flakeUpdate {
       gitRemote = "http://gitea:3000/test/repo";
       user = "test";
       forgeType = "gitea";
       createPullRequest = false; # not supported
     };
   };
-  secrets = {
-  };
-  
-  testScript = ''
-    start_all()
-    gitea.wait_for_unit("gitea.service")
 
-    gitea.succeed("""
-      su -l gitea -c 'GITEA_WORK_DIR=/var/lib/gitea gitea admin user create \
-        --username test --password test123 --email test@client'
-    """)
+  testCases = ''
 
-    client.wait_for_unit("multi-user.target")
-    gitea.wait_for_open_port(3000)
-
-    token = gitea.succeed("""
-      curl --fail -X POST http://test:test123@gitea:3000/api/v1/users/test/tokens \
-        -H 'Accept: application/json' -H 'Content-Type: application/json' \
-        -d '{\"name\":\"token\"}' \
-        | jq -r '.sha1'
-    """).strip()
+    token = gitea_admin_token
 
     repo = client.succeed("""
       curl -v --fail -X POST http://gitea:3000/api/v1/user/repos \
@@ -72,12 +41,6 @@ effectVMTest {
 
     dep_commits = client.succeed("""
     (
-    # set -x
-    echo "http://test:test123@gitea:3000" >~/.git-credentials
-    git config --global credential.helper store
-    git config --global user.email "test@client"
-    git config --global user.name "Test User"
-
     git clone http://gitea:3000/test/dep.git
     cd dep
     touch file
@@ -123,7 +86,7 @@ effectVMTest {
 
     assert len(dep_commits) == 2
 
-    agent.succeed("echo test123 | effect-update")
+    agent.succeed(f"echo {gitea_admin_password} | effect-update")
 
     repo_update_rev = client.succeed(f"""
       (
@@ -145,7 +108,7 @@ effectVMTest {
     """).rstrip()
 
     with subtest("Idempotent and successful when up to date"):
-      agent.succeed("echo test123 | effect-update")
+      agent.succeed(f"echo {gitea_admin_password} | effect-update")
       client.succeed(f"""
         (
           set -x

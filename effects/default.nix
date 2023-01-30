@@ -32,6 +32,14 @@ in
 
   modularEffect = module: (evalEffectModules { modules = [ module ]; }).config.effectDerivation;
 
+  modularEffectWithUserModule = name: libraryModule: userModule: 
+    self.modularEffect ({ lib, ... }: {
+      imports = [
+        libraryModule
+        (lib.setDefaultModuleLocation "${name} invocation parameters module" userModule)
+      ];
+    });
+
   runIf = condition: v:
     recurseIntoAttrs (
       (
@@ -44,6 +52,8 @@ in
     );
 
   flakeUpdate = callPackage ./flake-update/effect-fun.nix { };
+
+  gitWriteBranch = self.modularEffectWithUserModule "gitWriteBranch" ./write-branch/effect-module.nix;
 
   netlifyDeploy = callPackage ./netlify { };
   netlifySetupHook = pkgs.runCommand "hercules-ci-netlify-setup-hook" {} ''
@@ -75,6 +85,7 @@ in
   effectVMTest = callPackage ./effect-vm-test { extraModule = { config.hci = pkgs.hci; }; };
 
   effects = self;
+  hci-effects = self;
 
   inherit callPackage;
 }

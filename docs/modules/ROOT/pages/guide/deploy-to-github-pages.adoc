@@ -1,0 +1,90 @@
+
+= Deploy a static website to GitHub Pages with Nix
+
+This guide will show you how you can deploy for example packaged documentation whenever the `master` branch is updated.
+
+Prerequisites:
+
+ - You have xref:master@hercules-ci:ROOT:getting-started/index.adoc[set up an agent] for the account that owns the repository
+ - You have packaged a static site or documentation in a derivation output or possibly a subpath of the output
+ - You have added the repository to your Hercules CI installation
+
+== With flake-parts
+
+1. https://flake.parts/options/hercules-ci-effects.html#installation:[Add] `hercules-ci-effects.flakeModule` to your top level flake-parts imports.
+2. Specify the your main branch or release branch name in `hercules-ci.github-pages.branch`.
+3. Specify the path to your documentation site in `perSystem.hercules-ci.github-pages.settings.contents`.
+
+You may now push your feature branch. Hercules CI and the `hercules-ci-effects` code will check that the effect is buildable. When you merge the branch, the `onPush.default` job will trigger a GitHub Pages deployment when all the builds succeed.
+
+Example `flake.nix`:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+  };
+
+  outputs = inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        inputs.hercules-ci-effects.flakeModule
+      ];
+      systems = [ "x86_64-linux" "aarch64-darwin" ];
+
+      hercules-ci.github-pages.branch = "main";
+
+      perSystem = { config, pkgs, ... }: {
+        packages.default = pkgs.nix.doc;
+        hercules-ci.github-pages.settings.contents = config.packages.default + "/share/doc/nix/manual";
+      };
+    };
+}
+```
+
+== Without flake-parts
+
+Flake-parts is recommended, but with xref:guide/import-or-pin.adoc#mkHerculesCI[`mkHerculesCI`] you don't have to write your entire flake with flake-parts.
+
+Let's skip to the example:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+  };
+
+  outputs = inputs@{ nixpkgs, ... }:
+    {
+      packages = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux"] (system: {
+        default = nixpkgs.legacyPackages.${system}.nix.doc;
+      });
+
+      herculesCI = inputs.hercules-ci-effects.lib.mkHerculesCI { inherit inputs; } {
+        # Values for flake-parts options may be written here, including
+        # non-Hercules-CI options, but those will only take affect in CI and the `hci`
+        # command. See
+        # https://docs.hercules-ci.com/hercules-ci-effects/guide/import-or-pin.html#mkHerculesCI
+
+        herculesCI = {
+          ciSystems = [ "x86_64-linux" "aarch64-darwin" ];
+        };
+
+        hercules-ci.github-pages.branch = "main";
+        perSystem = { config, self', inputs', system, ... }: {
+          hercules-ci.github-pages.settings.contents = self'.packages.default + "/share/doc/nix/manual";
+        };
+      };
+    };
+}
+```
+
+In your own flake, make sure that the `herculesCI` flake output attribute is actually at the top level, and not in a place where it is duplicated for each system.
+
+== More
+
+* This effect is implemented as a module that calls xref:reference/nix-functions/gitWriteBranch.adoc[`gitWriteBranch`]. It provides some options for further customization.
+
+* See https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.github-pages.branch[`hercules-ci.github-pages.branch`] in the flake-parts reference documentation. You may find a few file:///home/user/h/flake.parts-website/result/options/hercules-ci-effects.html#options[other options] there as well.
