@@ -1,0 +1,6 @@
+
+# `hercules-ci.github-pages`
+
+These options configure a GitHub Pages deployment to run when the build for the https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.github-pages.branch[`hercules-ci.github-pages.branch`] completes.
+
+See also the xref:guide/deploy-to-github-pages.adoc[Guide] and the https://flake.parts/options/hercules-ci-effects.html[other options].
