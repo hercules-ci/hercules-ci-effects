@@ -137,6 +137,14 @@ in
       default = null;
     };
 
+    extraAttributes.tests = mkOption {
+      type = types.lazyAttrsOf types.package;
+      description = ''
+        Attributes to add to the returned effect. These only exist at the expression level and do not become part of the executable effect.
+      '';
+      default = { };
+    };
+
   };
   config = {
     effectDerivation = hci-effects.mkEffect config.effectDerivationArgs;
@@ -149,6 +157,7 @@ in
         getStateScript
         putStateScript
         ;
+      passthru = config.extraAttributes;
     }
     // filterAttrs (k: v: v != null) {
       # Attributes that are omitted when null
@@ -159,5 +168,8 @@ in
     }
     // config.env # TODO warn about collisions
     ;
+
+    extraAttributes.tests.buildable =
+      (config.effectDerivation.overrideAttrs(o: { isEffect = false; })).inputDerivation;
   };
 }
