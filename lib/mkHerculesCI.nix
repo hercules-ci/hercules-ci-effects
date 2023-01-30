@@ -27,7 +27,7 @@ let
       config = {
         systems = lib.mkDefault [ config.defaultEffectSystem ];
         # We're doing things the other way around...
-        herculesCI.flakeForOnPushDefault = config.flake;
+        herculesCI.flakeForOnPushDefault = { outputs = config.flake; };
 
         # self.herculesCI is supposed to be defined by mkHerculesCI.
         # If we were to set it here, that would cause it to

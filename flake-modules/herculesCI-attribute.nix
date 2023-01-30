@@ -208,7 +208,7 @@ let
     config = {
       onPush.default.outputs =
         default-hci-for-flake.flakeToOutputs
-          { outputs = config.flakeForOnPushDefault; }
+          config.flakeForOnPushDefault
           { ciSystems = lib.genAttrs config.ciSystems (system: {}); };
       out = {
         inherit (config) onPush onSchedule ciSystems;
