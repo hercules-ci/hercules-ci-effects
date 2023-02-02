@@ -244,10 +244,13 @@ in
           config = {
             # Filter out values which are unavailable and therefore null.
             # e.g. hci effect run may not support owner and name.
-            # Always be careful when filtering, because it's not as lazy as you'd like.
-            # Shouldn't be a problem here though.
-            repo = lib.filterAttrs (k: v: v != null) {
-              inherit (primaryRepo) ref branch tag rev shortRev;
+            repo = {
+              ref = primaryRepo.ref;
+              branch = primaryRepo.branch or null;
+              tag = primaryRepo.tag or null;
+              rev = primaryRepo.rev;
+              shortRev = primaryRepo.shortRev;
+            } // lib.filterAttrs (k: v: v != null) {
               remoteHttpUrl = primaryRepo.remoteHttpUrl or null;
               remoteSshUrl = primaryRepo.remoteSshUrl or null;
               webUrl = primaryRepo.webUrl or null;
