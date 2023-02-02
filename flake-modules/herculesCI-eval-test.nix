@@ -1,9 +1,47 @@
-{ inputs }:
+args@
+{ inputs ? hercules-ci-effects.inputs
+, hercules-ci-effects ? if args?inputs then inputs.self else builtins.getFlake "git+file://${toString ./..}"
+}:
+let
+  testSupport = import ../lib/testSupport.nix args;
+in
 rec {
   inherit (inputs) flake-parts;
+  inherit (testSupport) callFlakeOutputs;
+
+  emptyFlake = callFlakeOutputs (inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        ../flake-module.nix
+      ];
+      systems = [ "x86_64-linux" ];
+    }
+  );
+
+  fakeRepoBranch = {
+    branch = "main";
+    ref = "refs/heads/main";
+    rev = "deadbeef";
+    shortRev = "deadbe";
+    tag = null;
+    remoteHttpUrl = "https://git.forge/repo.git";
+  };
+  fakeRepoTag = {
+    branch = null;
+    ref = "refs/heads/main";
+    rev = "deadbeef";
+    shortRev = "deadbe";
+    tag = "1.0";
+    remoteHttpUrl = "https://git.forge/repo.git";
+  };
+  fakeHerculesCI = repo: {
+    primaryRepo = repo;
+    inherit (repo) branch ref tag rev shortRev remoteHttpUrl;
+  };
 
   example1 =
-    flake-parts.lib.mkFlake { self = { }; }
+    callFlakeOutputs (inputs:
+      flake-parts.lib.mkFlake { inherit inputs; }
       ({ ... }: {
         imports = [
           ../flake-module.nix
@@ -21,7 +59,8 @@ rec {
           minute = 59;
         };
         herculesCI.onSchedule.scheduledJob3 = { };
-      });
+      })
+    );
 
   tests = ok:
 
@@ -48,6 +87,12 @@ rec {
         hour = null;
         minute = null;
       };
+
+    assert (emptyFlake.herculesCI (fakeHerculesCI fakeRepoBranch))._debug.repo.branch == "main";
+    assert (emptyFlake.herculesCI (fakeHerculesCI fakeRepoBranch))._debug.repo.tag == null;
+
+    assert (emptyFlake.herculesCI (fakeHerculesCI fakeRepoTag))._debug.repo.branch == null;
+    assert (emptyFlake.herculesCI (fakeHerculesCI fakeRepoTag))._debug.repo.tag == "1.0";
 
     ok;
 
