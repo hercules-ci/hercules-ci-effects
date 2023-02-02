@@ -40,7 +40,8 @@ rec {
   };
 
   example1 =
-    flake-parts.lib.mkFlake { inputs = { self = { }; }; }
+    callFlakeOutputs (inputs:
+      flake-parts.lib.mkFlake { inherit inputs; }
       ({ ... }: {
         imports = [
           ../flake-module.nix
@@ -58,7 +59,8 @@ rec {
           minute = 59;
         };
         herculesCI.onSchedule.scheduledJob3 = { };
-      });
+      })
+    );
 
   tests = ok:
 
