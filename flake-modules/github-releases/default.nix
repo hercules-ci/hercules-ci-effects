@@ -91,7 +91,7 @@
                 remote.url = config.repo.remoteHttpUrl;
                 forgeType = config.repo.forgeType;
               };
-              effectDerivation = (artifacts-checker pkgs).outPath;
+              effectScript = (artifacts-checker pkgs).outPath;
               env = {
                 files = builtins.toJSON cfg.files;
                 inherit (config.repo) owner;
