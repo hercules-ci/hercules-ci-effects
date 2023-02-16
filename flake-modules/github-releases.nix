@@ -15,7 +15,7 @@
             By default, pushing happens if a tag is present.
           '';
           default = { tag, ... }: tag != null;
-          defaultText = ''
+          defaultText = lib.literalExpression ''
             { tag, ... }: tag != null
           '';
         };
@@ -25,16 +25,18 @@
             Tag to be assigned to the release.
           '';
           default = herculesCI: herculesCI.config.repo.tag;
-          defaultText = "herculesCI: herculesCI.config.repo.tag";
+          defaultText = lib.literalExpression "herculesCI: herculesCI.config.repo.tag";
         };
         files = lib.mkOption {
           type = types.listOf types.str;
           description = ''
             List of asset _files_ --- no directories allowed.
-            Each path is in a form of `(/path/to/file|glob)[#display_label]`.
+            Each path is in a form of `/path/to/file[#display_label]|glob`:
+            either a path with an optional display label (`/nix/store/path#short_name`)
+            or a unix-style glob (`/nix/store/path/*.tgz`)
           '';
           default = [];
-          defaultText = "[]";
+          defaultText = lib.literalExpression "[]";
         };
         pushJobName = lib.mkOption {
           type = types.str;
@@ -44,7 +46,7 @@
             so that the deployment only proceeds when the default builds are successful.
           '';
           default = "default";
-          defaultText = "default";
+          defaultText = lib.literalExpression "default";
         };
       };
     };
