@@ -8,7 +8,14 @@ let
     jq
   ];
 
-  mkDrv = args: stdenvNoCC.mkDerivation (args // {
+  mkDrv = args:
+    let
+      mkDerivation =
+        lib.throwIf (args?imports) "`mkEffect` does not support `imports`. Did you mean `modularEffect` instead of `mkEffect`?"
+        stdenvNoCC.mkDerivation;
+
+    in mkDerivation (args // {
+
 
     phases = args.phases or "initPhase unpackPhase patchPhase ${args.preGetStatePhases or ""} getStatePhase userSetupPhase ${args.preEffectPhases or ""} effectPhase putStatePhase ${args.postEffectPhases or ""}";
 
