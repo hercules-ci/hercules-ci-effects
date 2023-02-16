@@ -8,6 +8,10 @@ let
   cfg = config.programs.gh;
 in
 {
+  imports = [
+    ./git-auth.nix
+  ];
+
   options = {
     programs.gh.enable = lib.mkOption {
       description = ''
