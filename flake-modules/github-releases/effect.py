@@ -33,7 +33,8 @@ def file_to_gh_repr(file):
 
 
 files = [parse_file(file) for file in json.loads(environ["files"])]
-real_paths = {} # Map realpath (index, file)
+# Map realpath (index, file)
+real_paths = {}
 
 for i, file in enumerate(files):
     path = file["path"]
@@ -45,10 +46,15 @@ for i, file in enumerate(files):
             print("Not a file")
             exit(1)
         print("OK")
-        # GH does not accept release that contains 2 files with the same realpath
+        # GH does not accept release that
+        # contains 2 files with the same realpath
         if rpath in real_paths:
             prev_i, prev_file = real_paths[rpath]
-            print(f"Duplicate realpaths: file #{prev_i} {file_to_gh_repr(prev_file)} and file #{i} {file_to_gh_repr(file)}")
+            print(
+                "Duplicate realpaths: "
+                f"file #{prev_i} {file_to_gh_repr(prev_file)} "
+                f"and file #{i} {file_to_gh_repr(file)}"
+            )
             exit(1)
         real_paths[rpath] = (i, file)
     except Exception as e:
