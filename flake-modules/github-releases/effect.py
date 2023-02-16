@@ -33,8 +33,9 @@ def file_to_gh_repr(file):
 
 
 files = [parse_file(file) for file in json.loads(environ["files"])]
+real_paths = {} # Map realpath (index, file)
 
-for file in files:
+for i, file in enumerate(files):
     path = file["path"]
     labelMessage = file["label"] and f"with label `{file['label']}` " or ""
     print(f"Checking that path {path} {labelMessage}exists: ", end="")
@@ -43,10 +44,16 @@ for file in files:
         if not isfile(rpath):
             print("Not a file")
             exit(1)
+        print("OK")
+        # GH does not accept release that contains 2 files with the same realpath
+        if rpath in real_paths:
+            prev_i, prev_file = real_paths[rpath]
+            print(f"Duplicate realpaths: file #{prev_i} {file_to_gh_repr(prev_file)} and file #{i} {file_to_gh_repr(file)}")
+            exit(1)
+        real_paths[rpath] = (i, file)
     except Exception as e:
         print(f"Cannot access {path}")
         raise e
-    print("OK")
 
 if "check_only" in environ:
     print("check_only is present, creating $out")
