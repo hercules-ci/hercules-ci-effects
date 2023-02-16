@@ -108,18 +108,18 @@
                     from os.path import isfile, realpath
 
                     for file in environ["FILES"].split("\n"):
-                      path, *labelMaybe = file.rsplit("#", maxsplit=1)
-                      labelMessage = labelMaybe and f"with label `{labelMaybe[0]}` " or ""
-                      print(f"Checking that path {path} {labelMessage}exists: ", end="")
-                      try:
-                        rpath = realpath(path, strict=True)
-                        if not isfile(rpath):
-                          print('Not a file')
-                          exit(1)
-                      except Exception as e:
-                        print(f'Cannot access {path}')
-                        raise e
-                      print('OK')
+                        path, *labelMaybe = file.rsplit("#", maxsplit=1)
+                        labelMessage = labelMaybe and f"with label `{labelMaybe[0]}` " or ""
+                        print(f"Checking that path {path} {labelMessage}exists: ", end="")
+                        try:
+                            rpath = realpath(path, strict=True)
+                            if not isfile(rpath):
+                                print('Not a file')
+                                exit(1)
+                        except Exception as e:
+                            print(f'Cannot access {path}')
+                            raise e
+                        print('OK')
                     '';
                 in
                     pkgs.runCommandNoCCLocal "artifacts-check" { FILES = lib.concatStringsSep "\n" cfg.files; } ''
