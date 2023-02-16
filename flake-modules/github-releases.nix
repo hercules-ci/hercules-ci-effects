@@ -31,9 +31,9 @@
           type = types.listOf types.str;
           description = ''
             List of asset _files_ --- no directories allowed.
-            Each path is in a form of `/path/to/file[#display_label]|glob`:
-            either a path with an optional display label (`/nix/store/path#short_name`)
-            or a unix-style glob (`/nix/store/path/*.tgz`)
+            Each entry must be in a form of `/path/to/file[#display_label]`:
+            a path with an optional display label e.g. `/nix/store/path#short_name`.
+            If display label is ommited, file name will be used.
           '';
           default = [];
           defaultText = lib.literalExpression "[]";
