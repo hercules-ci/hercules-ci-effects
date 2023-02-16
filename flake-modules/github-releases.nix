@@ -65,7 +65,6 @@
           deploy = withSystem defaultEffectSystem ({ hci-effects, ... }:
             hci-effects.modularEffect {
               imports = [
-                ../effects/modules/git-auth.nix
                 ../effects/modules/git-auth-gh.nix
               ];
               secretsMap = {
