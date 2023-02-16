@@ -82,7 +82,7 @@
           deploy = withSystem defaultEffectSystem ({ hci-effects, pkgs, ... }:
             hci-effects.modularEffect {
               imports = [
-                ../effects/modules/git-auth-gh.nix
+                ../../effects/modules/git-auth-gh.nix
               ];
               secretsMap = {
                 token = { type = "GitToken"; };
