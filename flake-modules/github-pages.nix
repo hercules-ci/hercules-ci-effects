@@ -125,6 +125,14 @@ in
           # deploy
           {
             ${cfg.pushJob}.outputs.effects.gh-pages =
+              lib.throwIf (cfg.branch == "gh-pages") ''
+                The option `hercules-ci.github-pages.branch` refers to the branch
+                that serves as a source for the GitHub Pages deployment. You've set
+                it to "gh-pages" which is the output. You'll probably want to
+                specify a branch like your default branch, such as "main", "develop"
+                or "master", or some other branch that isn't occupied by the build
+                output.
+              ''
               lib.optionalAttrs
                 (herculesCI.config.repo.branch == cfg.branch)
                 deploy;
