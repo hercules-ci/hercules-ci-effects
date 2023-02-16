@@ -27,24 +27,32 @@
           default = herculesCI: herculesCI.config.repo.tag;
           defaultText = lib.literalExpression "herculesCI: herculesCI.config.repo.tag";
         };
-        files = lib.mkOption {
-          type = types.listOf types.str;
-          description = ''
-            List of asset _files_ --- no directories allowed.
-            Each entry must be in a form of `/path/to/file[#display_label]`:
-            a path with an optional display label e.g. `/nix/store/path#short_name`.
-            If display label is ommited, file name will be used.
-          '';
-          default = [];
-          defaultText = lib.literalExpression "[]";
-        };
+        files = with types;
+          let fileSpec = submodule {
+                options = {
+                  path = mkOption { type = str; };
+                  label = mkOption { type = str; };
+                };
+              };
+          in
+          lib.mkOption {
+            type = listOf (either str (attrsOf fileSpec));
+            description = ''
+              List of asset _files_ --- no directories allowed.
+              Each entry must be either a path (e.g. `/nix/store/...path`) or
+              an attribute set of type `{ path :: string, label :: string }`.
+              In the first case, `label` defaults to file name.
+            '';
+            default = [];
+            defaultText = lib.literalExpression "[]";
+          };
         checkArtifacts = lib.mkOption {
-          type = types.bool;
+          type = types.functionTo types.bool;
           description = ''
-            Whether to check if artifacts can be built regardless if they're going to be released or not.
+            Condition under which to check whether artifacts can be built.
           '';
-          default = true;
-          defaultText = lib.literalExpression "true";
+          default = _: true;
+          defaultText = lib.literalExpression "_: true";
         };
         pushJobName = lib.mkOption {
           type = types.str;
@@ -70,7 +78,8 @@
     mkIf enable {
       herculesCI = herculesCI@{ config, ... }:
         let
-          deploy = withSystem defaultEffectSystem ({ hci-effects, ... }:
+          artifacts-checker = pkgs: pkgs.writers.writePython3 "artifacts-checker" {} (builtins.readFile ./effect.py);
+          deploy = withSystem defaultEffectSystem ({ hci-effects, pkgs, ... }:
             hci-effects.modularEffect {
               imports = [
                 ../effects/modules/git-auth-gh.nix
@@ -82,14 +91,13 @@
                 remote.url = config.repo.remoteHttpUrl;
                 forgeType = config.repo.forgeType;
               };
-              effectScript = ''
-                gh repo clone ${config.repo.owner}/${config.repo.name} source -- --branch ${config.repo.tag} --single-branch
-                cd source
-                gh release create \
-                  --verify-tag ${cfg.releaseTag herculesCI} \
-                  ${lib.concatStringsSep " " cfg.files}
-              '';
-              env = { };
+              effectDerivation = (artifacts-checker pkgs).outPath;
+              env = {
+                files = builtins.toJSON cfg.files;
+                inherit (config.repo) owner;
+                repo = config.repo.name;
+                releaseTag = cfg.releaseTag herculesCI;
+              };
             }
           );
         in
@@ -102,29 +110,11 @@
                   deploy;
             }
             {
-              default.outputs.checks.release-artifacts = mkIf cfg.checkArtifacts (withSystem defaultEffectSystem ({ pkgs, ... }:
-                let artifacts-checker = pkgs.writers.writePython3 "artifacts-checker" {} ''
-                      from os import environ
-                      from os.path import isfile, realpath
-
-                      for file in environ["FILES"].split("\n"):
-                          path, *labelMaybe = file.rsplit("#", maxsplit=1)
-                          labelMessage = labelMaybe and f"with label `{labelMaybe[0]}` " or ""
-                          print(f"Checking that path {path} {labelMessage}exists: ", end="")
-                          try:
-                              rpath = realpath(path, strict=True)
-                              if not isfile(rpath):
-                                  print("Not a file")
-                                  exit(1)
-                          except Exception as e:
-                              print(f"Cannot access {path}")
-                              raise e
-                          print("OK")
-
-                      open(environ["out"], "w")
-                    '';
-                in
-                    pkgs.runCommandNoCCLocal "artifacts-check" { FILES = lib.concatStringsSep "\n" cfg.files; } artifacts-checker.outPath));
+              default.outputs.checks.release-artifacts = mkIf (cfg.checkArtifacts herculesCI) (withSystem defaultEffectSystem ({ pkgs, ... }:
+                pkgs.runCommandNoCCLocal
+                  "artifacts-check"
+                  { files = builtins.toJSON cfg.files; check_only = ""; }
+                  (artifacts-checker pkgs).outPath));
             }
           ];
         };
