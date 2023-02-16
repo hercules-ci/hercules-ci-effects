@@ -33,6 +33,8 @@
             List of asset _files_ --- no directories allowed.
             Each path is in a form of `(/path/to/file|glob)[#display_label]`.
           '';
+          default = [];
+          defaultText = "[]";
         };
         pushJobName = lib.mkOption {
           type = types.str;
@@ -53,7 +55,7 @@
       inherit (config) defaultEffectSystem;
 
       cfg = config.hercules-ci.github-releases;
-      enable = cfg ? files;
+      enable = cfg.files != [];
     in
     mkIf enable {
       herculesCI = herculesCI@{ config, ... }:
