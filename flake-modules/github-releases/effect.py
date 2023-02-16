@@ -1,7 +1,9 @@
 """
 Environment:
-  - files: JSON value of type `Array<string | {path: string, label: string}>`; files to use for release
-  - check_only: if present, do not perform release, only check that files exist and create $out file
+  - files: JSON value of type `Array<string | {path: string, label: string}>`;
+    files to use for release
+  - check_only: if present, do not perform release, only check that files
+    exist and create $out file
   - if check_only is not present:
     - owner, repo, releaseTag: information about repository
 """
@@ -9,6 +11,7 @@ Environment:
 import json
 from os import environ, execlp
 from os.path import isfile, realpath
+
 
 def parse_file(file):
     if type(file) is str:
@@ -19,10 +22,14 @@ def parse_file(file):
             "label" in file and \
             type(file["label"]) is str:
         return file
-    raise Exception(f"Every FILE must be either a string or a {{path: string, label: string}}, instead we got: {file}")
+    raise Exception(
+        "Every FILE must be either a string or a {{path: string, label: string}}, "
+        f"instead we got: {file}")
+
 
 def file_to_gh_repr(file):
     return file["path"] + (file["label"] and f"#{file['label']}" or "")
+
 
 files = [parse_file(file) for file in json.loads(environ["files"])]
 
