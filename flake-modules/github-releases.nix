@@ -100,6 +100,8 @@
                 lib.optionalAttrs
                   (cfg.condition herculesCI.config.repo)
                   deploy;
+            }
+            {
               default.outputs.checks.release-artifacts = mkIf cfg.checkArtifacts (withSystem defaultEffectSystem ({ pkgs, ... }:
                 let artifacts-checker = pkgs.writers.writePython3 "artifacts-checker" {} ''
                     from os import environ
