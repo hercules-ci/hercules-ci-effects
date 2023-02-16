@@ -38,6 +38,14 @@
           default = [];
           defaultText = lib.literalExpression "[]";
         };
+        checkArtifacts = lib.mkOption {
+          type = types.bool;
+          description = ''
+            Whether to check if artifacts can be built regardless if they're going to be released or not.
+          '';
+          default = true;
+          defaultText = lib.literalExpression "true";
+        };
         pushJobName = lib.mkOption {
           type = types.str;
           description = ''
@@ -92,6 +100,29 @@
                 lib.optionalAttrs
                   (cfg.condition herculesCI.config.repo)
                   deploy;
+              default.outputs.checks.release-artifacts = mkIf cfg.checkArtifacts (withSystem defaultEffectSystem ({ pkgs, ... }:
+                let artifacts-checker = pkgs.writers.writePython3 "artifacts-checker" {} ''
+                    from os import environ
+                    from os.path import isfile, realpath
+
+                    for file in environ["FILES"].split("\n"):
+                      path, *labelMaybe = file.rsplit("#", maxsplit=1)
+                      labelMessage = labelMaybe and f"with label `{labelMaybe[0]}` " or ""
+                      print(f"Checking that path {path} {labelMessage}exists: ", end="")
+                      try:
+                        rpath = realpath(path, strict=True)
+                        if not isfile(rpath):
+                          print('Not a file')
+                          exit(1)
+                      except Exception as e:
+                        print(f'Cannot access {path}')
+                        raise e
+                      print('OK')
+                    '';
+                in
+                    pkgs.runCommandNoCCLocal "artifacts-check" { FILES = lib.concatStringsSep "\n" cfg.files; } ''
+                      ${artifacts-checker} && touch $out
+                    ''));
             }
           ];
         };
