@@ -23,8 +23,9 @@ def parse_file(file):
             type(file["label"]) is str:
         return file
     raise Exception(
-        "Every FILE must be either a string or a {{path: string, label: string}}, "
-        f"instead we got: {file}")
+        "Every FILE must be either a string or a {path: string, label: string}"
+        f", instead we got: {file}"
+    )
 
 
 def file_to_gh_repr(file):
