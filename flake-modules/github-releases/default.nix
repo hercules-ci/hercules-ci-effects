@@ -6,7 +6,7 @@
     in
     {
       hercules-ci.github-releases = {
-        condition = lib.mkOption {
+        condition = mkOption {
           type = types.functionTo types.bool;
           description = ''
             Condition under which a release is going to be pushed.
@@ -19,7 +19,7 @@
             { tag, ... }: tag != null
           '';
         };
-        releaseTag = lib.mkOption {
+        releaseTag = mkOption {
           type = types.functionTo types.str;
           description = ''
             Tag to be assigned to the release.
@@ -35,8 +35,8 @@
                 };
               };
           in
-          lib.mkOption {
-            type = listOf (either str (attrsOf fileSpec));
+          mkOption {
+            type = listOf (either str fileSpec);
             description = ''
               List of asset _files_ --- no directories allowed.
               Each entry must be either a path (e.g. `/nix/store/...path`) or
@@ -46,7 +46,7 @@
             default = [];
             defaultText = lib.literalExpression "[]";
           };
-        checkArtifacts = lib.mkOption {
+        checkArtifacts = mkOption {
           type = types.functionTo types.bool;
           description = ''
             Condition under which to check whether artifacts can be built.
@@ -54,7 +54,7 @@
           default = _: true;
           defaultText = lib.literalExpression "_: true";
         };
-        pushJobName = lib.mkOption {
+        pushJobName = mkOption {
           type = types.str;
           description = ''
             Name of the Hercules CI job in which to perform the deployment.
