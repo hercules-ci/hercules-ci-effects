@@ -36,12 +36,11 @@
               };
           in
           mkOption {
-            type = listOf (either str fileSpec);
+            type = listOf fileSpec;
             description = ''
               List of asset _files_ --- no directories allowed.
-              Each entry must be either a path (e.g. `/nix/store/...path`) or
-              an attribute set of type `{ path :: string, label :: string }`.
-              In the first case, `label` defaults to file name.
+              Each entry must be either an attribute set of type
+              `{ path :: string, label :: string }`.
             '';
             default = [];
             defaultText = lib.literalExpression "[]";
