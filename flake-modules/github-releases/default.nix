@@ -28,19 +28,29 @@
           defaultText = lib.literalExpression "herculesCI: herculesCI.config.repo.tag";
         };
         files = with types;
-          let fileSpec = submodule {
+          let label = mkOption { type = str; };
+              fileSpec = submodule {
                 options = {
-                  path = mkOption { type = str; };
-                  label = mkOption { type = str; };
+                  inherit label;
+                  path = mkOption { type = path; };
+                };
+              };
+              archiveSpec = submodule {
+                options = {
+                  inherit label;
+                  paths = mkOption { type = addCheck (listOf path) (xs: builtins.length xs > 0); };
+                  archiver = mkOption { type = enum ["zip"]; };
                 };
               };
           in
           mkOption {
-            type = listOf fileSpec;
+            type = listOf (oneOf [archiveSpec fileSpec]);
             description = ''
-              List of asset _files_ --- no directories allowed.
+              List of asset files or archives.
               Each entry must be either an attribute set of type
-              `{ path :: string, label :: string }`.
+              `{ label: string, path: string }` for a single file or
+              `{ label: string, paths: [string], archiver: 'zip' }` for an archive.
+              In case of archive, `paths` may contain directories: their _contents_ will be archived recursively.
             '';
             default = [];
             defaultText = lib.literalExpression "[]";
@@ -97,6 +107,7 @@
                 repo = config.repo.name;
                 releaseTag = cfg.releaseTag herculesCI;
               };
+              inputs = [ pkgs.zip ];
             }
           );
         in

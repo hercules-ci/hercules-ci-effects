@@ -8,69 +8,116 @@ Environment:
     - owner, repo, releaseTag: information about repository
 """
 
+from dataclasses import dataclass
 import json
-from os import environ, execlp, symlink
-from os.path import isfile
-from typing import Dict, Tuple
+from os import getcwd, environ, execlp, rename, symlink
+from os.path import exists, isdir, isfile
+import subprocess
+from typing import Dict, List, Literal, Tuple
 
 
-def parse_file(file):
-    if type(file) is dict and \
-            "path" in file and \
-            type(file["path"]) is str and \
-            "label" in file and \
-            type(file["label"]) is str:
-        return file
-    raise Exception(
-        "Every FILE must be a {path: string, label: string}"
-        f", instead we got: {file}"
+@dataclass
+class File:
+    label: str
+    path: str
+
+
+@dataclass
+class Archive:
+    label: str
+    paths: List[str]
+    archiver: Literal["zip"]
+
+
+def parse_spec(spec) -> File | Archive:
+    e = Exception(
+        "Every SPEC must be a {label: string, path: string} "
+        "or a {label: string, paths: [string], archiver: 'zip'}, "
+        f"instead we got: {spec}"
     )
-
-
-def file_to_gh_repr(file):
-    path = file["path"]
-    label = file["label"]
-    return path + (label and f"#{label}" or "")
-
-
-files = [parse_file(file) for file in json.loads(environ["files"])]
-files_by_label: Dict[str, Tuple[int, Dict[str, str]]] = {}
-
-for i, file in enumerate(files):
-    path = file["path"]
-    label = file["label"]
-    labelMessage = label and f"with label `{label}` " or ""
-    print(f"Checking that path {path} {labelMessage}exists: ", end="")
-    try:
-        if not isfile(path):
-            print("Not a file")
-            exit(1)
-    except Exception as e:
-        print(f"Cannot access {path}")
+    if type(spec) is not dict:
         raise e
-    print("OK")
-    if label in files_by_label:
-        prev_i, prev_file = files_by_label[label]
+    if "label" not in spec or type(spec["label"]) is not str:
+        raise e
+    # spec is a file
+    if "path" in spec and type(spec["path"]) is str:
+        return File(spec["label"], spec["path"])
+    # spec is an archive
+    if "paths" in spec and \
+            type(spec["paths"]) is list and \
+            all(type(e) is str for e in spec["paths"]) and \
+            spec.get("archiver") in ["zip"]:
+        return Archive(spec["label"], spec["paths"], spec["archiver"])
+    raise e
+
+
+specs = [parse_spec(spec) for spec in json.loads(environ["files"])]
+specs_by_label: Dict[str, Tuple[int, File | Archive]] = {}
+
+for i, spec in enumerate(specs):
+    if type(spec) is File:
         print(
-            "Duplicate labels: "
-            f"file #{prev_i} {file_to_gh_repr(prev_file)} "
-            f"and file #{i} {file_to_gh_repr(file)}"
+            f"Checking that path {spec.path} "
+            f"with label `{spec.label}` exists: \t", end="")
+        try:
+            if not isfile(spec.path):
+                print("not a file")
+                exit(1)
+        except Exception as e:
+            print("cannot access")
+            raise e
+        print("OK")
+    elif type(spec) is Archive:
+        print(f"Checking that every path from {spec.label} exists:")
+        if len(spec.paths) == 0:
+            raise Exception(f"`[{i}].paths` is an empty list")
+        for path in spec.paths:
+            print(f"  {path}: \t", end="")
+            try:
+                if not exists(path):
+                    print("cannot access")
+                    exit(1)
+            except Exception as e:
+                print("cannot access")
+                raise e
+            print("OK")
+
+    if spec.label in specs_by_label:
+        prev_i, prev_spec = specs_by_label[spec.label]
+        print(
+            f"Duplicate labels: spec #{prev_i} `{prev_spec}` "
+            f"and spec #{i} `{spec}`"
         )
         exit(1)
-    files_by_label[label] = (i, file)
+    specs_by_label[spec.label] = (i, spec)
 
 if "check_only" in environ:
     print("check_only is present, creating $out")
     open(environ["out"], "w")
 else:
-    for file in files:
-        path = file["path"]
-        label = file["label"]
-        symlink(path, label)
+    for spec in specs:
+        if type(spec) is File:
+            symlink(spec.path, spec.label)
+        elif type(spec) is Archive:
+            if spec.archiver == "zip":
+                pwd = getcwd()
+                for path in spec.paths:
+                    if isdir(path):
+                        subprocess.run(
+                            ["zip", "-r", f"{pwd}/archive.zip", "."],
+                            cwd=path,
+                            check=True
+                        )
+                    else:
+                        subprocess.run(
+                            ["zip", "-r", f"{pwd}/archive.zip", path],
+                            check=True
+                        )
+                rename("archive.zip", spec.label)
     execlp(
         "gh",
         "gh", "release", "create",
         "--repo", f"{environ['owner']}/{environ['repo']}",
         environ["releaseTag"],
-        *(file["label"] for file in files)
+        *(spec.label for spec in specs)
     )
