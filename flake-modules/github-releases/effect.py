@@ -71,6 +71,6 @@ else:
         "gh",
         "gh", "release", "create",
         "--repo", f"{environ['owner']}/{environ['repo']}",
-        "--verify-tag", environ["releaseTag"],
+        environ["releaseTag"],
         *(file["label"] for file in files)
     )
