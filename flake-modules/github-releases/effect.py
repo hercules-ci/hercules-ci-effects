@@ -13,7 +13,12 @@ import json
 from os import getcwd, environ, execlp, rename, symlink
 from os.path import exists, isdir, isfile
 import subprocess
+from sys import stderr
 from typing import Dict, List, Literal, Tuple
+
+
+def eprint(*args, **kwargs):
+    return print(*args, **kwargs, file=stderr)
 
 
 @dataclass
@@ -56,35 +61,35 @@ specs_by_label: Dict[str, Tuple[int, File | Archive]] = {}
 
 for i, spec in enumerate(specs):
     if type(spec) is File:
-        print(
+        eprint(
             f"Checking that path {spec.path} "
             f"with label `{spec.label}` exists: \t", end="")
         try:
             if not isfile(spec.path):
-                print("not a file")
+                eprint("not a file")
                 exit(1)
         except Exception as e:
-            print("cannot access")
+            eprint("cannot access")
             raise e
-        print("OK")
+        eprint("OK")
     elif type(spec) is Archive:
-        print(f"Checking that every path from {spec.label} exists:")
+        eprint(f"Checking that every path from {spec.label} exists:")
         if len(spec.paths) == 0:
             raise Exception(f"`[{i}].paths` is an empty list")
         for path in spec.paths:
-            print(f"  {path}: \t", end="")
+            eprint(f"  {path}: \t", end="")
             try:
                 if not exists(path):
-                    print("cannot access")
+                    eprint("cannot access")
                     exit(1)
             except Exception as e:
-                print("cannot access")
+                eprint("cannot access")
                 raise e
-            print("OK")
+            eprint("OK")
 
     if spec.label in specs_by_label:
         prev_i, prev_spec = specs_by_label[spec.label]
-        print(
+        eprint(
             f"Duplicate labels: spec #{prev_i} `{prev_spec}` "
             f"and spec #{i} `{spec}`"
         )
@@ -92,7 +97,7 @@ for i, spec in enumerate(specs):
     specs_by_label[spec.label] = (i, spec)
 
 if "check_only" in environ:
-    print("check_only is present, creating $out")
+    eprint("check_only is present, creating $out")
     open(environ["out"], "w")
 else:
     for spec in specs:

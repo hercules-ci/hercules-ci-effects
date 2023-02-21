@@ -39,7 +39,7 @@
                 options = {
                   inherit label;
                   paths = mkOption { type = addCheck (listOf path) (xs: builtins.length xs > 0); };
-                  archiver = mkOption { type = enum ["zip"]; };
+                  archiver = mkOption { type = enum [ "zip" ]; };
                 };
               };
           in
