@@ -33,6 +33,8 @@ let
     git add .
     gpg --no-tty --import ${./test/fake-agent.pub.asc}
     # (echo trust; echo 5; echo quit) | gpg --no-tty --command-fd 0 --edit-key 21F488205D18E986
+    gpg --list-keys
+    gpg --list-secret-keys
     git crypt add-gpg-user --trusted fake-agent
     git commit -m 'First commit'
     git crypt status
