@@ -18,6 +18,10 @@ top@{ withSystem, lib, inputs, config, ... }: {
       evaluation-mkHerculesCI =
         let it = (import ./lib/mkHerculesCI-test.nix { inherit inputs; });
         in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
+      evaluation-nix-darwin =
+        let it = (import ./effects/nix-darwin/eval-test.nix { inherit inputs; });
+        in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
     };
 
     tests = withSystem "x86_64-linux" ({ hci-effects, pkgs, ... }: {
