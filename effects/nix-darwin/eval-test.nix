@@ -50,7 +50,7 @@ rec {
             ssh.destination = "john.local";
             system = "x86_64-darwin";
             nix-darwin = darwin.outPath;
-            pkgs = darwin.inputs.nixpkgs.legacyPackages.x86_64-darwin;
+            pkgs = darwin.inputs.nixpkgs.legacyPackages.x86_64-darwin.extend (self: super: { proof-of-overlay = "yes, overlay"; });
             configuration = ./test/configuration.nix;
           }
         );
@@ -74,6 +74,10 @@ rec {
     #   testEqDrv flake1.test.by-other-args.drvPath flake1.test.by-other-args-pkgs.drvPath;
     assert
       testEqDrv flake1.test.by-other-args-pkgs.config.expose.pkgs.hello.drvPath darwin.inputs.nixpkgs.legacyPackages.x86_64-darwin.hello.drvPath;
+
+    # A custom pkgs should be used without reinvoking nixpkgs from scratch.
+    assert
+      flake1.test.by-other-args-pkgs.config.expose.pkgs.proof-of-overlay == "yes, overlay";
 
     ok;
 

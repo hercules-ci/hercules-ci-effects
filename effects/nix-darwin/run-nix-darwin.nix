@@ -35,7 +35,9 @@ args@{
         { _module.args.pkgs = lib.mkForce pkgs; }
       ];
     } else configuration;
-  } // lib.filterAttrs (k: v: v != null) { inherit pkgs nixpkgs; }
+  }
+  // lib.filterAttrs (k: v: v != null) { inherit pkgs nixpkgs; }
+  // lib.optionalAttrs (args?pkgs && !args?nixpkgs) { nixpkgs = pkgs.path; }
   )).config
 , # Deployment parameters
   ssh
@@ -68,7 +70,6 @@ mutEx "config" "nixpkgs"
 mutEx "config" "nix-darwin"
 mutEx "config" "system"
 mutEx "config" "pkgs"
-mutEx "pkgs" "nixpkgs"
 
 mkEffect (removeAttrs args [ "configuration" "ssh" "config" "system" "nix-darwin" "nixpkgs" "pkgs" ] // {
   name = "nix-darwin${suffix}";
