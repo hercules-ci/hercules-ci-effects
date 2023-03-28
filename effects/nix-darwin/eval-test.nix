@@ -11,12 +11,13 @@ let
   darwin = builtins.getFlake "github:LnL7/nix-darwin?rev=87b9d090ad39b25b2400029c64825fc2a8868943";
 in
 rec {
+  inherit darwin testSupport;
   inherit (inputs) flake-parts;
   inherit (testSupport) callFlakeOutputs;
 
   testEqDrv = drv1: drv2:
     if drv1 == drv2 then true
-    else builtins.trace "Oh-oh, these are different! Check the differences with\nnix-diff ${drv1} ${drv2}" false;
+    else builtins.trace "Oh-oh, these are different! Check the differences with\nnix-diff --color=always ${drv1} ${drv2} | less -RS" false;
 
   flake1 = callFlakeOutputs (inputs:
     flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, self, ... }: {
