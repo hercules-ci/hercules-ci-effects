@@ -5,7 +5,7 @@ let
 
   isRequired = param: throw ''
     runNixDarwin: the argument ${param} wasn't specified. You must pass either:
-     - nix-darwin, nixpkgs, system and configuration,
+     - nix-darwin, {nixpkgs or pkgs}, system and configuration,
      - or config
 
     See ${docUrl}
@@ -23,11 +23,20 @@ args@{
   # Configuration parameters
   nix-darwin ? isRequired "nix-darwin"
 , configuration ? isRequired "configuration"
-, nixpkgs ? isRequired "nixpkgs"
+, nixpkgs ? null
+, pkgs ? null
 , system ? isRequired "system"
-, config ? (import nix-darwin {
-    inherit nixpkgs system configuration;
-  }).config
+, config ? (import nix-darwin ({
+    inherit system;
+    configuration = if args?pkgs then {
+      imports = [
+        { imports = [ configuration ]; }
+        # Apparent bug in nix-darwin; we need this
+        { _module.args.pkgs = lib.mkForce pkgs; }
+      ];
+    } else configuration;
+  } // lib.filterAttrs (k: v: v != null) { inherit pkgs nixpkgs; }
+  )).config
 , # Deployment parameters
   ssh
 , # Misc, optional
@@ -58,8 +67,10 @@ mutEx "config" "configuration"
 mutEx "config" "nixpkgs"
 mutEx "config" "nix-darwin"
 mutEx "config" "system"
+mutEx "config" "pkgs"
+mutEx "pkgs" "nixpkgs"
 
-mkEffect (removeAttrs args [ "configuration" "ssh" "config" "system" "nix-darwin" "nixpkgs" ] // {
+mkEffect (removeAttrs args [ "configuration" "ssh" "config" "system" "nix-darwin" "nixpkgs" "pkgs" ] // {
   name = "nix-darwin${suffix}";
   inputs = [ openssh ];
   dontUnpack = true;

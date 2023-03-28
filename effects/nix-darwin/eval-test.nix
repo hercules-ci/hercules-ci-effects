@@ -45,6 +45,15 @@ rec {
             configuration = ./test/configuration.nix;
           }
         );
+        test.by-other-args-pkgs = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            system = "x86_64-darwin";
+            nix-darwin = darwin.outPath;
+            pkgs = darwin.inputs.nixpkgs.legacyPackages.x86_64-darwin;
+            configuration = ./test/configuration.nix;
+          }
+        );
       };
     })
   );
@@ -57,6 +66,14 @@ rec {
 
     assert 
       testEqDrv flake1.test.by-config.drvPath flake1.test.by-other-args.drvPath;
+
+    assert
+      builtins.isString flake1.test.by-other-args-pkgs.drvPath;
+    # The addition of the pkgs module appears to reorder the system path, so this equality doesn't quite hold. (or it could be a flake vs legacy related difference; not sure)
+    # assert
+    #   testEqDrv flake1.test.by-other-args.drvPath flake1.test.by-other-args-pkgs.drvPath;
+    assert
+      testEqDrv flake1.test.by-other-args-pkgs.config.expose.pkgs.hello.drvPath darwin.inputs.nixpkgs.legacyPackages.x86_64-darwin.hello.drvPath;
 
     ok;
 

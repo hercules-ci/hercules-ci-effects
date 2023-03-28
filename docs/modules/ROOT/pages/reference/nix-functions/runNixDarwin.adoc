@@ -67,11 +67,19 @@ Path of the nix-darwin sources to use.
 [[param-nixpkgs]]
 === `nixpkgs`
 
-Optional, mutually exclusive with <<param-config>>.
+Optional, mutually exclusive with <<param-config>> and <<param-pkgs>>.
 
 Path of the Nixpkgs sources to use.
 
 Default: `pkgs.path`, where `pkgs` is the Nixpkgs invocation that included the effects overlay.
+
+
+[[param-pkgs]]
+=== `pkgs`
+
+Optional, mutually exclusive with <<param-config>> and <<param-nixpkgs>>.
+
+An evaluated Nixpkgs invocation to use.
 
 
 [[param-secretsMap]]
