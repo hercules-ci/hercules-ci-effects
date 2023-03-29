@@ -11,12 +11,13 @@ let
   darwin = builtins.getFlake "github:LnL7/nix-darwin?rev=87b9d090ad39b25b2400029c64825fc2a8868943";
 in
 rec {
+  inherit darwin testSupport;
   inherit (inputs) flake-parts;
   inherit (testSupport) callFlakeOutputs;
 
   testEqDrv = drv1: drv2:
     if drv1 == drv2 then true
-    else builtins.trace "Oh-oh, these are different! Check the differences with\nnix-diff ${drv1} ${drv2}" false;
+    else builtins.trace "Oh-oh, these are different! Check the differences with\nnix-diff --color=always ${drv1} ${drv2} | less -RS" false;
 
   flake1 = callFlakeOutputs (inputs:
     flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, self, ... }: {
@@ -44,6 +45,15 @@ rec {
             configuration = ./test/configuration.nix;
           }
         );
+        test.by-other-args-pkgs = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            system = "x86_64-darwin";
+            nix-darwin = darwin.outPath;
+            pkgs = darwin.inputs.nixpkgs.legacyPackages.x86_64-darwin.extend (self: super: { proof-of-overlay = "yes, overlay"; });
+            configuration = ./test/configuration.nix;
+          }
+        );
       };
     })
   );
@@ -56,6 +66,18 @@ rec {
 
     assert 
       testEqDrv flake1.test.by-config.drvPath flake1.test.by-other-args.drvPath;
+
+    assert
+      builtins.isString flake1.test.by-other-args-pkgs.drvPath;
+    # The addition of the pkgs module appears to reorder the system path, so this equality doesn't quite hold. (or it could be a flake vs legacy related difference; not sure)
+    # assert
+    #   testEqDrv flake1.test.by-other-args.drvPath flake1.test.by-other-args-pkgs.drvPath;
+    assert
+      testEqDrv flake1.test.by-other-args-pkgs.config.expose.pkgs.hello.drvPath darwin.inputs.nixpkgs.legacyPackages.x86_64-darwin.hello.drvPath;
+
+    # A custom pkgs should be used without reinvoking nixpkgs from scratch.
+    assert
+      flake1.test.by-other-args-pkgs.config.expose.pkgs.proof-of-overlay == "yes, overlay";
 
     ok;
 

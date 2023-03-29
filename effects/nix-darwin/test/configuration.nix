@@ -11,4 +11,18 @@
   system.nixpkgsVersion = lib.mkForce "TEST-NIXPKGS-VERSION";
   system.nixpkgsVersionSuffix = lib.mkForce "TEST-NIXPKGS-VERSION-SUFFIX";
   system.checks.verifyNixPath = lib.mkForce false;
+
+  imports = [
+    ({ pkgs, ... }: {
+      options = {
+        expose.pkgs = lib.mkOption {
+          type = lib.types.raw;
+          default = pkgs;
+          description = "Expose pkgs to the test";
+          readOnly = true;
+        };
+      };
+    })
+  ];
+
 }
