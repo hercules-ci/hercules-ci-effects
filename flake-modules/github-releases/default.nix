@@ -5,12 +5,41 @@ let
   fileSpec = with types;
     submodule ({ config, options, ... }: {
       options = {
-        label = mkOption { type = str; };
-        path = mkOption { type = path; };
-        paths = mkOption { type = addCheck (listOf path) (xs: builtins.length xs > 0); };
-        archiver = mkOption { type = enum [ "zip" ]; };
+        label = mkOption {
+          type = str;
+          description = ''
+            Label of the asset file or archive.
+
+            This is the name that will be used in the GitHub release.
+          '';
+        };
+        path = mkOption {
+          type = path;
+          description = ''
+            Path to the asset file. Must not be a directory. Mutually exclusive with `paths`.
+          '';
+        };
+        paths = mkOption {
+          type = addCheck (listOf path) (xs: builtins.length xs > 0);
+          description = ''
+            Paths to the asset files.
+            Mutually exclusive with `path`.
+
+            Directories are allowed, and their contents will be archived recursively.
+          '';
+        };
+        archiver = mkOption {
+          type = enum [ "zip" ];
+          description = ''
+            The archiver to use for the archive.
+
+            This must be set when `paths` is set.
+          '';
+          defaultText = lib.literalMD "_(unset)_";
+        };
         _out = mkOption {
           readOnly = true;
+          internal = true;
           default = if options.path.isDefined
             then
               # Assume single, but check first
@@ -53,18 +82,33 @@ in
           type = types.listOf fileSpec;
           description = ''
             List of asset files or archives.
+
             Each entry must be either an attribute set of type
-            `{ label: string, path: string }` for a single file or
-            `{ label: string, paths: [string], archiver: 'zip' }` for an archive.
+             - `{ label: string, path: string }` for a single file, or
+             - `{ label: string, paths: [string], archiver: 'zip' }` for an archive.
+            
             In case of archive, `paths` may contain directories: their _contents_ will be archived recursively.
           '';
           default = [];
           defaultText = lib.literalExpression "[]";
+          example = lib.literalExpression ''
+            [
+              {
+                label = "api.json";
+                path = withSystem "x86_64-linux" ({config, ...}: config.packages.api-json);
+              }
+              {
+                label = "api-docs.zip";
+                paths = withSystem "x86_64-linux" ({config, ...}: [ config.packages.api-docs ]);
+                archiver = "zip";
+              }
+            ]
+          '';
         };
         systems = mkOption {
           type = types.nullOr (types.listOf types.str);
           description = ''
-            List of systems for which to call `filesPerSystem`.
+            List of systems for which to call [`filesPerSystem`](#opt-hercules-ci.github-releases.filesPerSystem).
           '';
           default = config.systems;
           defaultText = lib.literalMD "[`systems` from flake-parts](flake-parts.html#opt-systems)";
@@ -76,7 +120,7 @@ in
 
             The arguments passed are the same as those passed to `perSystem` modules.
 
-            The result must have unique attribute names. This generally means that you have to include the `system` value in the attribute names.
+            The function is invoked for each of the [`systems`](#opt-hercules-ci.github-releases.systems) specified. The returned labels must be unique across invocations. This generally means that you have to include the `system` value in the attribute names.
           '';
 
           # NOTE: ''${ is just how to escape ${ inside a ''-string; it does not occur in the rendered example
