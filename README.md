@@ -1,5 +1,5 @@
 # hercules-ci-effects
-Expressions to change the world
+Expressions to change the world (just a tiny bit)
 
 # About the project
 

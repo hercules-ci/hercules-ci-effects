@@ -13,7 +13,13 @@ let
       default = {
 
         nixpkgs = nixpkgsFlake;
-        defaults = { config, ... }: { nixpkgs.pkgs = pkgs; };
+        defaults = { config, lib, ... }: {
+          nixpkgs.pkgs = pkgs;
+
+
+          # TODO fix nixops docs by migrating them to markdown
+          documentation.enable = lib.mkForce false;
+        };
 
         network.description = "hercules-ci/nixops-example";
 

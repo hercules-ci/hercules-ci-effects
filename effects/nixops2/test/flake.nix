@@ -3,17 +3,14 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # TODO change when merged
-    flake-compat.url = "github:edolstra/flake-compat";
-    flake-compat.flake = false;
     # !!!: This isn't supported yet, so constructing the effect is done outside this flake.
     #      It is not representative of how you would wire it up normally.
     # hercules-ci-effects.url = "path:../..";
     hercules-ci-agent.url = "github:hercules-ci/hercules-ci-agent"; # TODO remove after hci release is in Nixpkgs
-    flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-compat-ci, flake-utils, hercules-ci-agent, ... }:
+  outputs = { self, nixpkgs, flake-utils, hercules-ci-agent, ... }:
     let
       inherit (nixpkgs) lib;
 

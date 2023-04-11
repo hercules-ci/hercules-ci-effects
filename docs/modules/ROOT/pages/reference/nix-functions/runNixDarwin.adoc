@@ -7,11 +7,48 @@ Deploys a nix-darwin configuration, to maintain a macOS machine.
 
 Use the nix-darwin installer first, then base the configuration off the generated ~/.nixpkgs/darwin-configuration.nix.
 
+== Examples:
+
+In a flake, or other code that calls `darwin.lib.darwinSystem`,
+
+```nix
+hci-effects.runNixDarwin {
+  ssh.destination = "jane.local";
+  config = self.darwinConfigurations."Janes-MacBook";
+}
+```
+
+or without explicitly using the nix-darwin library,
+
+```nix
+hci-effects.runNixDarwin {
+  ssh.destination = "jane.local";
+
+  configuration = ./configuration.nix;
+  system = "x86_64-darwin";
+  nix-darwin = sources.nix-darwin;
+  nixpkgs = sources.nixpkgs;
+}
+```
+
 [[parameters]]
 == Parameters
 
+[[param-config]]
+=== `config`
+
+An evaluated configuration to deploy, such as returned by `darwin.lib.darwinSystem`.
+
+Unlike a module, such as can be passed to <<param-configuration>>, a configuration contains all required option values, so that other parameters such as <<param-configuration>>, <<param-nix-darwin>>, <<param-nixpkgs>> and <<param-system>> can be omitted.
+
+If needed, it is sufficient to only pass the `config` attribute returned by `darwin.lib.darwinSystem`.
+
+This parameter is optional and mutually exclusive with <<param-configuration>> and aforementioned other parameters.
+
 [[param-configuration]]
 === `configuration`
+
+Optional, mutually exclusive with <<param-config>>.
 
 The main configuration module; file path or module expression.
 
@@ -22,15 +59,28 @@ repo.
 [[param-nix-darwin]]
 === `nix-darwin`
 
+Optional, mutually exclusive with <<param-config>>.
+
 Path of the nix-darwin sources to use.
 
 
 [[param-nixpkgs]]
 === `nixpkgs`
 
+Optional, mutually exclusive with <<param-config>>.
+
 Path of the Nixpkgs sources to use.
 
 Default: `pkgs.path`, where `pkgs` is the Nixpkgs invocation that included the effects overlay.
+
+NOTE: This should match `pkgs.path` if both are set explicitly.
+
+[[param-pkgs]]
+=== `pkgs`
+
+Optional, mutually exclusive with <<param-config>>.
+
+An evaluated Nixpkgs invocation to use.
 
 
 [[param-secretsMap]]
@@ -56,6 +106,8 @@ See the named arguments in xref:reference/nix-functions/ssh.adoc[]. Example:
 
 [[param-system]]
 === `system`
+
+Optional, mutually exclusive with <<param-config>>.
 
 The Nix `system` of the machine to deploy.
 
