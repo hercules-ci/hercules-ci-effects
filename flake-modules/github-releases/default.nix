@@ -1,9 +1,31 @@
 { config, lib, withSystem, ... }:
+let
+  inherit (lib) mkOption mkOptionType types;
+
+  fileSpec = with types;
+    submodule ({ config, options, ... }: {
+      options = {
+        label = mkOption { type = str; };
+        path = mkOption { type = path; };
+        paths = mkOption { type = addCheck (listOf path) (xs: builtins.length xs > 0); };
+        archiver = mkOption { type = enum [ "zip" ]; };
+        _out = mkOption {
+          readOnly = true;
+          default = if options.path.isDefined
+            then
+              # Assume single, but check first
+              lib.throwIf (options.paths.isDefined) "${options.path} and ${options.paths} are mutually exclusive"
+              lib.throwIf (options.archiver.isDefined) "${options.path} and ${options.archiver} are mutually exclusive"
+              { inherit (config) label path; }
+            else
+              { inherit (config) label paths archiver; };
+        };
+      };
+    });
+
+in
 {
   options =
-    let
-      inherit (lib) mkOption mkOptionType types;
-    in
     {
       hercules-ci.github-releases = {
         condition = mkOption {
@@ -27,40 +49,18 @@
           default = herculesCI: herculesCI.config.repo.tag;
           defaultText = lib.literalExpression "herculesCI: herculesCI.config.repo.tag";
         };
-        files = with types;
-          let label = mkOption { type = str; };
-              fileSpec = submodule ({ config, options, ... }: {
-                options = {
-                  inherit label;
-                  path = mkOption { type = path; };
-                  paths = mkOption { type = addCheck (listOf path) (xs: builtins.length xs > 0); };
-                  archiver = mkOption { type = enum [ "zip" ]; };
-                  _out = mkOption {
-                    readOnly = true;
-                    default = if options.path.isDefined
-                      then
-                        # Assume single, but check first
-                        lib.throwIf (options.paths.isDefined) "${options.path} and ${options.paths} are mutually exclusive"
-                        lib.throwIf (options.archiver.isDefined) "${options.path} and ${options.archiver} are mutually exclusive"
-                        { inherit (config) label path; }
-                      else 
-                        { inherit (config) label paths archiver; };
-                  };
-                };
-              });
-          in
-          mkOption {
-            type = listOf fileSpec;
-            description = ''
-              List of asset files or archives.
-              Each entry must be either an attribute set of type
-              `{ label: string, path: string }` for a single file or
-              `{ label: string, paths: [string], archiver: 'zip' }` for an archive.
-              In case of archive, `paths` may contain directories: their _contents_ will be archived recursively.
-            '';
-            default = [];
-            defaultText = lib.literalExpression "[]";
-          };
+        files = mkOption {
+          type = types.listOf fileSpec;
+          description = ''
+            List of asset files or archives.
+            Each entry must be either an attribute set of type
+            `{ label: string, path: string }` for a single file or
+            `{ label: string, paths: [string], archiver: 'zip' }` for an archive.
+            In case of archive, `paths` may contain directories: their _contents_ will be archived recursively.
+          '';
+          default = [];
+          defaultText = lib.literalExpression "[]";
+        };
         checkArtifacts = mkOption {
           type = types.functionTo types.bool;
           description = ''
