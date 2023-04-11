@@ -1,4 +1,4 @@
-{ config, lib, withSystem, ... }:
+{ config, lib, options, withSystem, ... }:
 let
   inherit (lib) mkOption mkOptionType types;
 
@@ -61,6 +61,34 @@ in
           default = [];
           defaultText = lib.literalExpression "[]";
         };
+        systems = mkOption {
+          type = types.nullOr (types.listOf types.str);
+          description = ''
+            List of systems for which to call `filesPerSystem`.
+          '';
+          default = config.systems;
+          defaultText = lib.literalMD "[`systems` from flake-parts](flake-parts.html#opt-systems)";
+        };
+        filesPerSystem = mkOption {
+          type = types.functionTo (types.listOf fileSpec);
+          description = ''
+            List of asset files or archives for each system.
+
+            The arguments passed are the same as those passed to `perSystem` modules.
+
+            The result must have unique attribute names. This generally means that you have to include the `system` value in the attribute names.
+          '';
+
+          # NOTE: ''${ is just how to escape ${ inside a ''-string; it does not occur in the rendered example
+          example = lib.literalExpression ''
+            { system, config, ... }: [
+              {
+                label = "foo-static-''${system}";
+                path = lib.getExe config.packages.foo-static;
+              }
+            ]
+          '';
+        };
         checkArtifacts = mkOption {
           type = types.functionTo types.bool;
           description = ''
@@ -88,12 +116,24 @@ in
       inherit (config) defaultEffectSystem;
 
       cfg = config.hercules-ci.github-releases;
+      opt = options.hercules-ci.github-releases;
       enable = cfg.files != [];
       files = map (v: v._out) cfg.files;
       filesJSON = builtins.toJSON files;
     in
-    mkIf enable {
-      herculesCI = herculesCI@{ config, ... }:
+    {
+      hercules-ci.github-releases.files = mkIf opt.filesPerSystem.isDefined (
+        lib.concatMap
+          (system:
+            let
+              filesForSystem = withSystem system cfg.filesPerSystem;
+              files = map (v: v._out) filesForSystem;
+            in
+            files
+          )
+          cfg.systems
+      );
+      herculesCI = mkIf enable (herculesCI@{ config, ... }:
         let
           artifacts-tool = pkgs: pkgs.callPackage ../../packages/artifacts-tool/package.nix { };
           deploy = withSystem defaultEffectSystem ({ hci-effects, pkgs, ... }:
@@ -139,6 +179,6 @@ in
                   (lib.getExe (artifacts-tool pkgs))));
             }
           ];
-        };
+        });
     };
 }

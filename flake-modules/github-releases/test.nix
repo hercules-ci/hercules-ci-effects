@@ -68,6 +68,27 @@ rec {
         })
     );
 
+  example2 =
+    callFlakeOutputs (inputs:
+      flake-parts.lib.mkFlake { inherit inputs; }
+        ({ lib, ... }: {
+          imports = [
+            ../../flake-module.nix
+          ];
+          systems = [ "aarch64-darwin" "x86_64-linux" ];
+          defaultEffectSystem = effectSystem;
+          hercules-ci.github-releases.filesPerSystem = { config, system, ... }: [
+            {
+              label = "hello-static-${system}";
+              path = lib.getExe config.packages.hello;
+            }
+          ];
+          perSystem = { pkgs, ... }: {
+            packages.hello = pkgs.pkgsStatic.hello;
+          };
+        })
+    );
+
   expectedFiles = [
     {
       label = "test label";
@@ -86,6 +107,18 @@ rec {
   example1Branch = example1.herculesCI (fakeHerculesCI fakeRepoBranch);
   example1Tag = example1.herculesCI (fakeHerculesCI fakeRepoTag);
 
+  example2Branch = example2.herculesCI (fakeHerculesCI fakeRepoBranch);
+  expectedFiles2 = let inherit (inputs.nixpkgs) lib; in [
+    {
+      label = "hello-static-aarch64-darwin";
+      path = "${inputs.nixpkgs.legacyPackages.aarch64-darwin.pkgsStatic.hello}/bin/hello";
+    }
+    {
+      label = "hello-static-x86_64-linux";
+      path = "${inputs.nixpkgs.legacyPackages.x86_64-linux.pkgsStatic.hello}/bin/hello";
+    }
+  ];
+
   test =
     assert example1Branch.onPush.default.outputs.checks.release-artifacts.files
       == expectedFiles;
@@ -96,7 +129,13 @@ rec {
     assert example1Tag.onPush.default.outputs.effects.github-releases.isEffect;
     assert example1Tag.onPush.default.outputs.effects.github-releases.files == expectedFiles;
 
-    # Return the check, so that we can build it in CI
-    example1Branch.onPush.default.outputs.checks.release-artifacts;
+    assert example2Branch.onPush.default.outputs.checks.release-artifacts.files
+      == expectedFiles2;
+
+    # Return the checks, so that we can build them in CI
+    {
+      simple = example1Branch.onPush.default.outputs.checks.release-artifacts;
+      perSystem = example2Branch.onPush.default.outputs.checks.release-artifacts;
+    };
 
 }
