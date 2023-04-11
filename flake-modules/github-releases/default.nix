@@ -29,22 +29,28 @@
         };
         files = with types;
           let label = mkOption { type = str; };
-              fileSpec = submodule {
+              fileSpec = submodule ({ config, options, ... }: {
                 options = {
                   inherit label;
                   path = mkOption { type = path; };
-                };
-              };
-              archiveSpec = submodule {
-                options = {
-                  inherit label;
                   paths = mkOption { type = addCheck (listOf path) (xs: builtins.length xs > 0); };
                   archiver = mkOption { type = enum [ "zip" ]; };
+                  _out = mkOption {
+                    readOnly = true;
+                    default = if options.path.isDefined
+                      then
+                        # Assume single, but check first
+                        lib.throwIf (options.paths.isDefined) "${options.path} and ${options.paths} are mutually exclusive"
+                        lib.throwIf (options.archiver.isDefined) "${options.path} and ${options.archiver} are mutually exclusive"
+                        { inherit (config) label path; }
+                      else 
+                        { inherit (config) label paths archiver; };
+                  };
                 };
-              };
+              });
           in
           mkOption {
-            type = listOf (oneOf [archiveSpec fileSpec]);
+            type = listOf fileSpec;
             description = ''
               List of asset files or archives.
               Each entry must be either an attribute set of type
@@ -83,6 +89,8 @@
 
       cfg = config.hercules-ci.github-releases;
       enable = cfg.files != [];
+      files = map (v: v._out) cfg.files;
+      filesJSON = builtins.toJSON files;
     in
     mkIf enable {
       herculesCI = herculesCI@{ config, ... }:
@@ -102,12 +110,13 @@
               };
               effectScript = lib.getExe (artifacts-tool pkgs);
               env = {
-                files = builtins.toJSON cfg.files;
+                files = filesJSON;
                 inherit (config.repo) owner;
                 repo = config.repo.name;
                 releaseTag = cfg.releaseTag herculesCI;
               };
               inputs = [ pkgs.zip ];
+              extraAttributes.files = files;
             }
           );
         in
@@ -123,7 +132,10 @@
               default.outputs.checks.release-artifacts = mkIf (cfg.checkArtifacts herculesCI) (withSystem defaultEffectSystem ({ pkgs, ... }:
                 pkgs.runCommandNoCCLocal
                   "artifacts-check"
-                  { files = builtins.toJSON cfg.files; check_only = ""; }
+                  { files = filesJSON;
+                    check_only = "";
+                    passthru.files = files;
+                  }
                   (lib.getExe (artifacts-tool pkgs))));
             }
           ];
