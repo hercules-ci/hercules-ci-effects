@@ -184,6 +184,6 @@ in
     ;
 
     extraAttributes.tests.buildable =
-      (config.effectDerivation.overrideAttrs(o: { isEffect = false; })).inputDerivation;
+      (config.effectDerivation.overrideAttrs (o: { isEffect = false; })).inputDerivation;
   };
 }
