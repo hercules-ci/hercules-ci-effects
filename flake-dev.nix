@@ -66,10 +66,16 @@ top@{ withSystem, lib, inputs, config, ... }: {
       write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
       artifacts-tool = hci-effects.callPackage ./packages/artifacts-tool/test { };
+      artifacts-tool-typecheck = hci-effects.callPackage ./packages/artifacts-tool/mypy.nix { };
       github-releases = (import ./flake-modules/github-releases/test.nix { effectSystem = system; inherit inputs; }).test;
     };
     devShells.default = pkgs.mkShell {
-      nativeBuildInputs = [ pkgs.nixpkgs-fmt pkgs.hci ];
+      nativeBuildInputs = [
+        pkgs.nixpkgs-fmt
+        pkgs.hci
+        pkgs.python3Packages.python
+        pkgs.python3Packages.mypy
+      ];
     };
 
     # Quick and dirty // override. Do not recommend.

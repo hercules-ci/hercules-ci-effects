@@ -14,10 +14,10 @@ from os import getcwd, environ, execlp, rename, symlink
 from os.path import exists, isdir, isfile
 import subprocess
 from sys import stderr
-from typing import Dict, List, Literal, Tuple
+from typing import Dict, List, Literal, Tuple, Any
 
 
-def eprint(*args, **kwargs):
+def eprint(*args: object, **kwargs: Any) -> None:
     return print(*args, **kwargs, file=stderr)
 
 
@@ -34,7 +34,10 @@ class Archive:
     archiver: Literal["zip"]
 
 
-def parse_spec(spec) -> File | Archive:
+"""
+Parse a JSON value into a File or Archive object
+"""
+def parse_spec(spec: Any) -> File | Archive:
     e = Exception(
         "Every SPEC must be a {label: string, path: string} "
         "or a {label: string, paths: [string], archiver: 'zip'}, "
