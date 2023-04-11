@@ -137,12 +137,26 @@ in
       default = null;
     };
 
-    extraAttributes.tests = mkOption {
-      type = types.lazyAttrsOf types.package;
+    extraAttributes = mkOption {
       description = ''
         Attributes to add to the returned effect. These only exist at the expression level and do not become part of the executable effect.
+
+        This is similar to `passthru` in `mkDerivation`.
       '';
       default = { };
+      type = types.submodule {
+        freeformType = types.attrsOf types.raw;
+        options = {
+          # Is this a good idea? Needs integration.
+          # tests = mkOption {
+          #   type = types.lazyAttrsOf types.package;
+          #   description = ''
+          #     Tests
+          #   '';
+          #   default = { };
+          # };
+        };
+      };
     };
 
   };
