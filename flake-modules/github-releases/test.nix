@@ -64,6 +64,10 @@ rec {
               ];
               archiver = "zip";
             }
+            {
+              label = "a single file package";
+              path = inputs.nixpkgs.legacyPackages.x86_64-linux.writeText "hi" "hello";
+            }
           ];
         })
     );
@@ -101,6 +105,10 @@ rec {
         (builtins.toFile "foo" "bar")
         (builtins.toFile "foobar" "bazqux")
       ];
+    }
+    {
+      label = "a single file package";
+      path = inputs.nixpkgs.legacyPackages.x86_64-linux.writeText "hi" "hello";
     }
   ];
 
