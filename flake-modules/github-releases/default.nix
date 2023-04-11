@@ -123,7 +123,7 @@
         {
           onPush = mkMerge [
             {
-              ${cfg.pushJobName}.outputs.effects.gh-releases =
+              ${cfg.pushJobName}.outputs.effects.github-releases =
                 lib.optionalAttrs
                   (cfg.condition herculesCI.config.repo)
                   deploy;

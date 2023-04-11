@@ -92,9 +92,9 @@ rec {
     assert example1Tag.onPush.default.outputs.checks.release-artifacts.files
       == expectedFiles;
 
-    assert example1Branch.onPush.default.outputs.effects.gh-releases == { };
-    assert example1Tag.onPush.default.outputs.effects.gh-releases.isEffect;
-    assert example1Tag.onPush.default.outputs.effects.gh-releases.files == expectedFiles;
+    assert example1Branch.onPush.default.outputs.effects.github-releases == { };
+    assert example1Tag.onPush.default.outputs.effects.github-releases.isEffect;
+    assert example1Tag.onPush.default.outputs.effects.github-releases.files == expectedFiles;
 
     # Return the check, so that we can build it in CI
     example1Branch.onPush.default.outputs.checks.release-artifacts;
