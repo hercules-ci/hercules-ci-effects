@@ -60,12 +60,13 @@ top@{ withSystem, lib, inputs, config, ... }: {
     };
   };
 
-  perSystem = { pkgs, hci-effects, inputs', ... }: {
+  perSystem = { pkgs, hci-effects, inputs', system, ... }: {
     checks = {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
       write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
       artifacts-tool = hci-effects.callPackage ./packages/artifacts-tool/test { };
+      github-releases = (import ./flake-modules/github-releases/test.nix { effectSystem = system; inherit inputs; }).test;
     };
     devShells.default = pkgs.mkShell {
       nativeBuildInputs = [ pkgs.nixpkgs-fmt pkgs.hci ];
