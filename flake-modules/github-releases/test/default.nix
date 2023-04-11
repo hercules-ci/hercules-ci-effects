@@ -2,11 +2,11 @@
 let
   fake-gh = pkgs.writers.writePython3Bin "gh" {} (builtins.readFile ./fake-gh.py);
   fake-zip = pkgs.writers.writePython3Bin "zip" {} (builtins.readFile ./fake-zip.py);
-  artifacts-checker = pkgs.writers.writePython3Bin "artifacts-checker" {} (builtins.readFile ../effect.py);
+  artifacts-tool = pkgs.writers.writePython3Bin "artifacts-tool" {} (builtins.readFile ../effect.py);
 in
 pkgs.runCommandNoCCLocal "github-releases-check"
 {
-  buildInputs = [ artifacts-checker fake-gh fake-zip ];
+  buildInputs = [ artifacts-tool fake-gh fake-zip ];
 }
 ''
   set -ex
@@ -17,7 +17,7 @@ pkgs.runCommandNoCCLocal "github-releases-check"
 
   export files='[{"label":"fake-gh","path":"${fake-gh}"}]'
   echo "test should fail: directory"
-  artifacts-checker && result=0 || result=1
+  artifacts-tool && result=0 || result=1
   if [[ $result != 1 ]]; then
     echo "failed"
     exit 1
@@ -26,7 +26,7 @@ pkgs.runCommandNoCCLocal "github-releases-check"
 
   export files='[{"label":"fake-gh","path":"${fake-gh}/bin/gh"}]'
   echo "test should succeed: single file"
-  artifacts-checker && result=0 || result=1
+  artifacts-tool && result=0 || result=1
   if [[ $result != 0 ]]; then
     echo "failed"
     exit 1
