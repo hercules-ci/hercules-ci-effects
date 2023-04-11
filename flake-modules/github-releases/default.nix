@@ -121,6 +121,8 @@ in
             The arguments passed are the same as those passed to `perSystem` modules.
 
             The function is invoked for each of the [`systems`](#opt-hercules-ci.github-releases.systems). The returned labels must be unique across invocations. This generally means that you have to include the `system` value in the attribute names.
+
+            NOTE: If you are implementing generic logic, consider placing the function in a `mkIf`, so that the function remains undefined in cases where it is statically known to produce no files. When `filesPerSystem` has no definitions, a traversal of potentially many `perSystems` modules is avoided.
           '';
 
           # NOTE: ''${ is just how to escape ${ inside a ''-string; it does not occur in the rendered example
