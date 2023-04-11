@@ -34,10 +34,11 @@ class Archive:
     archiver: Literal["zip"]
 
 
-"""
-Parse a JSON value into a File or Archive object
-"""
 def parse_spec(spec: Any) -> File | Archive:
+    """
+    Parse a JSON value into a File or Archive object
+    """
+
     e = Exception(
         "Every SPEC must be a {label: string, path: string} "
         "or a {label: string, paths: [string], archiver: 'zip'}, "

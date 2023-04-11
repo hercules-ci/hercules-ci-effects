@@ -75,6 +75,7 @@ top@{ withSystem, lib, inputs, config, ... }: {
         pkgs.hci
         pkgs.python3Packages.python
         pkgs.python3Packages.mypy
+        pkgs.python3Packages.autopep8
       ];
     };
 
