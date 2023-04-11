@@ -110,8 +110,8 @@ in
           description = ''
             List of systems for which to call [`filesPerSystem`](#opt-hercules-ci.github-releases.filesPerSystem).
           '';
-          default = config.systems;
-          defaultText = lib.literalMD "[`systems` from flake-parts](flake-parts.html#opt-systems)";
+          default = null;
+          defaultText = lib.literalMD "`null`, which means that [`herculesCI.ciSystems`](#opt-herculesCI.ciSystems) will be used.";
         };
         filesPerSystem = mkOption {
           type = types.functionTo (types.listOf fileSpec);
@@ -120,7 +120,7 @@ in
 
             The arguments passed are the same as those passed to `perSystem` modules.
 
-            The function is invoked for each of the [`systems`](#opt-hercules-ci.github-releases.systems) specified. The returned labels must be unique across invocations. This generally means that you have to include the `system` value in the attribute names.
+            The function is invoked for each of the [`systems`](#opt-hercules-ci.github-releases.systems). The returned labels must be unique across invocations. This generally means that you have to include the `system` value in the attribute names.
           '';
 
           # NOTE: ''${ is just how to escape ${ inside a ''-string; it does not occur in the rendered example
@@ -161,24 +161,21 @@ in
 
       cfg = config.hercules-ci.github-releases;
       opt = options.hercules-ci.github-releases;
-      enable = cfg.files != [];
-      files = map (v: v._out) cfg.files;
-      filesJSON = builtins.toJSON files;
+      enable = cfg.files != [] || opt.filesPerSystem.isDefined;
     in
     {
-      hercules-ci.github-releases.files = mkIf opt.filesPerSystem.isDefined (
-        lib.concatMap
-          (system:
-            let
-              filesForSystem = withSystem system cfg.filesPerSystem;
-              files = map (v: v._out) filesForSystem;
-            in
-            files
-          )
-          cfg.systems
-      );
       herculesCI = mkIf enable (herculesCI@{ config, ... }:
         let
+          releaseSystems = if cfg.systems == null then config.ciSystems else cfg.systems;
+          systemFiles =
+            lib.optionals (opt.filesPerSystem.isDefined) (
+              lib.concatMap
+                (system: withSystem system cfg.filesPerSystem)
+                releaseSystems
+            );
+          files = map (v: v._out) (cfg.files ++ systemFiles);
+          filesJSON = builtins.toJSON files;
+
           artifacts-tool = pkgs: pkgs.callPackage ../../packages/artifacts-tool/package.nix { };
           deploy = withSystem defaultEffectSystem ({ hci-effects, pkgs, ... }:
             hci-effects.modularEffect {

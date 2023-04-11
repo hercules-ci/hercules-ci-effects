@@ -49,8 +49,15 @@ rec {
           imports = [
             ../../flake-module.nix
           ];
-          systems = [ "aarch64-darwin" "x86_64-linux" ];
+          systems = [
+            "aarch64-darwin"
+            "aarch64-linux"
+            "x86_64-darwin"
+            "x86_64-linux"
+          ];
           defaultEffectSystem = effectSystem;
+          herculesCI.ciSystems = [ "aarch64-darwin" "x86_64-linux" ];
+
           hercules-ci.github-releases.files = [
             {
               label = "test label";
@@ -79,8 +86,15 @@ rec {
           imports = [
             ../../flake-module.nix
           ];
-          systems = [ "aarch64-darwin" "x86_64-linux" ];
+          systems = [
+            "aarch64-darwin"
+            "aarch64-linux"
+            "x86_64-darwin"
+            "x86_64-linux"
+          ];
           defaultEffectSystem = effectSystem;
+          herculesCI.ciSystems = [ "aarch64-darwin" "x86_64-linux" ];
+
           hercules-ci.github-releases.filesPerSystem = { config, system, ... }: [
             {
               label = "hello-static-${system}";
