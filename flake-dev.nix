@@ -65,7 +65,7 @@ top@{ withSystem, lib, inputs, config, ... }: {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
       write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
-      github-releases = hci-effects.callPackage ./flake-modules/github-releases/test { };
+      artifacts-tool = hci-effects.callPackage ./packages/artifacts-tool/test { };
     };
     devShells.default = pkgs.mkShell {
       nativeBuildInputs = [ pkgs.nixpkgs-fmt pkgs.hci ];

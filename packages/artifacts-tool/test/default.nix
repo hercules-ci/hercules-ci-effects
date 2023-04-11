@@ -2,11 +2,14 @@
 let
   fake-gh = pkgs.writers.writePython3Bin "gh" {} (builtins.readFile ./fake-gh.py);
   fake-zip = pkgs.writers.writePython3Bin "zip" {} (builtins.readFile ./fake-zip.py);
-  artifacts-tool = pkgs.writers.writePython3Bin "artifacts-tool" {} (builtins.readFile ../effect.py);
+  artifacts-tool = pkgs.callPackage ../package.nix { };
 in
 pkgs.runCommandNoCCLocal "github-releases-check"
 {
-  buildInputs = [ artifacts-tool fake-gh fake-zip ];
+  nativeBuildInputs = [ artifacts-tool fake-gh fake-zip ];
+  passthru = {
+    inherit artifacts-tool;
+  };
 }
 ''
   set -ex

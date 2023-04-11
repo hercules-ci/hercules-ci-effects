@@ -87,7 +87,7 @@
     mkIf enable {
       herculesCI = herculesCI@{ config, ... }:
         let
-          artifacts-tool = pkgs: pkgs.writers.writePython3 "artifacts-tool" {} (builtins.readFile ./effect.py);
+          artifacts-tool = pkgs: pkgs.callPackage ../../packages/artifacts-tool/package.nix { };
           deploy = withSystem defaultEffectSystem ({ hci-effects, pkgs, ... }:
             hci-effects.modularEffect {
               imports = [
@@ -100,7 +100,7 @@
                 remote.url = config.repo.remoteHttpUrl;
                 forgeType = config.repo.forgeType;
               };
-              effectScript = (artifacts-tool pkgs).outPath;
+              effectScript = lib.getExe (artifacts-tool pkgs);
               env = {
                 files = builtins.toJSON cfg.files;
                 inherit (config.repo) owner;
@@ -124,7 +124,7 @@
                 pkgs.runCommandNoCCLocal
                   "artifacts-check"
                   { files = builtins.toJSON cfg.files; check_only = ""; }
-                  (artifacts-tool pkgs).outPath));
+                  (lib.getExe (artifacts-tool pkgs))));
             }
           ];
         };
