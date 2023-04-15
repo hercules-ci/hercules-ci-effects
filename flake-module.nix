@@ -5,5 +5,6 @@
     ./flake-modules/herculesCI-helpers.nix
     ./flake-modules/github-pages.nix
     ./effects/flake-update/flake-module.nix
+    ./effects/cloudflare-pages/flake-module.nix
   ];
 }
