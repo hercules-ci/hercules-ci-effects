@@ -60,16 +60,31 @@ top@{ withSystem, lib, inputs, config, ... }: {
     };
   };
 
-  perSystem = { pkgs, hci-effects, inputs', ... }: {
-    checks = {
+  perSystem = { pkgs, hci-effects, inputs', system, ... }: {
+    checks =
+    let
+      github-releases-tests =
+        import ./flake-modules/github-releases/test.nix
+          { effectSystem = system; inherit inputs; };
+    in {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
       write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
+      artifacts-tool = hci-effects.callPackage ./packages/artifacts-tool/test { };
+      artifacts-tool-typecheck = hci-effects.callPackage ./packages/artifacts-tool/mypy.nix { };
+      github-releases = github-releases-tests.test.simple;
+      github-releases-perSystem = github-releases-tests.test.perSystem;
     };
     devShells.default = pkgs.mkShell {
-      nativeBuildInputs = [ pkgs.nixpkgs-fmt pkgs.hci ];
+      nativeBuildInputs = [
+        pkgs.nixpkgs-fmt
+        pkgs.hci
+        pkgs.python3Packages.python
+        pkgs.python3Packages.mypy
+        pkgs.python3Packages.autopep8
+      ];
     };
- 
+
     # Quick and dirty // override. Do not recommend.
     herculesCIEffects.pkgs = pkgs // {
       hci = inputs'.hercules-ci-agent.packages.hercules-ci-cli;

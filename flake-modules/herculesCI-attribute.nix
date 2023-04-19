@@ -225,8 +225,13 @@ in
       description = ''
         Hercules CI environment and configuration. See the sub-options for details.
 
-        Regarding the implementation: Hercules CI offers a bit more information than flakes by itself, and does so by calling the `herculesCI` attribute on the flake.
-        The purpose of the top-level `herculesCI` option in the flake-parts module is to facilitate define this function using declared options.
+        This module represents a function. Hercules CI calls this function to provide expressions in the flake with extra information, such as repository and job metadata.
+
+        While this attribute feels a lot like a submodule, it can not be queried by definitions outside of `herculesCI`. This is required by the design of flakes: evaluation of the standard flake attribute values is hermetic.
+
+        Data that is unique to Hercules CI (as opposed to the flake itself) is provided by in the sub-options of `herculesCI`. This is syntactically different from the [native `herculesCI` attribute interface](https://docs.hercules-ci.com/hercules-ci-agent/evaluation#params-herculesCI). For example, instead of `{ primaryRepo, ... }: ... primaryRepo.ref`, you would write `{ config, ... }: ... config.repo.ref`.
+
+        See e.g. [`ref`](#opt-herculesCI.repo.ref).
       '';
     };
   };

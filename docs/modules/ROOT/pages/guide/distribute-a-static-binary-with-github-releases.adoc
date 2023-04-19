@@ -1,0 +1,58 @@
+
+= Distribute a Static Binary with GitHub Releases
+
+This guide will show you how you can push a set of static binaries to GitHub Releases using a flake-parts module.
+
+Prerequisites:
+
+ - You have configured your flake with https://flake.parts[flake-parts]. It may be possible to adapt the instructions for xref:guide/import-or-pin.adoc[`mkHerculesCI`].
+ - You have packaged a static binary in `perSystem`.
+ - You have xref:master@hercules-ci:ROOT:getting-started/index.adoc[set up an agent] for the account that owns the repository.
+ - You have added the repository to your Hercules CI installation.
+
+== 1. Identify the path of the binary
+
+The first step is to identify the binary that you want to distribute. In this example, we will use the `hello` binary from the `hello` package.
+
+```nix
+perSystem = { pkgs, lib, ... }: {
+  packages.hello = pkgs.pkgsStatic.hello;
+}
+```
+
+Usually, the binary can be picked out by `lib.getExe`, but otherwise, build the package with `nix build .#hello` and inspect the result symlink with `ls`.
+
+In our example the package is accessible as `config.packages.hello`, and `lib.getExe` works for it.
+
+If your package contains multiple binaries, you can use a string interpolation:
+
+```nix
+"${config.packages.hello}/bin/hello"
+```
+
+If your package consists of a single file that sits directly in the store, such as the output of `pkgs.writeText`, then you don't need to add anything.
+
+
+== 2. Declare the binary as a `filesPerSystem` item
+
+When you have identified the path of the binary, you can declare it as a `filesPerSystem` item. This will make it available to the github-releases effect, which will run when a tag is pushed.
+
+```nix
+hercules-ci.github-releases.filesPerSystem = { config, system, lib, ... }: [
+  {
+    label = "hello-static-${system}";
+    path = lib.getExe config.packages.hello;
+  }
+];
+perSystem = { pkgs, ... }: {
+  packages.hello = pkgs.pkgsStatic.hello;
+};
+```
+
+== 3. Push
+
+Your configuration is now ready to be pushed to a branch.
+
+If the check passes, you can merge your branch, and the github-releases effect will publish your files when you push a tag.
+
+Whenever you push a commit containing this configuration to a branch, Hercules CI will check it and make sure that the paths build.
