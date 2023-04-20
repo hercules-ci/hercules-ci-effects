@@ -31,6 +31,7 @@
     gitea_admin_password = "test123test"
 
     gitea.succeed(f"""
+      gitea --version >&2
       su -l gitea -c 'GITEA_WORK_DIR=/var/lib/gitea gitea admin user create \
         --username {gitea_admin} --password {gitea_admin_password} --email test@client'
     """)
@@ -41,7 +42,7 @@
     gitea_admin_token = gitea.succeed(f"""
       curl --fail -X POST http://{gitea_admin}:{gitea_admin_password}@gitea:3000/api/v1/users/test/tokens \
         -H 'Accept: application/json' -H 'Content-Type: application/json' \
-        -d {shlex.quote( '{"name":"token"}' )} \
+        -d {shlex.quote( '{"name":"token", "scopes":["all"]}' )} \
         | jq -r '.sha1'
     """).strip()
 
