@@ -1,4 +1,4 @@
-{ config, lib, withSystem, ... }:
+{ config, lib, withSystem, self, ... }:
 let
   inherit (lib) mkOption types optionalAttrs;
   cfg = config.hercules-ci.flake-update;
@@ -70,6 +70,30 @@ in
         The [system](https://nixos.org/manual/nix/stable/command-ref/conf-file.html#conf-system) on which to run the flake update job.
       '';
     };
+
+    pullRequestTitle = mkOption {
+      type = types.str;
+      default = "`flake.lock`: Update";
+      example = "chore: update flake.lock";
+      description = ''
+        The title of the pull request being made
+      '';
+    };
+
+    pullRequestBody = mkOption {
+      type = types.str;
+      default = ''
+        Update `flake.lock`. See the commit message(s) for details.
+
+        You may reset this branch by deleting it and re-running the update job.
+
+            git push origin :${cfg.updateBranch}
+      '';
+      example = "updated flake.lock";
+      description = ''
+        The body of the pull request being made
+      '';
+    };
   };
 
   config = {
@@ -82,7 +106,7 @@ in
               hci-effects.flakeUpdate {
                 gitRemote = herculesCI.config.repo.remoteHttpUrl;
                 user = "x-access-token";
-                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod;
+                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod pullRequestTitle pullRequestBody;
               }
             );
           };

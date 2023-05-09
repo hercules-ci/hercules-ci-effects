@@ -14,6 +14,8 @@ in
 , forgeType ? "github"
 , createPullRequest ? true
 , autoMergeMethod ? null
+, pullRequestTitle
+, pullRequestBody
 }:
 assert createPullRequest -> forgeType == "github";
 assert (autoMergeMethod != null) -> forgeType == "github";
@@ -29,14 +31,8 @@ modularEffect {
 
   git.update.branch = updateBranch;
   git.update.pullRequest.enable = createPullRequest;
-  git.update.pullRequest.title = "`flake.lock`: Update";
-  git.update.pullRequest.body = ''
-    Update `flake.lock`. See the commit message(s) for details.
-
-    You may reset this branch by deleting it and re-running the update job.
-
-        git push origin :${updateBranch}
-  '';
+  git.update.pullRequest.title = pullRequestTitle;
+  git.update.pullRequest.body = pullRequestBody;
   git.update.pullRequest.autoMergeMethod = autoMergeMethod;
 
   secretsMap.token = tokenSecret;
