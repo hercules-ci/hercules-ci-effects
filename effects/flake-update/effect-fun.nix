@@ -4,7 +4,8 @@
 }:
 
 let
-  inherit (lib) optionals optionalAttrs optionalString;
+  inherit (builtins) concatStringsSep;
+  inherit (lib) forEach optionals optionalAttrs optionalString;
 in
 
 { gitRemote
@@ -16,6 +17,7 @@ in
 , autoMergeMethod ? null
 , pullRequestTitle
 , pullRequestBody
+, inputs ? []
 }:
 assert createPullRequest -> forgeType == "github";
 assert (autoMergeMethod != null) -> forgeType == "github";
@@ -42,9 +44,14 @@ modularEffect {
     pkgs.nix
   ];
 
-  git.update.script = ''
-    echo 1>&2 'Running nix flake update...'
-    nix flake update \
+  git.update.script =
+  let
+    isSet = inputs != [];
+    extraArgs = concatStringsSep " " (forEach inputs (i: "--update-input ${i}"));
+    command = if isSet then "flake lock" else "flake update";
+  in ''
+    echo 1>&2 'Running nix ${command}...'
+    nix ${command} ${optionalString isSet extraArgs} \
       --commit-lock-file \
       --extra-experimental-features 'nix-command flakes'
   '';

@@ -1,4 +1,4 @@
-{ config, lib, withSystem, self, ... }:
+{ config, lib, withSystem, ... }:
 let
   inherit (lib) mkOption types optionalAttrs;
   cfg = config.hercules-ci.flake-update;
@@ -94,6 +94,15 @@ in
         The body of the pull request being made
       '';
     };
+
+    inputs = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        example = ''["nixpkgs" "nixpkgs-unstable"]'';
+        description = ''
+          Flake inputs to update
+        '';
+    };
   };
 
   config = {
@@ -106,7 +115,7 @@ in
               hci-effects.flakeUpdate {
                 gitRemote = herculesCI.config.repo.remoteHttpUrl;
                 user = "x-access-token";
-                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod pullRequestTitle pullRequestBody;
+                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod pullRequestTitle pullRequestBody inputs;
               }
             );
           };
