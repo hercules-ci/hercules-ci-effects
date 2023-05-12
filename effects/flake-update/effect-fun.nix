@@ -18,6 +18,7 @@ in
 , pullRequestTitle
 , pullRequestBody
 , inputs ? []
+, commitSummary ? ""
 }:
 assert createPullRequest -> forgeType == "github";
 assert (autoMergeMethod != null) -> forgeType == "github";
@@ -47,12 +48,14 @@ modularEffect {
   git.update.script =
   let
     isSet = inputs != [];
+    hasSummary = commitSummary != "";
     extraArgs = concatStringsSep " " (forEach inputs (i: "--update-input ${i}"));
     command = if isSet then "flake lock" else "flake update";
   in ''
     echo 1>&2 'Running nix ${command}...'
     nix ${command} ${optionalString isSet extraArgs} \
       --commit-lock-file \
+      ${optionalString hasSummary "--commit-lockfile-summary \"${commitSummary}\""} \
       --extra-experimental-features 'nix-command flakes'
   '';
 

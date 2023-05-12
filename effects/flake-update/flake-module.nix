@@ -96,12 +96,21 @@ in
     };
 
     inputs = mkOption {
-        type = types.listOf types.str;
-        default = [];
-        example = ''["nixpkgs" "nixpkgs-unstable"]'';
-        description = ''
-          Flake inputs to update
-        '';
+      type = types.listOf types.str;
+      default = [];
+      example = ''["nixpkgs" "nixpkgs-unstable"]'';
+      description = ''
+        Flake inputs to update
+      '';
+    };
+
+    commitSummary = mkOption {
+      type = types.str;
+      default = "";
+      example = "chore: update flake inputs";
+      description = ''
+        Summary for commit
+      '';
     };
   };
 
@@ -115,7 +124,7 @@ in
               hci-effects.flakeUpdate {
                 gitRemote = herculesCI.config.repo.remoteHttpUrl;
                 user = "x-access-token";
-                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod pullRequestTitle pullRequestBody inputs;
+                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod pullRequestTitle pullRequestBody inputs commitSummary;
               }
             );
           };
