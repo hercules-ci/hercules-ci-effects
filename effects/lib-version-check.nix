@@ -1,6 +1,9 @@
 { lib,
   revInfo ? "",
   versionSource ? "passed to hercules-ci-effects",
+  # A component name to be used in error messages. Adds context about the way
+  # in which hercules-ci-effects gets invoked.
+  component ? "hercules-ci-effects",
 }:
 
 let
@@ -10,7 +13,7 @@ let
   checkVersion = if builtins.compareVersions lib.version minVersion < 0
     then
       abort ''
-        hercules-ci-effects: The nixpkgs version ${versionSource} is too old.
+        ${component}: The nixpkgs version ${versionSource} is too old.
         The version of nixpkgs must be at least ${minVersion},
         but the actual version is ${lib.version}${revInfo}.
       ''

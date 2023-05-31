@@ -26,7 +26,10 @@ let
     };
   };
 
-  checkVersion = import ./lib-version-check.nix { inherit (pkgs) lib; };
+  checkVersion = import ./lib-version-check.nix {
+    inherit (pkgs) lib;
+    component = "hercules-ci-effects/effects/default.nix";
+  };
 
 in
 checkVersion

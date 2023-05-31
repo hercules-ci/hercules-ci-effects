@@ -5,7 +5,10 @@
 }:
 let
 
-  checkVersion = import ../lib-version-check.nix { inherit revInfo lib; };
+  checkVersion = import ../lib-version-check.nix {
+    inherit revInfo lib;
+    component = "hercules-ci-effects/mkEffect";
+  };
 
   defaultInputs = [
     effectSetupHook
