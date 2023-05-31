@@ -1,5 +1,11 @@
-{ cacert, curl, jq, lib, runCommand, stdenvNoCC }:
+{ cacert, curl, jq, lib, runCommand, stdenvNoCC,
+
+  # Optional, used by nixpkgs version check.
+  revInfo ? "",
+}:
 let
+
+  checkVersion = import ../lib-version-check.nix { inherit revInfo lib; };
 
   defaultInputs = [
     effectSetupHook
@@ -14,7 +20,7 @@ let
         lib.throwIf (args?imports) "`mkEffect` does not support `imports`. Did you mean `modularEffect` instead of `mkEffect`?"
         stdenvNoCC.mkDerivation;
 
-    in mkDerivation (args // {
+    in checkVersion mkDerivation (args // {
 
 
     phases = args.phases or "initPhase unpackPhase patchPhase ${args.preGetStatePhases or ""} getStatePhase userSetupPhase ${args.preEffectPhases or ""} effectPhase putStatePhase ${args.postEffectPhases or ""}";

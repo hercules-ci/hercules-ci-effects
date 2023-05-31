@@ -26,7 +26,10 @@ let
     };
   };
 
+  checkVersion = import ./lib-version-check.nix { inherit (pkgs) lib; };
+
 in
+checkVersion
 {
   mkEffect = callPackage ./effect/effect.nix { };
 
