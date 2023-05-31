@@ -1,4 +1,4 @@
-{ config, lib, flake-parts-lib, self, getSystem, ... }:
+{ config, lib, flake-parts-lib, self, getSystem, inputs, ... }:
 let
   inherit (lib)
     mkOption
@@ -10,9 +10,22 @@ let
 in
 {
   options = {
-    perSystem = mkPerSystemOption ({ config, pkgs, ... }:
+    perSystem = mkPerSystemOption ({ config, options, pkgs, ... }:
     let
-      hci-effects = import ../effects/default.nix hci-effects config.herculesCIEffects.pkgs;
+      hci-effects = checkVersion import ../effects/default.nix hci-effects config.herculesCIEffects.pkgs;
+
+      checkVersion = import ../effects/lib-version-check.nix {
+        inherit (config.herculesCIEffects.pkgs) lib;
+        revInfo =
+          # pkgs doesn't carry its own revision, so we guess where it came from and report if we got it right.
+          if toString pkgs.path == toString inputs.nixpkgs.outPath or null
+              && inputs?nixpkgs.rev
+          then " (rev: ${inputs.nixpkgs.rev})"
+          else "";
+        versionSource = if options.herculesCIEffects.pkgs.highestPrio < (lib.mkOptionDefault {}).priority
+          then "from the perSystem option `herculesCIEffects.pkgs`"
+          else "from the perSystem `pkgs` module argument";
+      };
     in
     {
       _file = ./module-argument.nix;
