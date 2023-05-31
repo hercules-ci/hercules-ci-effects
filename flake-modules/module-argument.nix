@@ -25,6 +25,7 @@ in
         versionSource = if options.herculesCIEffects.pkgs.highestPrio < (lib.mkOptionDefault {}).priority
           then "from the perSystem option `herculesCIEffects.pkgs`"
           else "from the perSystem `pkgs` module argument";
+        component = "hercules-ci-effects.flakeModule";
       };
     in
     {
