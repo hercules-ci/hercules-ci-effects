@@ -28,7 +28,7 @@ effectVMTest {
     ../testsupport/gitea.nix
     ../testsupport/setup.nix
   ];
-  name = "flake-update";
+  name = "write-branch";
   effects = {
     write-contents = hci-effects.gitWriteBranch {
       imports = [ defaults ];
