@@ -15,8 +15,9 @@ in
 , forgeType ? "github"
 , createPullRequest ? true
 , autoMergeMethod ? null
-, pullRequestTitle
-, pullRequestBody
+  # NB: Default also specified in ./flake-module.nix
+, pullRequestTitle ? "`flake.lock`: Update"
+, pullRequestBody ? null
 , inputs ? []
 , commitSummary ? ""
 }:

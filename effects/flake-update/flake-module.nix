@@ -81,7 +81,7 @@ in
     };
 
     pullRequestBody = mkOption {
-      type = types.str;
+      type = types.nullOr types.str;
       default = ''
         Update `flake.lock`. See the commit message(s) for details.
 

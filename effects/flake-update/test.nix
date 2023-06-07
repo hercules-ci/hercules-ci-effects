@@ -17,6 +17,15 @@ effectVMTest {
       forgeType = "gitea";
       createPullRequest = false; # not supported
     };
+    update-no-pr-body = hci-effects.flakeUpdate {
+      gitRemote = "http://gitea:3000/test/repo";
+      user = "test";
+      forgeType = "gitea";
+      createPullRequest = false; # TODO: should be `true`! Test case is almost useless now, except for evaluation
+      pullRequestBody = null;
+      # TODO add test case for non-empty body
+      # TODO add test case for empty body
+    };
   };
 
   testCases = ''
@@ -117,5 +126,34 @@ effectVMTest {
           [[ $(git rev-parse HEAD) == {repo_update_rev} ]]
         )
     """)
+
+    with subtest("Works when pullRequest body is empty"):
+
+      depRev = client.succeed("""
+        (
+          set -x
+          cd dep
+          git log
+          echo changed >>file
+          git add file
+          git commit -m 'file: change'
+          git push
+          git log
+          cd ../repo
+          git log
+        ) 1>&2
+        (cd dep; git rev-parse HEAD)
+      """).rstrip()
+      agent.succeed(f"echo {gitea_admin_password} | effect-update-no-pr-body")
+      # FIXME: actually enable pull request for this effect, using a different backend, and/or by implementing it for gitea (useless for now), and check that it is created
+      client.succeed(f"""
+        (
+          set -x
+          cd repo
+          git pull
+          git log
+          grep {depRev} <flake.lock
+        ) 1>&2
+      """)
   '';
 }
