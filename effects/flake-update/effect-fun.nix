@@ -5,9 +5,19 @@
 
 let
   inherit (builtins) concatStringsSep;
-  inherit (lib) forEach optionals optionalAttrs optionalString;
+  inherit (lib) attrNames forEach length mapAttrsToList optionals optionalAttrs optionalString;
+
+  genTitle = flakes:
+    let
+      names = attrNames flakes;
+      showName = name: if name == "." then "`flake.lock`" else "`${name}/flake.lock`";
+      allNames = concatStringsSep ", " (map showName names);
+      sensibleNames = if length names > 3 then "`flake.lock`" else allNames;
+    in
+      "${sensibleNames}: Update";
 in
 
+passedArgs@
 { gitRemote
 , tokenSecret ? { type = "GitToken"; }
 , user ? "git"
@@ -16,13 +26,23 @@ in
 , createPullRequest ? true
 , autoMergeMethod ? null
   # NB: Default also specified in ./flake-module.nix
-, pullRequestTitle ? "`flake.lock`: Update"
+, pullRequestTitle ? genTitle flakes
 , pullRequestBody ? null
-, inputs ? []
+, flakes ? { "." = { inherit inputs commitSummary; }; }
+, inputs ? [ ]
 , commitSummary ? ""
 }:
 assert createPullRequest -> forgeType == "github";
 assert (autoMergeMethod != null) -> forgeType == "github";
+
+# Do not specify inputs when `flakes` is used
+assert passedArgs?flakes -> inputs == [ ];
+
+# Do not specify commitSummary when `flakes` is used
+assert passedArgs?flakes -> commitSummary == "";
+
+# If you don't specify any flakes, probably that's a mistake, or don't create the effect.
+assert flakes != { };
 
 modularEffect {
   imports = [
@@ -47,16 +67,23 @@ modularEffect {
   ];
 
   git.update.script =
-  let
-    hasSummary = commitSummary != "";
-    extraArgs = concatStringsSep " " (forEach inputs (i: "--update-input ${i}"));
-    command = if inputs != [] then "flake lock" else "flake update";
-  in ''
-    echo 1>&2 'Running nix ${command}...'
-    nix ${command} ${extraArgs} \
-      --commit-lock-file \
-      ${optionalString hasSummary "--commit-lockfile-summary \"${commitSummary}\""} \
-      --extra-experimental-features 'nix-command flakes'
-  '';
+    let
+      script = concatStringsSep "\n" (mapAttrsToList toScript flakes);
+      toScript = relPath: flakeCfg@{inputs ? [], commitSummary ? ""}:
+        let
+          hasSummary = commitSummary != "";
+          extraArgs = concatStringsSep " " (forEach inputs (i: "--update-input ${i}"));
+          command = if inputs != [ ] then "flake lock" else "flake update";
+        in
+        ''
+          echo 1>&2 'Running nix ${command}...'
+          nix ${command} ${extraArgs} \
+            --commit-lock-file \
+            ${optionalString hasSummary "--commit-lockfile-summary \"${commitSummary}\""} \
+            --extra-experimental-features 'nix-command flakes' \
+            ${lib.escapeShellArg ("./" + relPath)}
+        '';
+    in
+    script;
 
 }

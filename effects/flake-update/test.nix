@@ -32,7 +32,26 @@ effectVMTest {
       forgeType = "gitea";
       createPullRequest = false;
       commitSummary = "Update dep2input with custom message";
-      inputs = ["dep2input"];
+      inputs = [ "dep2input" ];
+    };
+    update-subflake = hci-effects.flakeUpdate {
+      gitRemote = "http://gitea:3000/test/repo";
+      user = "test";
+      forgeType = "gitea";
+      createPullRequest = false; # TODO: check pull request title, "`sub/flake.nix`: Update"
+      flakes = {
+        "sub" = { };
+      };
+    };
+    update-flake-and-subflake = hci-effects.flakeUpdate {
+      gitRemote = "http://gitea:3000/test/repo";
+      user = "test";
+      forgeType = "gitea";
+      createPullRequest = false; # TODO: check pull request title
+      flakes = {
+        "." = { };
+        "sub" = { };
+      };
     };
   };
 
@@ -66,6 +85,7 @@ effectVMTest {
 
     dep_commits = client.succeed("""
     (
+    set -x
     git clone http://gitea:3000/test/dep.git
     cd dep
     touch file
@@ -105,6 +125,26 @@ effectVMTest {
     nix flake lock -v --extra-experimental-features nix-command\ flakes
     git add .
     git commit -m 'init'
+
+    mkdir sub
+    (
+      cd sub;
+      cat >flake.nix <<EOF
+    {
+      inputs.dep = {
+        url = "git+http://gitea:3000/test/dep";
+        flake = false;
+      };
+      outputs = { ... }: {
+      };
+    }
+    EOF
+      git add .
+      nix flake lock -v --extra-experimental-features nix-command\ flakes
+      git add .
+      git commit -m 'init sub/flake.nix'
+    )
+
     git push
     cd ..
 
@@ -141,6 +181,10 @@ effectVMTest {
         # We only check for shortRev length, which is 7
         git log | grep '{dep_commits[0][:7]}'
         git log | grep '{dep_commits[1][:7]}'
+
+        # The subflake is untouched
+        ! grep '{dep_commits[0]}' <sub/flake.lock
+        git log --format=%H -- sub | wc -l | grep '^1$' >/dev/null
       ) 1>&2
       (cd repo; git rev-parse HEAD)
     """).rstrip()
@@ -204,5 +248,37 @@ effectVMTest {
           grep {dep2Rev} <flake.lock
         ) 1>&2
       """)
+    
+    with subtest("Can update subflake"):
+      depRev = updateRepo("dep")
+      agent.succeed(f"echo {gitea_admin_password} | effect-update-subflake")
+      client.succeed(f"""
+        (
+          set -x
+          cd repo
+          git pull
+          git log
+          grep {depRev} <sub/flake.lock
+          ! grep {depRev} <flake.lock
+          git log | grep -F "sub/flake.lock: Update"
+        ) 1>&2
+      """)
+
+    with subtest("Can update flake and subflake in one go"):
+      depRev = updateRepo("dep")
+      agent.succeed(f"echo {gitea_admin_password} | effect-update-flake-and-subflake")
+      client.succeed(f"""
+        (
+          set -x
+          cd repo
+          git pull
+          git log
+          grep {depRev} <sub/flake.lock
+          grep {depRev} <flake.lock
+          git log -n 2 | grep -F "sub/flake.lock: Update"
+          git log -n 2 | grep -F "flake.lock: Update"
+        ) 1>&2
+      """)
+
   '';
 }
