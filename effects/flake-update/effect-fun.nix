@@ -48,10 +48,9 @@ modularEffect {
 
   git.update.script =
   let
-    isSet = inputs != [];
     hasSummary = commitSummary != "";
     extraArgs = concatStringsSep " " (forEach inputs (i: "--update-input ${i}"));
-    command = if isSet then "flake lock" else "flake update";
+    command = if inputs != [] then "flake lock" else "flake update";
   in ''
     echo 1>&2 'Running nix ${command}...'
     nix ${command} ${extraArgs} \
