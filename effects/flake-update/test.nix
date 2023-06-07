@@ -26,6 +26,14 @@ effectVMTest {
       # TODO add test case for non-empty body
       # TODO add test case for empty body
     };
+    update-dep2input = hci-effects.flakeUpdate {
+      gitRemote = "http://gitea:3000/test/repo";
+      user = "test";
+      forgeType = "gitea";
+      createPullRequest = false;
+      commitSummary = "Update dep2input with custom message";
+      inputs = ["dep2input"];
+    };
   };
 
   testCases = ''
@@ -48,6 +56,14 @@ effectVMTest {
     """)
     print(dep)
 
+    dep2 = client.succeed("""
+      curl -v --fail -X POST http://gitea:3000/api/v1/user/repos \
+        -H 'Accept: application/json' -H 'Content-Type: application/json' \
+        """ + f"-H 'Authorization: token {token}'" + """ \
+        -d '{"name":"dep2", "private":true}'
+    """)
+    print(dep2)
+
     dep_commits = client.succeed("""
     (
     git clone http://gitea:3000/test/dep.git
@@ -58,12 +74,25 @@ effectVMTest {
     git push
     cd ..
 
+    git clone http://gitea:3000/test/dep2.git
+    cd dep2
+    touch file
+    git add file
+    git commit -m 'init dep2'
+    git push
+    cd ..
+
     git clone http://gitea:3000/test/repo.git
     cd repo
     cat >flake.nix <<EOF
     {
       inputs.dep = {
         url = "git+http://gitea:3000/test/dep";
+        flake = false;
+      };
+      # a different input name as opposed to repo name
+      inputs.dep2input = {
+        url = "git+http://gitea:3000/test/dep2";
         flake = false;
       };
       outputs = { ... }: {
@@ -127,12 +156,12 @@ effectVMTest {
         )
     """)
 
-    with subtest("Works when pullRequest body is empty"):
-
-      depRev = client.succeed("""
+    # repoName: name of the repo checkout directory on `client`
+    def updateRepo(repoName):
+      return client.succeed(f"""
         (
           set -x
-          cd dep
+          cd {repoName}
           git log
           echo changed >>file
           git add file
@@ -142,8 +171,12 @@ effectVMTest {
           cd ../repo
           git log
         ) 1>&2
-        (cd dep; git rev-parse HEAD)
+        (cd {repoName}; git rev-parse HEAD)
       """).rstrip()
+
+    with subtest("Works when pullRequest body is empty"):
+
+      depRev = updateRepo("dep")
       agent.succeed(f"echo {gitea_admin_password} | effect-update-no-pr-body")
       # FIXME: actually enable pull request for this effect, using a different backend, and/or by implementing it for gitea (useless for now), and check that it is created
       client.succeed(f"""
@@ -153,6 +186,22 @@ effectVMTest {
           git pull
           git log
           grep {depRev} <flake.lock
+        ) 1>&2
+      """)
+
+    with subtest("Can select specific input to update"):
+      depRev = updateRepo("dep")
+      dep2Rev = updateRepo("dep2")
+      agent.succeed(f"echo {gitea_admin_password} | effect-update-dep2input")
+      client.succeed(f"""
+        (
+          set -x
+          cd repo
+          git pull
+          git log
+          git log | grep "Update dep2input with custom message"
+          ! grep {depRev} <flake.lock
+          grep {dep2Rev} <flake.lock
         ) 1>&2
       """)
   '';
