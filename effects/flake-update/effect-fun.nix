@@ -54,7 +54,7 @@ modularEffect {
     command = if isSet then "flake lock" else "flake update";
   in ''
     echo 1>&2 'Running nix ${command}...'
-    nix ${command} ${optionalString isSet extraArgs} \
+    nix ${command} ${extraArgs} \
       --commit-lock-file \
       ${optionalString hasSummary "--commit-lockfile-summary \"${commitSummary}\""} \
       --extra-experimental-features 'nix-command flakes'
