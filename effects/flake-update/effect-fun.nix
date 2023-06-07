@@ -31,6 +31,7 @@ passedArgs@
 , flakes ? { "." = { inherit inputs commitSummary; }; }
 , inputs ? [ ]
 , commitSummary ? ""
+, module ? { }
 }:
 assert createPullRequest -> forgeType == "github";
 assert (autoMergeMethod != null) -> forgeType == "github";
@@ -47,6 +48,7 @@ assert flakes != { };
 modularEffect {
   imports = [
     ../modules/git-update.nix
+    module
   ];
 
   git.checkout.remote.url = gitRemote;
