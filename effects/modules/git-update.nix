@@ -63,12 +63,14 @@ in
           '';
         };
         body = mkOption {
-          type = types.str;
+          type = types.nullOr types.str;
           description = ''
             The body, or description, of the pull request.
 
             A more detailed body can be achieved by making `git.update.script` set the
             body contents in the `HCI_GIT_UPDATE_PR_BODY` environment variable.
+
+            If `null`, the body will be empty or automatic based on the commit message.
           '';
         };
       };
@@ -83,6 +85,8 @@ in
     }
     // optionalAttrs cfg.pullRequest.enable {
       HCI_GIT_UPDATE_PR_TITLE = cfg.pullRequest.title;
+    }
+    // optionalAttrs (cfg.pullRequest.enable && cfg.pullRequest.body != null) {
       HCI_GIT_UPDATE_PR_BODY = cfg.pullRequest.body;
     };
 
@@ -109,10 +113,20 @@ in
     '' + optionalString cfg.pullRequest.enable ''
       # Too many PRs is better than to few. Ensure that the PR exists
       if git rev-parse "refs/remotes/origin/$HCI_GIT_UPDATE_BRANCH" &>/dev/null; then
+        prCreateArgs=()
+
+        # Check that HCI_GIT_UPDATE_PR_BODY is set, including empty.
+        if [[ -n "''${HCI_GIT_UPDATE_PR_BODY+x}" ]]; then
+          prCreateArgs+=(--body "$HCI_GIT_UPDATE_PR_BODY")
+        else
+          # > Do not prompt for title/body and just use commit info
+          prCreateArgs+=(--fill)
+        fi
+
         if gh pr create \
                   --head "$HCI_GIT_UPDATE_BRANCH" \
                   --title "$HCI_GIT_UPDATE_PR_TITLE" \
-                  --body "$HCI_GIT_UPDATE_PR_BODY" \
+                  "''${prCreateArgs[@]}" \
                   2> >(tee $TMPDIR/pr.err) \
                   > $TMPDIR/pr.out
         then

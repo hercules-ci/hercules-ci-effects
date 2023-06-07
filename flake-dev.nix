@@ -15,6 +15,10 @@ top@{ withSystem, lib, inputs, config, ... }: {
         let it = (import ./flake-modules/herculesCI-eval-test.nix { inherit inputs; });
         in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
 
+      evaluation-flake-update =
+        let it = (import ./effects/flake-update/test-module-eval.nix { inherit inputs; });
+        in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
       evaluation-mkHerculesCI =
         let it = (import ./lib/mkHerculesCI-test.nix { inherit inputs; });
         in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };

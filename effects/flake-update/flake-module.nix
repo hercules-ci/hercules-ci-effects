@@ -2,6 +2,29 @@
 let
   inherit (lib) mkOption types optionalAttrs;
   cfg = config.hercules-ci.flake-update;
+
+  flakeConfigModule = {
+    options = {
+      inputs = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        example = ''["nixpkgs" "nixpkgs-unstable"]'';
+        description = ''
+          Flake inputs to update. The default, `[]` means to update all inputs.
+        '';
+      };
+
+      commitSummary = mkOption {
+        type = types.str;
+        default = "";
+        example = "chore: update flake inputs";
+        description = ''
+          Summary for commit. "" means to use the default.
+        '';
+      };
+    };
+  };
+
 in
 {
   options.hercules-ci.flake-update = {
@@ -70,6 +93,48 @@ in
         The [system](https://nixos.org/manual/nix/stable/command-ref/conf-file.html#conf-system) on which to run the flake update job.
       '';
     };
+
+    pullRequestTitle = mkOption {
+      type = types.str;
+      default = "`flake.lock`: Update";
+      example = "chore: update flake.lock";
+      description = ''
+        The title of the pull request being made
+      '';
+    };
+
+    pullRequestBody = mkOption {
+      type = types.nullOr types.str;
+      default = ''
+        Update `flake.lock`. See the commit message(s) for details.
+
+        You may reset this branch by deleting it and re-running the update job.
+
+            git push origin :${cfg.updateBranch}
+      '';
+      example = "updated flake.lock";
+      description = ''
+        The body of the pull request being made
+      '';
+    };
+
+    flakes = mkOption {
+      type = types.attrsOf (types.submodule flakeConfigModule);
+      default = { "." = { }; };
+      example = {
+        "." = { commitSummary = "/flake.lock: Update"; };
+        "path/to/subflake" = { inputs = [ "nixpkgs" ]; };
+      };
+      description = ''
+        Flakes to update.
+
+        The attribute names refer to the relative paths where the flakes/subflakes are located in the repository.
+
+        The values specify further details about how to update the lock. See the sub-options for details.
+
+        NOTE: If you provide a definition for this option, it does *not* extend the default. You must specify all flakes you want to update, including the project root (`"."`) if applicable.
+      '';
+    };
   };
 
   config = {
@@ -82,7 +147,7 @@ in
               hci-effects.flakeUpdate {
                 gitRemote = herculesCI.config.repo.remoteHttpUrl;
                 user = "x-access-token";
-                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod;
+                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod pullRequestTitle pullRequestBody flakes;
               }
             );
           };
