@@ -94,6 +94,18 @@ in
       '';
     };
 
+    effect.settings = mkOption {
+      type = types.deferredModule;
+      default = {};
+      description = ''
+        A module that extends the flake-update effect arbitrarily.
+
+        See also:
+         - [Effect Modules / Core Options](https://docs.hercules-ci.com/hercules-ci-effects/reference/effect-modules/core)
+         - [Effect Modules / Git Options](https://docs.hercules-ci.com/hercules-ci-effects/reference/effect-modules/git)
+      '';
+    };
+
     pullRequestTitle = mkOption {
       type = types.str;
       default = "`flake.lock`: Update";
@@ -148,6 +160,7 @@ in
                 gitRemote = herculesCI.config.repo.remoteHttpUrl;
                 user = "x-access-token";
                 inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod pullRequestTitle pullRequestBody flakes;
+                module = cfg.effect.settings;
               }
             );
           };
