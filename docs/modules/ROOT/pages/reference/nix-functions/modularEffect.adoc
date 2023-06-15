@@ -3,6 +3,22 @@
 
 This function is a module system-based wrapper for xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]. The module systemfootnote:[The _module system_ refers to the module system used by NixOS. It does not include anything specific to NixOS, but rather the features such as `imports`, types, `mkForce`, etc.] helps effect logic to be composed, factored out and reused. `hercules-ci-effects` provides a number of modules to be imported.
 
+[[example]]
+## Example
+
+```nix
+hci-effects.modularEffect ({ pkgs, ... }: {
+  imports = [ hci-effects.modules.git-auth ];
+  inputs = [ pkgs.hello ]
+  effectScript = ''
+    hello
+    git status
+  '';
+})
+```
+
+For `hci-effects`, see xref:guide/import-or-pin.adoc[Import `hercules-ci-effects`].
+
 [[parameter]]
 ## Parameter
 

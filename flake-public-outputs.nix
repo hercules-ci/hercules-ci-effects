@@ -1,4 +1,4 @@
-{ withSystem, inputs, ... }: {
+{ withSystem, inputs, lib, ... }: {
   imports = [
     ./flake-module.nix
     ./flake-docs-render.nix
@@ -21,7 +21,8 @@
     };
 
     overlay = final: prev: {
-      effects = import ./effects/default.nix final.effects final;
+      effects = lib.warn "pkgs.effects is deprecated. Use pkgs.hci-effects instead." final.hci-effects;
+      hci-effects = import ./effects/default.nix final.effects final;
     };
 
     templates = rec {
