@@ -17,7 +17,7 @@
     modules = {
       # Also available as `(lib.withPkgs pkgs).modules` aka
       # `hci-effects.modules` when using flake-parts `perSystem` module argument.
-      effects = import ./effects/modules.nix;
+      effect = import ./effects/modules.nix;
     };
 
     overlay = final: prev: {
