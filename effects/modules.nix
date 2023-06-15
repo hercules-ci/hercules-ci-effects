@@ -28,7 +28,7 @@
 
     See https://docs.hercules-ci.com/hercules-ci-effects/reference/effect-modules/git#git-update
   */
-  git-update = ./modules/git-auth.nix;
+  git-update = ./modules/git-update.nix;
 
   /*
     Very basic git configuration; default author, adding git to PATH, etc.
