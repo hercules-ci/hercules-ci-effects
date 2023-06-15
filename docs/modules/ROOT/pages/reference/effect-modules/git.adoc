@@ -5,12 +5,32 @@
 
 The module provides the basics for working with a git repository.
 
+Example import:
+
+```nix
+hci-effects.modularEffect {
+  imports = [
+    hci-effects.modules.git-auth
+  ];
+}
+```
+
 include::partial$options/git-auth.adoc[leveloffset=0]
 
 [[git-update]]
 ## `git-update`
 
 A module that facilitates the updating of a git repository.
+
+Example import:
+
+```nix
+hci-effects.modularEffect {
+  imports = [
+    hci-effects.modules.git-update
+  ];
+}
+```
 
 include::partial$options/git-update.adoc[leveloffset=0]
 

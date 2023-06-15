@@ -14,6 +14,12 @@
 
     lib.mkHerculesCI = import ./lib/mkHerculesCI.nix inputs;
 
+    modules = {
+      # Also available as `(lib.withPkgs pkgs).modules` aka
+      # `hci-effects.modules` when using flake-parts `perSystem` module argument.
+      effects = import ./effects/modules.nix;
+    };
+
     overlay = final: prev: {
       effects = import ./effects/default.nix final.effects final;
     };
