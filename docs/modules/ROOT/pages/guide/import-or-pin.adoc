@@ -29,10 +29,12 @@ In your outputs section:
         hercules-ci-effects.flakeModule
       ];
 
-      effects = { branch, ... }: withSystem "x86_64-linux" (
-        { config, effects, pkgs, inputs', ... }:
+      # flake.effects is added as onPush.default.outputs.
+      # For full flexibility, instead use https://flake.parts/options/hercules-ci-effects.html#opt-herculesCI
+      flake.effects = { branch, ... }: withSystem "x86_64-linux" (
+        { config, hci-effects, pkgs, inputs', ... }:
         {
-          deploy = effects.runNixOS {
+          deploy = hci-effects.runNixOS {
             # ...
           };
         }
@@ -102,7 +104,7 @@ Define the `herculesCI` flake output attribute. Here's a complete example:
         };
 
         # Some modules have options in `perSystem`
-        perSystem = { system, ... } = {
+        perSystem = { system, hci-effects, ... } = {
           # Many flakes call Nixpkgs, to set some `config` or `overlays`.
           # If yours needs that, it's best to reuse your pkgs here. Example:
           # _module.args.pkgs = pkgsFor.${system};
@@ -135,9 +137,9 @@ In your outputs section, call Nixpkgs with the overlay:
           hercules-ci-effects.overlay
         ];
       };
-      inherit (pkgs) effects; # optional
+      inherit (pkgs) hci-effects; # optional
     in {
-      # your flake attributes, using `pkgs.effects` or `effects` (optional)
+      # your flake attributes, using `pkgs.hci-effects` or `hci-effects` (optional)
     }
 ```
 
@@ -160,7 +162,7 @@ Call `hercules-ci-effects`:
   outputs = { hercules-ci-effects, ... }:
     let
       pkgs = /* ... */;
-      effects = hercules-ci-effects.lib.withPkgs pkgs;
+      hci-effects = hercules-ci-effects.lib.withPkgs pkgs;
     in {
       # your flake attributes, using `effects`
     }

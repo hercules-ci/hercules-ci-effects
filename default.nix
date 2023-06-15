@@ -8,5 +8,7 @@
  */
 
 { pkgs }: rec {
-  effects = import ./effects/default.nix effects pkgs;
+  effects = hci-effects;
+  hci-effects = import ./effects/default.nix effects pkgs;
+  modules = import ./effects/modules.nix;
 }

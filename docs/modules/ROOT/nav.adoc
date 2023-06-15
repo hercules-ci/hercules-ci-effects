@@ -10,7 +10,7 @@
 ** xref:guide/write-a-custom-effect.adoc[Write a Custom Effect]
 ** xref:guide/deploy-to-github-pages.adoc[Deploy to GitHub Pages]
 ** xref:guide/distribute-a-static-binary-with-github-releases.adoc[Distribute a Static Binary with GitHub Releases]
-* Effect Module Reference
+* xref:reference/effect-modules.adoc[Effect Module Reference]
 ** xref:reference/effect-modules/core.adoc[Core Options]
 ** xref:reference/effect-modules/git.adoc[Git Options]
 * Flake Parts Module Reference

@@ -46,6 +46,8 @@ checkVersion
       ];
     });
 
+  modules = import ./modules.nix;
+
   runIf = condition: v:
     recurseIntoAttrs (
       (
