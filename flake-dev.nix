@@ -1,4 +1,4 @@
-top@{ withSystem, lib, inputs, config, ... }: {
+top@{ withSystem, lib, inputs, config, self, ... }: {
   imports = [
     # dogfooding
     ./flake-module.nix
@@ -70,6 +70,12 @@ top@{ withSystem, lib, inputs, config, ... }: {
       github-releases-tests =
         import ./flake-modules/github-releases/test.nix
           { effectSystem = system; inherit inputs; };
+      checkModules =
+        builtins.deepSeq
+          (lib.mapAttrs
+            (_name: builtins.readFile)
+            (self.modules.effect)
+          );
     in {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
       git-update = hci-effects.callPackage ./effects/modules/git-update/test.nix { };
@@ -79,6 +85,7 @@ top@{ withSystem, lib, inputs, config, ... }: {
       artifacts-tool-typecheck = hci-effects.callPackage ./packages/artifacts-tool/mypy.nix { };
       github-releases = github-releases-tests.test.simple;
       github-releases-perSystem = github-releases-tests.test.perSystem;
+      module-files-readable = checkModules pkgs.emptyFile;
     };
     devShells.default = pkgs.mkShell {
       nativeBuildInputs = [
