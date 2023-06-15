@@ -31,7 +31,8 @@ in
       };
       script = mkOption {
         description = ''
-          Bash statements that make changes to the checkout.
+          Bash statements that create zero or more commits.
+          All changes must be explicitly committed by the script.
 
           The working directory is the root of the checkout.
         '';
@@ -102,6 +103,12 @@ in
       rev_before="$(git rev-parse HEAD)"
 
       ${cfg.script}
+
+      # Require all changes to be committed
+      if ! git diff HEAD --exit-code; then
+        echo 1>&2 'Uncommitted changes detected. To avoid ignoring changes by accident, `git.update.script` must commit all changes or revert them.'
+        exit 1
+      fi
 
       rev_after="$(git rev-parse HEAD)"
 

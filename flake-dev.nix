@@ -72,6 +72,7 @@ top@{ withSystem, lib, inputs, config, ... }: {
           { effectSystem = system; inherit inputs; };
     in {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
+      git-update = hci-effects.callPackage ./effects/modules/git-update/test.nix { };
       write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
       artifacts-tool = hci-effects.callPackage ./packages/artifacts-tool/test { };
