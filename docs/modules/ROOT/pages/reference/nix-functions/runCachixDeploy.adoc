@@ -91,7 +91,7 @@ You can generate a value for _ACTIVATION-TOKEN_ by navigating to https://app.cac
 
 Default: `false`
 
-Whether to exit immediately.
+Whether to exit immediately instead of waiting for all deployments to finish. This is useful if you are deploying to a system that might be offline, for example, a laptop.
 
 When `true`, the effect will exit immediately and the deployment will continue in the background.
 
