@@ -86,6 +86,17 @@ And then copy the secret over to your Hercules CI agent `secrets.json`.
 
 You can generate a value for _ACTIVATION-TOKEN_ by navigating to https://app.cachix.org/deploy[Cachix Deploy], creating a workspace if you haven't already done so and clicking btn:[Start Deployment].
 
+[[param-async]]
+=== `async`
+
+Default: `false`
+
+Whether to exit immediately.
+
+When `true`, the effect will exit immediately and the deployment will continue in the background.
+
+When `false`, the effect will wait for the deployment to finish before exiting. The log will be available in the Hercules CI dashboard.
+
 [[param-cachix]]
 === `cachix`
 
