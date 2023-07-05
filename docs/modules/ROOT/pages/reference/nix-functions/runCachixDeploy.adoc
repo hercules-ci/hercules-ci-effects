@@ -14,6 +14,7 @@ Example:
 ```nix
 runCachixDeploy {
   deploy.agents."machine1" = (pkgs.nixos ./configuration.nix).toplevel;
+  async = true;
 }
 ```
 
@@ -96,6 +97,8 @@ Whether to exit immediately instead of waiting for all deployments to finish. Th
 When `true`, the effect will exit immediately and the deployment will continue in the background.
 
 When `false`, the effect will wait for the deployment to finish before exiting. The log will be available in the Hercules CI dashboard.
+
+NOTE: If the effect will redeploy the `hercules-ci-agent` that runs the effect, `async` must be set to `true`.
 
 [[param-cachix]]
 === `cachix`
