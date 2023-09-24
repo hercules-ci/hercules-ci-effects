@@ -28,6 +28,9 @@ passedArgs@
   # NB: Default also specified in ./flake-module.nix
 , pullRequestTitle ? genTitle flakes
 , pullRequestBody ? null
+  # TODO [baseMerge] "HEAD" by default instead of null after real world testing
+, baseMergeBranch ? null
+, baseMergeMethod ? "merge"
 , flakes ? { "." = { inherit inputs commitSummary; }; }
 , inputs ? [ ]
 , commitSummary ? ""
@@ -60,6 +63,9 @@ modularEffect {
   git.update.pullRequest.title = pullRequestTitle;
   git.update.pullRequest.body = pullRequestBody;
   git.update.pullRequest.autoMergeMethod = autoMergeMethod;
+  git.update.baseMerge.branch = lib.mkIf (baseMergeBranch != null) (lib.mkDefault baseMergeBranch);
+  git.update.baseMerge.method = lib.mkDefault baseMergeMethod;
+  git.update.baseMerge.enable = lib.mkDefault (baseMergeMethod != null && baseMergeBranch != null);
 
   secretsMap.token = tokenSecret;
 

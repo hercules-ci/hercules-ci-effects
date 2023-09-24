@@ -59,6 +59,36 @@ in
       '';
     };
 
+    baseMerge.enable = mkOption {
+      description = ''
+        Whether to merge the base branch into the update branch before running the update.
+
+        This is useful to ensure that the update branch is up to date with the base branch.
+      '';
+      type = types.bool;
+      default = false;
+    };
+
+    baseMerge.branch = mkOption {
+      description = ''
+        Branch name on the remote to merge into the update branch before running the update.
+
+        Used when `hercules-ci.flake-update.baseMerge.enable` is true.
+      '';
+      type = types.str;
+      default = "HEAD";
+    };
+
+    baseMerge.method = mkOption {
+      description = ''
+        How to merge the base branch into the update branch before running the update.
+
+        Used when `hercules-ci.flake-update.baseMerge.enable` is true.
+      '';
+      type = types.enum [ "merge" "rebase" ];
+      default = "merge";
+    };
+
     createPullRequest = mkOption {
       type = types.bool;
       default = true;
@@ -150,6 +180,9 @@ in
   };
 
   config = {
+    hercules-ci.flake-update.effect.settings = {
+      git.update.baseMerge = cfg.baseMerge;
+    };
     herculesCI = herculesCI@{ config, ... }: optionalAttrs (cfg.enable) {
       onSchedule.flake-update = {
         inherit (cfg) when;

@@ -25,7 +25,9 @@ in
     git.update = {
       branch = mkOption {
         description = ''
-          Branch name to pull from and push any changes to.
+          Branch name to push to.
+
+          If you use pull requests, this should be a "feature" branch.
         '';
         type = types.str;
       };
@@ -38,6 +40,34 @@ in
         '';
         type = types.lines;
       };
+      baseMerge.enable = mkOption {
+        description = ''
+          Whether to merge the base branch into the update branch before running `git.update.script`.
+
+          This is useful to ensure that the update branch is up to date with the base branch.
+        '';
+        type = types.bool;
+        # TODO [baseMerge] enable by default after real world testing
+        default = false;
+      };
+      baseMerge.branch = mkOption {
+        description = ''
+          Branch name on the remote to merge into the update branch before running `git.update.script`.
+
+          Used when `git.update.baseMerge.enable` is true.
+        '';
+        type = types.str;
+        default = "HEAD";
+      };
+      baseMerge.method = mkOption {
+        description = ''
+          How to merge the base branch into the update branch before running `git.update.script`.
+
+          Used when `git.update.baseMerge.enable` is true.
+        '';
+        type = types.enum [ "merge" "rebase" ];
+        default = "merge";
+      };
       pullRequest = {
         enable = mkOption {
           description = ''
@@ -45,6 +75,15 @@ in
           '';
           type = types.bool;
           default = true;
+        };
+        base = mkOption {
+          description = ''
+            Branch name on the remote to merge the update branch into.
+
+            Used when `git.update.pullRequest.enable` is true.
+          '';
+          type = types.str;
+          default = "HEAD";
         };
         autoMergeMethod = mkOption {
           type = types.enum [ null "merge" "rebase" "squash" ];
@@ -86,9 +125,14 @@ in
     }
     // optionalAttrs cfg.pullRequest.enable {
       HCI_GIT_UPDATE_PR_TITLE = cfg.pullRequest.title;
+      HCI_GIT_UPDATE_PR_BASE = cfg.pullRequest.base;
     }
     // optionalAttrs (cfg.pullRequest.enable && cfg.pullRequest.body != null) {
       HCI_GIT_UPDATE_PR_BODY = cfg.pullRequest.body;
+    }
+    // optionalAttrs (cfg.baseMerge.enable) {
+      HCI_GIT_UPDATE_BASE_BRANCH = cfg.baseMerge.branch;
+      HCI_GIT_UPDATE_BASE_MERGE_METHOD = cfg.baseMerge.method;
     };
 
     effectScript = ''
@@ -96,9 +140,20 @@ in
       cd repo
       if git rev-parse "refs/remotes/origin/$HCI_GIT_UPDATE_BRANCH" &>/dev/null; then
         git checkout "$HCI_GIT_UPDATE_BRANCH"
+        updateBranchExisted=true
       else
         git checkout -b "$HCI_GIT_UPDATE_BRANCH"
+        updateBranchExisted=false
       fi
+
+      case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
+        merge)
+          git merge "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
+          ;;
+        rebase)
+          git rebase "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
+          ;;
+      esac
 
       rev_before="$(git rev-parse HEAD)"
 
@@ -128,6 +183,10 @@ in
         else
           # > Do not prompt for title/body and just use commit info
           prCreateArgs+=(--fill)
+        fi
+
+        if [[ "$HCI_GIT_UPDATE_PR_BASE" != "HEAD" ]]; then
+          prCreateArgs+=(--base "$HCI_GIT_UPDATE_PR_BASE")
         fi
 
         if gh pr create \

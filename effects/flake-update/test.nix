@@ -53,6 +53,13 @@ effectVMTest {
         "sub" = { };
       };
     };
+    update-custom-baseMerge-branch = hci-effects.flakeUpdate {
+      gitRemote = "http://gitea:3000/test/repo";
+      user = "test";
+      forgeType = "gitea";
+      baseMergeBranch = "develop";
+      createPullRequest = false;
+    };
   };
 
   testCases = ''
@@ -278,6 +285,43 @@ effectVMTest {
           git log -n 2 | grep -F "sub/flake.lock: Update"
           git log -n 2 | grep -F "flake.lock: Update"
         ) 1>&2
+      """)
+
+    with subtest("Can pull from a custom branch using baseMerge"):
+      developRev = client.succeed("""
+        # Create a branch with a different name than the default
+        (
+          set -x
+          cd repo
+          git checkout -b develop
+          echo changedq345t6y >>extra-file-from-develop
+          git add extra-file-from-develop
+          git commit -m 'extra-file-from-develop: init'
+          git push origin develop -u
+          git log
+        ) 1>&2
+        ( cd repo; git log --format=%H -n 1; )
+      """).rstrip()
+
+      depRev = updateRepo("dep")
+      agent.succeed(f"echo {gitea_admin_password} | effect-update-custom-baseMerge-branch")
+      client.succeed(f"""
+        (
+          set -x
+          cd repo
+          git checkout flake-update
+          git pull --ff-only
+
+          # Check that both commits made it in
+          cat extra-file-from-develop
+          grep {depRev} <flake.lock
+          git log
+          git log | grep {depRev}
+          git log | grep {developRev}
+          git push origin :develop
+          git branch -d develop
+        ) 1>&2;
+        # done
       """)
 
   '';
