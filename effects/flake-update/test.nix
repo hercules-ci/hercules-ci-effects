@@ -321,8 +321,51 @@ effectVMTest {
           git push origin :develop
           git branch -d develop
         ) 1>&2;
-        # done
       """)
 
+    with subtest("Will checkout a the base branch when update branch is missing"):
+      developRev = client.succeed("""
+        # Create a branch with a different name than the default
+        (
+          set -x
+          cd repo
+          git checkout -b develop
+          echo change8bn48w >>extra-file-from-develop
+          git add extra-file-from-develop
+          git commit -m 'extra-file-from-develop: append'
+          git push origin develop -u
+          git log
+        ) 1>&2
+        ( cd repo; git log --format=%H -n 1; )
+      """).rstrip()
+      depRev = updateRepo("dep")
+      client.succeed("""
+        (
+          set -x
+          cd repo
+          git push origin :flake-update
+          git branch -d flake-update
+        ) 1>&2
+      """)
+      
+      agent.succeed(f"echo {gitea_admin_password} | effect-update-custom-baseMerge-branch")
+
+      client.succeed(f"""
+        (
+          set -x
+          cd repo
+          git fetch origin
+          git checkout flake-update
+          git pull --ff-only
+
+          # Check that both commits made it in
+          cat extra-file-from-develop
+          git log --graph --all --oneline
+          git log | grep {developRev}
+          git log | grep {depRev}
+          git push origin :develop
+          git branch -d develop
+        ) 1>&2;
+      """)
   '';
 }
