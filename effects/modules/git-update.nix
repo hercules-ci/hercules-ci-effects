@@ -142,6 +142,7 @@ in
     env = {
       HCI_GIT_REMOTE_URL = config.git.checkout.remote.url;
       HCI_GIT_UPDATE_BRANCH = cfg.branch;
+      HCI_GIT_UPDATE_BASE_BRANCH = cfg.baseMerge.branch;
     }
     // optionalAttrs cfg.pullRequest.enable {
       HCI_GIT_UPDATE_PR_TITLE = cfg.pullRequest.title;
@@ -151,7 +152,6 @@ in
       HCI_GIT_UPDATE_PR_BODY = cfg.pullRequest.body;
     }
     // optionalAttrs (cfg.baseMerge.enable) {
-      HCI_GIT_UPDATE_BASE_BRANCH = cfg.baseMerge.branch;
       HCI_GIT_UPDATE_BASE_MERGE_METHOD = cfg.baseMerge.method;
     };
 
@@ -162,18 +162,20 @@ in
         git checkout "$HCI_GIT_UPDATE_BRANCH"
         updateBranchExisted=true
       else
-        git checkout -b "$HCI_GIT_UPDATE_BRANCH"
+        git checkout -b "$HCI_GIT_UPDATE_BRANCH" "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
         updateBranchExisted=false
       fi
 
-      case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
-        merge)
-          git merge "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
-          ;;
-        rebase)
-          git rebase "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
-          ;;
-      esac
+      if [[ "$updateBranchExisted" == "true" ]]; then
+        case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
+          merge)
+            git merge "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
+            ;;
+          rebase)
+            git rebase "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
+            ;;
+        esac
+      fi
 
       rev_before="$(git rev-parse HEAD)"
 
