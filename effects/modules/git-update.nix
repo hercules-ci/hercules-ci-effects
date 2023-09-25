@@ -151,7 +151,7 @@ in
     // optionalAttrs (cfg.pullRequest.enable && cfg.pullRequest.body != null) {
       HCI_GIT_UPDATE_PR_BODY = cfg.pullRequest.body;
     }
-    // optionalAttrs (cfg.baseMerge.enable) {
+    // optionalAttrs cfg.baseMerge.enable {
       HCI_GIT_UPDATE_BASE_MERGE_METHOD = cfg.baseMerge.method;
     };
 
