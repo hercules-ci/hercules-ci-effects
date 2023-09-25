@@ -166,15 +166,36 @@ in
         updateBranchExisted=false
       fi
 
+      function die_conflict(){
+        echo 1>&2 "Failed. Please resolve conflicts by hand and push to $HCI_GIT_UPDATE_BASE_BRANCH."
+        echo 1>&2 "Conflicts with diff; summary at end:"
+        echo 1>&2
+        git diff --diff-filter=U --relative
+        echo 1>&2
+        echo 1>&2 "Conflict summary:"
+        echo 1>&2
+        # bold red
+        printf '\033[1;31m'
+        git diff --diff-filter=U --relative --name-only
+        # reset
+        printf '\033[0m'
+        echo 1>&2
+        exit 1
+      }
+
       if [[ "$updateBranchExisted" == "true" ]]; then
+        baseDescr="$(git rev-parse --abbrev-ref "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH")"
         case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
           merge)
-            git merge "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
+            echo "Merging $baseDescr into $HCI_GIT_UPDATE_BRANCH ..."
+            git merge "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH" || die_conflict
             ;;
           rebase)
-            git rebase "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
+            echo "Rebasing $HCI_GIT_UPDATE_BRANCH onto $baseDescr ..."
+            git rebase "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH" || die_conflict
             ;;
         esac
+        unset baseDescr
       fi
 
       rev_before="$(git rev-parse HEAD)"
