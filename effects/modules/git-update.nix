@@ -40,11 +40,24 @@ in
         '';
         type = types.lines;
       };
+      baseBranch = mkOption {
+        description = ''
+          Branch name on the remote that the update branch will be
+            - based on (via `git.update.baseMerge.branch`), and
+            - merged back into (via `git.update.pullRequest.base`) if enabled.
+
+          `"HEAD"` refers to the default branch, which is often `main` or `master`.
+        '';
+        type = types.str;
+        default = "HEAD";
+      };
       baseMerge.enable = mkOption {
         description = ''
           Whether to merge the base branch into the update branch before running `git.update.script`.
 
           This is useful to ensure that the update branch is up to date with the base branch.
+
+          If this option is `false`, you may have to merge or rebase the update branch manually sometimes.
         '';
         type = types.bool;
         # TODO [baseMerge] enable by default after real world testing
@@ -57,7 +70,10 @@ in
           Used when `git.update.baseMerge.enable` is true.
         '';
         type = types.str;
-        default = "HEAD";
+        default = cfg.baseBranch;
+        defaultText = lib.literalExpression ''
+          git.update.baseBranch
+        '';
       };
       baseMerge.method = mkOption {
         description = ''
@@ -83,7 +99,11 @@ in
             Used when `git.update.pullRequest.enable` is true.
           '';
           type = types.str;
-          default = "HEAD";
+          default = cfg.baseBranch;
+          defaultText = lib.literalExpression ''
+            git.update.baseBranch
+          '';
+          example = "develop";
         };
         autoMergeMethod = mkOption {
           type = types.enum [ null "merge" "rebase" "squash" ];
