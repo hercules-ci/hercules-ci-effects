@@ -50,6 +50,19 @@ in
       '';
     };
 
+    baseBranch = mkOption {
+      type = types.str;
+      default = "HEAD";
+      example = "develop";
+      description = ''
+        Branch name on the remote that the update branch will be
+          - based on (via `hercules-ci.flake-update.baseMerge.branch`), and
+          - merged back into if `hercules-ci.flake-update.createPullRequest` is enabled.
+
+        `"HEAD"` refers to the default branch, which is often `main` or `master`.
+      '';
+    };
+
     forgeType = mkOption {
       type = types.str;
       default = "github";
@@ -57,6 +70,39 @@ in
       description = ''
         The type of Git server commited to.
       '';
+    };
+
+    baseMerge.enable = mkOption {
+      description = ''
+        Whether to merge the base branch into the update branch before running the update.
+
+        This is useful to ensure that the update branch is up to date with the base branch.
+
+        If this option is `false`, you may have to merge or rebase the update branch manually sometimes.
+      '';
+      type = types.bool;
+      default = false;
+    };
+
+    baseMerge.branch = mkOption {
+      description = ''
+        Branch name on the remote to merge into the update branch before running the update.
+
+        Used when `hercules-ci.flake-update.baseMerge.enable` is true.
+      '';
+      type = types.str;
+      default = cfg.baseBranch;
+      defaultText = lib.literalExpression "hercules-ci.flake-update.baseBranch";
+    };
+
+    baseMerge.method = mkOption {
+      description = ''
+        How to merge the base branch into the update branch before running the update.
+
+        Used when `hercules-ci.flake-update.baseMerge.enable` is true.
+      '';
+      type = types.enum [ "merge" "rebase" ];
+      default = "merge";
     };
 
     createPullRequest = mkOption {
@@ -150,6 +196,10 @@ in
   };
 
   config = {
+    hercules-ci.flake-update.effect.settings = {
+      git.update.baseMerge = cfg.baseMerge;
+      git.update.baseBranch = cfg.baseBranch;
+    };
     herculesCI = herculesCI@{ config, ... }: optionalAttrs (cfg.enable) {
       onSchedule.flake-update = {
         inherit (cfg) when;
