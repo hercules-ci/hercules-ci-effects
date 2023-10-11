@@ -106,6 +106,7 @@ in
       description = ''
         The initial environment variables to set in the effect sandbox.
       '';
+      default = { };
     };
 
     /* Semi-internal options */
