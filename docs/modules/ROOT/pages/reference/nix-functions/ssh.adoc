@@ -77,6 +77,30 @@ not been `export`-ed. Such variables remain un-`export`-ed.
 
 == Parameters
 
+[[param-buildOnDestination]]
+=== `buildOnDestination`
+
+Default: `false`. Whether to build the command and its dependencies on the remote.
+
+This is useful when bootstrapping a new agent without setting it up as a remote builder first.
+
+Builds that are deferred to the destination are by definition not built during the "build phase" of CI.
+This means that you may encounter a build failure after the job's effects are started.
+For this reason, you might want to enable this only temporarily, or you could add attributes to the job for relevant packages and checks.
+
+The latter option has the benefit that packages will be in your binary cache, to speed up realisation on the remote, similar to when `buildOnDestination` is `false`.
+
+[[param-destinationPkgs]]
+=== `destinationPkgs`
+
+Only needed when <<param-buildOnDestination>> is `true`.
+
+Some functions, such as `runNixDarwin` will set a default value for you.
+
+A Nixpkgs instance that is buildable on the destination.
+
+This parameter is part of a workaround for https://github.com/NixOS/nix/issues/5868#issuecomment-1757869475[no `builtins.storePath` in pure mode (nix issue)].
+
 [[param-compressClosure]]
 === `compressClosure`
 
