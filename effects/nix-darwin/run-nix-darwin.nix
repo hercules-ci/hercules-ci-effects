@@ -63,6 +63,9 @@ let
 
   mutEx = this: that: lib.throwIf (args?${this} && args?${that}) (mutExMsg this that);
 
+  # Add default value for destinationPkgs, for when buildOnDestination is true
+  ssh' = { destinationPkgs = config.options._module.args.value.pkgs; } // ssh;
+
 in
 
 mutEx "config" "configuration"
@@ -80,7 +83,7 @@ mkEffect (removeAttrs args [ "configuration" "ssh" "config" "system" "nix-darwin
     inherit config;
   };
   effectScript = ''
-    ${effects.ssh ssh ''
+    ${effects.ssh ssh' ''
       set -eu
       echo >&2 "remote nix version:"
       nix-env --version >&2
