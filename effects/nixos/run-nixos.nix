@@ -11,7 +11,8 @@ let
 in
 args@{
     configuration ? throw "effects.runNixOS: you must provide a configuration (or a fully evaluated configuration in `config`)",
-    system ? throw "effects.runNixOS: you must provide a `system` parameter (or a fully evaluated configuration in `config`)",
+    # null means let the configuration specify it
+    system ? null,
     nixpkgs ? path,
     config ? null,
     profile ? "/nix/var/nix/profiles/system",
