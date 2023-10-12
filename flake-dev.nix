@@ -11,6 +11,10 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
         (import ./flake-modules/derivationTree-type.nix { inherit lib; }).tests
           inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile;
 
+      evaluation-runNixOS =
+        let it = (import ./effects/nixos/eval-test.nix { inherit inputs; });
+        in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
       evaluation-herculesCI =
         let it = (import ./flake-modules/herculesCI-eval-test.nix { inherit inputs; });
         in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
