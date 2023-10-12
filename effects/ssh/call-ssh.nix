@@ -38,11 +38,13 @@ let
 
   remoteCommands' =
     if buildOnDestination
-    then destinationBuild remoteCommands
+    then destinationBuild remoteCommandsFile
     else remoteCommands;
 
+  remoteCommandsFile = destinationPkgs.writeText "remote-commands-after-build" remoteCommands;
+
   # Turn a binary deployment into a source deployment.
-  # type: string of bash statements -> string of bash statements
+  # type: derivation with bash statements -> string of bash statements
   #
   # Ideally we don't use and don't ask for destinationPkgs, but instead we
   # retrieve the derivation paths directly, without constructing an unnecessary
@@ -50,12 +52,9 @@ let
   # Such an approach would be possible with builtins.storePath, but that isn't
   # available in pure mode, yet(?).
   # See https://github.com/NixOS/nix/issues/5868#issuecomment-1757869475
-  destinationBuild = commands:
-    let
-      file = destinationPkgs.writeText "remote-commands-after-build" commands;
-
-      # Why `eval`? `source` would change the environment slightly.
-    in ''
+  destinationBuild = file:
+    # Why `eval`? `source` would change the environment slightly.
+    ''
       (
         _call_ssh_script=$(nix-store -vr ${builtins.unsafeDiscardOutputDependency file.drvPath})
         eval "$(cat "$_call_ssh_script")"
@@ -90,7 +89,14 @@ let
       sort ./references >$out
     '';
 
-  referencesFile = writeDirectReferencesToFile (writeText "remote-commands" remoteCommands');
+  referencesFile =
+    if buildOnDestination
+    then
+      # The else branch would be sufficient if it wasn't for
+      # https://github.com/NixOS/nix/issues/9146
+      writeText "remote-derivations" "${builtins.unsafeDiscardOutputDependency remoteCommandsFile.drvPath}"
+    else writeDirectReferencesToFile (writeText "remote-commands" remoteCommands');
+
 in ''(
   export PATH="${makeBinPath [nix ssh]}:$PATH"
   _call_ssh_references="''${ssh_copy_paths:-}''${ssh_copy_paths:+ }$(cat ${referencesFile})"
