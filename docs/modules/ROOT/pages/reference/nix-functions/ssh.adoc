@@ -90,6 +90,8 @@ For this reason, you might want to enable this only temporarily, or you could ad
 
 The latter option has the benefit that packages will be in your binary cache, to speed up realisation on the remote, similar to when `buildOnDestination` is `false`.
 
+Evaluation still happens in CI, as well as builds for "import from derivation" if needed.
+
 [[param-destinationPkgs]]
 === `destinationPkgs`
 
