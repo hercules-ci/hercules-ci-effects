@@ -68,9 +68,12 @@ let
 
   # Add default value for destinationPkgs, for when buildOnDestination is true
   ssh' = {
-      # non-standard
-      # destinationPkgs = config.options._module.args.value.pkgs;
-      destinationPkgs = throw "When buildOnDestination is true, you must specify destinationPkgs. See https://docs.hercules-ci.com/hercules-ci-effects/reference/nix-functions/ssh.html#param-buildOnDestination";
+      destinationPkgs =
+        _config._module.args.pkgs or (throw ''
+          When `buildOnDestination` is true, you must either specify a whole nix-darwin configuration attrset (not just `config = myConfiguration.config`, or you must specify `ssh.destinationPkgs`.
+
+          See also https://docs.hercules-ci.com/hercules-ci-effects/reference/nix-functions/ssh.html#param-buildOnDestination
+        '');
     }
     // ssh
     // optionalAttrs (buildOnDestination != null) {

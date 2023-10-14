@@ -41,8 +41,6 @@ rec {
         test.by-config-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
-            # TODO make destinationPkgs obsolete
-            ssh.destinationPkgs = inputs.nixpkgs.legacyPackages.x86_64-darwin;
             ssh.buildOnDestination = true;
             config = self.darwinConfigurations."Johns-MacBook";
           }
@@ -50,8 +48,6 @@ rec {
         test.by-config-buildOnDestination-override = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
-            # TODO make destinationPkgs obsolete
-            ssh.destinationPkgs = inputs.nixpkgs.legacyPackages.x86_64-darwin;
             buildOnDestination = true;
             config = self.darwinConfigurations."Johns-MacBook";
           }
