@@ -32,6 +32,38 @@ rec {
             config = self.darwinConfigurations."Johns-MacBook";
           }
         );
+        test.by-config-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            # TODO make destinationPkgs obsolete
+            ssh.destinationPkgs = inputs.nixpkgs.legacyPackages.x86_64-darwin;
+            ssh.buildOnDestination = true;
+            config = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
+        test.by-config-buildOnDestination-override = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            # TODO make destinationPkgs obsolete
+            ssh.destinationPkgs = inputs.nixpkgs.legacyPackages.x86_64-darwin;
+            buildOnDestination = true;
+            config = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
+        test.by-config-no-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            buildOnDestination = false;
+            config = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
+        test.by-config-no-ssh-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            buildOnDestination = false;
+            config = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
         test.by-other-args = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
@@ -74,6 +106,21 @@ rec {
     # A custom pkgs should be used without reinvoking nixpkgs from scratch.
     assert
       flake1.test.by-other-args-pkgs.config.expose.pkgs.proof-of-overlay == "yes, overlay";
+
+    assert
+      testEqDrv
+        flake1.test.by-config.drvPath
+        flake1.test.by-config-no-buildOnDestination.drvPath;
+
+    assert
+      testEqDrv
+        flake1.test.by-config.drvPath
+        flake1.test.by-config-no-ssh-buildOnDestination.drvPath;
+
+    assert
+      testEqDrv
+        flake1.test.by-config-buildOnDestination.drvPath
+        flake1.test.by-config-buildOnDestination-override.drvPath;
 
     ok;
 

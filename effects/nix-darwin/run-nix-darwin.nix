@@ -1,6 +1,8 @@
 { effects, mkEffect, lib, openssh, path }:
 
 let
+  inherit (lib) optionalAttrs;
+
   docUrl = "https://docs.hercules-ci.com/hercules-ci-effects/reference/nix-functions/runnixdarwin";
 
   isRequired = param: throw ''
@@ -41,6 +43,7 @@ args@{
   )).config
 , # Deployment parameters
   ssh
+, buildOnDestination ? null
 , # Misc, optional
   passthru ? { }
 , ...
@@ -64,7 +67,15 @@ let
   mutEx = this: that: lib.throwIf (args?${this} && args?${that}) (mutExMsg this that);
 
   # Add default value for destinationPkgs, for when buildOnDestination is true
-  ssh' = { destinationPkgs = config.options._module.args.value.pkgs; } // ssh;
+  ssh' = {
+      # non-standard
+      # destinationPkgs = config.options._module.args.value.pkgs;
+      destinationPkgs = throw "When buildOnDestination is true, you must specify destinationPkgs. See https://docs.hercules-ci.com/hercules-ci-effects/reference/nix-functions/ssh.html#param-buildOnDestination";
+    }
+    // ssh
+    // optionalAttrs (buildOnDestination != null) {
+      inherit buildOnDestination;
+    };
 
 in
 
@@ -74,7 +85,7 @@ mutEx "config" "nix-darwin"
 mutEx "config" "system"
 mutEx "config" "pkgs"
 
-mkEffect (removeAttrs args [ "configuration" "ssh" "config" "system" "nix-darwin" "nixpkgs" "pkgs" ] // {
+mkEffect (removeAttrs args [ "configuration" "ssh" "config" "system" "nix-darwin" "nixpkgs" "pkgs" "buildOnDestination" ] // {
   name = "nix-darwin${suffix}";
   inputs = [ openssh ];
   dontUnpack = true;
