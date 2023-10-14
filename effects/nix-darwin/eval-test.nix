@@ -8,7 +8,7 @@ let
   # TODO: use a flake.lock, so that we can CI the upstream
   #       also lib.darwinSystem would need follows to inject our own nixpkgs,
   #       so we use the one from the nix-darwin flake for testing here. Awkward.
-  darwin = builtins.getFlake "github:LnL7/nix-darwin?rev=87b9d090ad39b25b2400029c64825fc2a8868943";
+  darwin = builtins.getFlake "github:LnL7/nix-darwin?rev=8b6ea26d5d2e8359d06278364f41fbc4b903b28a";
 in
 rec {
   inherit darwin testSupport;
