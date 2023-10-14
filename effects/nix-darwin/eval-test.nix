@@ -32,6 +32,12 @@ rec {
             config = self.darwinConfigurations."Johns-MacBook";
           }
         );
+        test.by-config-legacy = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            config = self.darwinConfigurations."Johns-MacBook".config;
+          }
+        );
         test.by-config-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
@@ -94,6 +100,11 @@ rec {
 
     assert 
       testEqDrv flake1.test.by-config.drvPath flake1.test.by-other-args.drvPath;
+
+    assert
+      testEqDrv
+        flake1.test.by-config.drvPath
+        flake1.test.by-config-legacy.drvPath;
 
     assert
       builtins.isString flake1.test.by-other-args-pkgs.drvPath;
