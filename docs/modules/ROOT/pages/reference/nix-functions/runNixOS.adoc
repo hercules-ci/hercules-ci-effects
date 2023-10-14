@@ -31,9 +31,12 @@ Example (Flakes): `configuration = self.nixosConfigurations.foo;`
 
 Required, unless you set xref:param-config, which is not the preferred solution.
 
+When this option is set to a pre-evaluated configuration, as in the latter example, xref:param-system[], xref:param-configuration[] and xref:param-nixpkgs[] are ignored.
 
 [[param-nixpkgs]]
 === `nixpkgs`
+
+Required when `configuration` is a module or file.
 
 Path of the Nixpkgs sources to use. These also include the NixOS sources.
 
