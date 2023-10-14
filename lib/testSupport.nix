@@ -21,9 +21,14 @@ let
     sourceInfo = { };
   };
 
+  testEqDrv = drv1: drv2:
+    if drv1 == drv2 then true
+    else builtins.trace "Oh-oh, these are different! Check the differences with\nnix-diff --color=always ${drv1} ${drv2} | less -RS" false;
+
 in {
   inherit
     callFlake
     callFlakeOutputs
+    testEqDrv
     ;
 }

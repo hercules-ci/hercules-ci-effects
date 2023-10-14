@@ -13,11 +13,7 @@ in
 rec {
   inherit darwin testSupport;
   inherit (inputs) flake-parts;
-  inherit (testSupport) callFlakeOutputs;
-
-  testEqDrv = drv1: drv2:
-    if drv1 == drv2 then true
-    else builtins.trace "Oh-oh, these are different! Check the differences with\nnix-diff --color=always ${drv1} ${drv2} | less -RS" false;
+  inherit (testSupport) callFlakeOutputs testEqDrv;
 
   flake1 = callFlakeOutputs (inputs:
     flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, self, ... }: {
