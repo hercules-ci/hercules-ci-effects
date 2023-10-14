@@ -63,15 +63,11 @@ See the named arguments in xref:reference/nix-functions/ssh.adoc[]. Example:
 [[param-system]]
 === `system`
 
-The Nix `system` of the machine to deploy.
+Optional, legacy.
 
-Example: `system = "x86_64-linux";`
+Preferably, this is set in the configuration itself, in `nixpkgs.hostPlatform`.
 
-Example: `system = "aarch64-linux";`
-
-See https://nixos.org/manual/nix/stable/#ch-supported-platforms[Nix supported platforms,role=external]
-
-Required, unless you pass the module system result via xref:param-config.
+`nixos-generate-config` sets that option automatically in `hardware-configuration.nix`.
 
 
 [[param-userSetupScript]]
