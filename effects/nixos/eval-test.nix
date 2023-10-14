@@ -9,7 +9,7 @@ in
 rec {
   inherit testSupport;
   inherit (inputs) flake-parts;
-  inherit (testSupport) callFlakeOutputs;
+  inherit (testSupport) callFlakeOutputs testEqDrv;
   inherit (inputs.nixpkgs) lib;
 
   isEffect = x: x.isEffect == true && lib.isString x.drvPath;
@@ -46,10 +46,25 @@ rec {
             configuration = ./test/configuration.nix;
           }
         );
+        test.by-nixosConfigurations-no-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixOS {
+            ssh.destination = "john.local";
+            ssh.buildOnDestination = false;
+            configuration = self.nixosConfigurations."john.lan";
+          }
+        );
         test.by-nixosConfigurations-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixOS {
             ssh.destination = "john.local";
             ssh.buildOnDestination = true;
+            configuration = self.nixosConfigurations."john.lan";
+          }
+        );
+        test.by-nixosConfigurations-buildOnDestination-override = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixOS {
+            ssh.destination = "john.local";
+            ssh.buildOnDestination = false;
+            buildOnDestination = true;
             configuration = self.nixosConfigurations."john.lan";
           }
         );
@@ -63,9 +78,17 @@ rec {
     assert
       isEffect flake1.test.by-nixosConfigurations;
     assert
+      testEqDrv
+        flake1.test.by-nixosConfigurations.drvPath
+        flake1.test.by-nixosConfigurations-no-buildOnDestination.drvPath;
+    assert
       isEffect flake1.test.by-configuration-file;
     assert
       isEffect flake1.test.by-configuration-file-buildOnDestination;
+    assert
+      testEqDrv
+        flake1.test.by-nixosConfigurations-buildOnDestination.drvPath
+        flake1.test.by-nixosConfigurations-buildOnDestination-override.drvPath;
 
     ok;
 

@@ -18,6 +18,7 @@ args@{
     profile ? "/nix/var/nix/profiles/system",
     ssh,
     passthru ? {},
+    buildOnDestination ? null,
     ...
   }:
   let
@@ -35,9 +36,13 @@ args@{
 
     config = configuration_.config;
 
-    ssh' = { inherit destinationPkgs; } // ssh;
+    ssh' = { inherit destinationPkgs; }
+      // ssh
+      // optionalAttrs (buildOnDestination != null) {
+        inherit buildOnDestination;
+      };
 
-    # Only evaluated when ssh.buildOnDestination = true.
+    # Only evaluated when ssh'.buildOnDestination = true.
     # Ideally this whole thing goes away when Nix gives good access to a string's
     # derivation paths in pure mode.
     destinationPkgs =
@@ -83,7 +88,7 @@ args@{
       else x: x;
     inherit (config.system.build) toplevel;
   in
-  checked (mkEffect (removeAttrs args ["config" "configuration" "system" "nixpkgs" "ssh"] // {
+  checked (mkEffect (removeAttrs args ["config" "configuration" "system" "nixpkgs" "ssh" "buildOnDestination"] // {
     name = "nixos-${ssh.destination}";
     inputs = [
       # For user setup
