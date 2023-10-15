@@ -23,6 +23,8 @@ hci-effects.runNixOS {
 }
 ```
 
+TIP: This function has a how-to guide. See xref:guide/deploy-a-nixos-machine.adoc[] for a step by step guide to deploy to an existing NixOS machine.
+
 
 [[parameters]]
 == Parameters
