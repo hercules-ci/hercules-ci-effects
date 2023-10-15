@@ -33,7 +33,7 @@ hci-effects.runNixOS {
 
 Default: value of `ssh.buildOnDestination`, which defaults to `false`.
 
-Overrides xref:reference/nix-functions/ssh.adoc#param-buildOnDestination[`ssh.buildOnDestination`]. Defer builds to the host instead of pre-building in CI.
+Overrides xref:reference/nix-functions/ssh.adoc#param-buildOnDestination[`ssh.buildOnDestination`]. Defer builds to the destination host instead of pre-building in CI.
 
 
 [[param-config]]
