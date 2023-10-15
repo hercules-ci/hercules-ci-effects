@@ -3,7 +3,26 @@
 
 _runNixOS {two-colons} AttrSet -> Effect_
 
-Deploy a NixOS configuration to a machine.
+Deploy a NixOS configuration to a machine over SSH.
+
+Example (Flakes):
+
+```nix
+hci-effects.runNixOS {
+  name = "deploy";
+  configuration = self.nixosConfigurations.zeus;
+  ssh.destination = "root@zeus.local";
+  system = "aarch64-linux";
+  secretsMap.ssh = "deploy-ssh";
+  userSetupScript = ''
+    writeSSHKey
+    cat >>~/.ssh/known_hosts <<EOF
+    zeus.local ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+    EOF
+  '';
+}
+```
+
 
 [[parameters]]
 == Parameters
