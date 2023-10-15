@@ -118,7 +118,7 @@ The `config` parameter of the module system. This can be used to inspect the
 system configuration before committing it. For example:
 
 ```
-nix repl ci.nix
+nix repl --file ci.nix
 nix-repl> my-host.prebuilt.config.services.postgresql.enable
 false
 ```
