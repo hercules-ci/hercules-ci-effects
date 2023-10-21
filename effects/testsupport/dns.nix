@@ -47,7 +47,6 @@ in
     };
 
     defaults = { nodes, ... }: {
-      networking.dhcpcd.enable = false;
       environment.etc."resolv.conf".text = ''
         nameserver ${nodes.${cfg.nodeName}.networking.primaryIPAddress}
       '';
