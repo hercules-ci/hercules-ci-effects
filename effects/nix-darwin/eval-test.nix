@@ -29,7 +29,7 @@ rec {
         test.by-config = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
-            config = self.darwinConfigurations."Johns-MacBook";
+            configuration = self.darwinConfigurations."Johns-MacBook";
           }
         );
         test.by-config-legacy = withSystem "x86_64-linux" ({ hci-effects, ... }:
@@ -38,32 +38,38 @@ rec {
             config = self.darwinConfigurations."Johns-MacBook".config;
           }
         );
+        test.by-config-legacy-2 = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            config = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
         test.by-config-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
             ssh.buildOnDestination = true;
-            config = self.darwinConfigurations."Johns-MacBook";
+            configuration = self.darwinConfigurations."Johns-MacBook";
           }
         );
         test.by-config-buildOnDestination-override = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
             buildOnDestination = true;
-            config = self.darwinConfigurations."Johns-MacBook";
+            configuration = self.darwinConfigurations."Johns-MacBook";
           }
         );
         test.by-config-no-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
             buildOnDestination = false;
-            config = self.darwinConfigurations."Johns-MacBook";
+            configuration = self.darwinConfigurations."Johns-MacBook";
           }
         );
         test.by-config-no-ssh-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
             buildOnDestination = false;
-            config = self.darwinConfigurations."Johns-MacBook";
+            configuration = self.darwinConfigurations."Johns-MacBook";
           }
         );
         test.by-other-args = withSystem "x86_64-linux" ({ hci-effects, ... }:
@@ -84,6 +90,26 @@ rec {
             configuration = ./test/configuration.nix;
           }
         );
+        test.by-other-args-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            buildOnDestination = true;
+            system = "x86_64-darwin";
+            nix-darwin = darwin.outPath;
+            nixpkgs = darwin.inputs.nixpkgs.outPath;
+            configuration = ./test/configuration.nix;
+          }
+        );
+        test.by-other-args-buildOnDestination2 = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            ssh.buildOnDestination = true;
+            system = "x86_64-darwin";
+            nix-darwin = darwin.outPath;
+            nixpkgs = darwin.inputs.nixpkgs.outPath;
+            configuration = ./test/configuration.nix;
+          }
+        );
       };
     })
   );
@@ -101,6 +127,11 @@ rec {
       testEqDrv
         flake1.test.by-config.drvPath
         flake1.test.by-config-legacy.drvPath;
+
+    assert
+      testEqDrv
+        flake1.test.by-config.drvPath
+        flake1.test.by-config-legacy-2.drvPath;
 
     assert
       builtins.isString flake1.test.by-other-args-pkgs.drvPath;
@@ -128,6 +159,11 @@ rec {
       testEqDrv
         flake1.test.by-config-buildOnDestination.drvPath
         flake1.test.by-config-buildOnDestination-override.drvPath;
+
+    assert
+      testEqDrv
+        flake1.test.by-other-args-buildOnDestination.drvPath
+        flake1.test.by-other-args-buildOnDestination2.drvPath;
 
     ok;
 
