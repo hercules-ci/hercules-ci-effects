@@ -25,6 +25,8 @@ in
 , compressClosure ? compress
 , compressSession ? compress
 , inheritVariables ? []
+, buildOnDestination ? false
+, destinationPkgs ? throw "hci-effects.ssh: buildOnDestination is true, but destinationPkgs is not set. Please set destinationPkgs to a Nixpkgs instance that is buildable on the destination."
 }:
 
 remoteCommands:
@@ -32,7 +34,35 @@ remoteCommands:
 let
 
   commands = optionalString (inheritVariables != []) ''"$(declare -p ${escapeShellArgs inheritVariables});"''
-    + lib.escapeShellArg remoteCommands;
+    + lib.escapeShellArg remoteCommands';
+
+  remoteCommands' =
+    if buildOnDestination
+    then destinationBuild remoteCommandsFile
+    else remoteCommands;
+
+  remoteCommandsFile = destinationPkgs.writeText "remote-commands-after-build" remoteCommands;
+
+  # Turn a binary deployment into a source deployment.
+  # type: derivation with bash statements -> string of bash statements
+  #
+  # Ideally we don't use and don't ask for destinationPkgs, but instead we
+  # retrieve the derivation paths directly, without constructing an unnecessary
+  # derivation (`file` below).
+  # Such an approach would be possible with builtins.storePath, but that isn't
+  # available in pure mode, yet(?).
+  # See https://github.com/NixOS/nix/issues/5868#issuecomment-1757869475
+  destinationBuild = file:
+    # Why `eval`? `source` would change the environment slightly.
+    ''
+      (
+        _call_ssh_script=$(nix-store -vr ${builtins.unsafeDiscardOutputDependency file.drvPath})
+        eval "$(cat "$_call_ssh_script")"
+        r=$?
+        nix-store --delete "$_call_ssh_script" || echo "Failed to delete script file from store; ignoring."
+        exit $r
+      )
+    '';
 
   # TODO (2022-01): Use upstream function: https://github.com/NixOS/nixpkgs/pull/123111
   writeDirectReferencesToFile = path: runCommand "runtime-references"
@@ -59,7 +89,14 @@ let
       sort ./references >$out
     '';
 
-  referencesFile = writeDirectReferencesToFile (writeText "remote-commands" remoteCommands);
+  referencesFile =
+    if buildOnDestination
+    then
+      # The else branch would be sufficient if it wasn't for
+      # https://github.com/NixOS/nix/issues/9146
+      writeText "remote-derivations" "${builtins.unsafeDiscardOutputDependency remoteCommandsFile.drvPath}"
+    else writeDirectReferencesToFile (writeText "remote-commands" remoteCommands');
+
 in ''(
   export PATH="${makeBinPath [nix ssh]}:$PATH"
   _call_ssh_references="''${ssh_copy_paths:-}''${ssh_copy_paths:+ }$(cat ${referencesFile})"

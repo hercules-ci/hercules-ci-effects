@@ -9,6 +9,14 @@ Deploy a NixOS configuration to a machine.
 == Parameters
 
 
+[[param-buildOnDestination]]
+== `buildOnDestination`
+
+Default: value of `ssh.buildOnDestination`, which defaults to `false`.
+
+Overrides xref:reference/nix-functions/ssh.adoc#param-buildOnDestination[`ssh.buildOnDestination`]. Defer builds to the host instead of pre-building in CI.
+
+
 [[param-config]]
 === `config`
 
@@ -23,15 +31,20 @@ When this option is set, xref:param-system[], xref:param-configuration[] and xre
 [[param-configuration]]
 === `configuration`
 
-A NixOS configuration file or module.
+A NixOS configuration or module.
 
 Example: `configuration = ./configuration.nix;`
 
-Required, unless you invoke the module system yourself via xref:param-config.
+Example (Flakes): `configuration = self.nixosConfigurations.foo;`
 
+Required, unless you set xref:param-config, which is not the preferred solution.
+
+When this option is set to a pre-evaluated configuration, as in the latter example, xref:param-system[], xref:param-configuration[] and xref:param-nixpkgs[] are ignored.
 
 [[param-nixpkgs]]
 === `nixpkgs`
+
+Required when `configuration` is a module or file.
 
 Path of the Nixpkgs sources to use. These also include the NixOS sources.
 
@@ -63,15 +76,11 @@ See the named arguments in xref:reference/nix-functions/ssh.adoc[]. Example:
 [[param-system]]
 === `system`
 
-The Nix `system` of the machine to deploy.
+Optional, legacy.
 
-Example: `system = "x86_64-linux";`
+Preferably, this is set in the configuration itself, in `nixpkgs.hostPlatform`.
 
-Example: `system = "aarch64-linux";`
-
-See https://nixos.org/manual/nix/stable/#ch-supported-platforms[Nix supported platforms,role=external]
-
-Required, unless you pass the module system result via xref:param-config.
+`nixos-generate-config` sets that option automatically in `hardware-configuration.nix`.
 
 
 [[param-userSetupScript]]
