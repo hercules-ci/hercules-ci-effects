@@ -28,19 +28,7 @@ args@{
 , nixpkgs ? null
 , pkgs ? null
 , system ? isRequired "system"
-, config ? (import nix-darwin ({
-    inherit system;
-    configuration = if args?pkgs then {
-      imports = [
-        { imports = [ configuration ]; }
-        # Apparent bug in nix-darwin; we need this
-        { _module.args.pkgs = lib.mkForce pkgs; }
-      ];
-    } else configuration;
-  }
-  // lib.filterAttrs (k: v: v != null) { inherit pkgs nixpkgs; }
-  // lib.optionalAttrs (args?pkgs && !args?nixpkgs) { nixpkgs = pkgs.path; }
-  )).config
+, config ? null
 , # Deployment parameters
   ssh
 , buildOnDestination ? null
@@ -48,10 +36,50 @@ args@{
   passthru ? { }
 , ...
 }:
-let _config = config;
+let 
+  # An actual configuration object. If only `config` was passed, this will be incomplete.
+  configuration_ =
+    if args?configuration.config
+        && configuration?_module
+        # lenient: nix-darwin doesn't preserve the _type as of 2023-10
+        && configuration._type or "configuration" == "configuration"
+    then configuration
+
+    else if args?config.config
+        && args?config._module
+        # lenient: nix-darwin doesn't preserve the _type as of 2023-10
+        && config._type or "configuration" == "configuration"
+    then
+      lib.warn
+        "hci-effects.runNixDarwin: `config` was renamed to `configuration` for the purpose of passing a whole configuration. Please pass your configuration in the `configuration` argument attribute."
+        config
+
+    else if args?config.system.build.toplevel
+    then { inherit (args) config; }  # incomplete, but permissible for backcompat
+
+    else if args?configuration
+    then # assume configuration is a module
+      import nix-darwin (
+        {
+          inherit system;
+          configuration = if args?pkgs then {
+            imports = [
+              { imports = [ configuration ]; }
+              # Apparent bug in nix-darwin; we need this
+              { _module.args.pkgs = lib.mkForce pkgs; }
+            ];
+          } else configuration;
+        }
+        // lib.filterAttrs (k: v: v != null) { inherit pkgs nixpkgs; }
+        // lib.optionalAttrs (args?pkgs && !args?nixpkgs) { nixpkgs = pkgs.path; }
+      )
+
+    else throw "hci-effects.runNixDarwin: you must provide a configuration";
+
 in
 let
-  config = if _config?config.system.build.toplevel then _config.config else _config;
+  configuration = configuration_;
+  config = configuration.config;
 
   suffix =
     if args ? name
@@ -69,7 +97,9 @@ let
   # Add default value for destinationPkgs, for when buildOnDestination is true
   ssh' = {
       destinationPkgs =
-        _config._module.args.pkgs or (throw ''
+        configuration._module.args.pkgs or
+          /* before nix-darwin#723 (?) */ configuration.pkgs or
+        (throw ''
           When `buildOnDestination` is true, you must either specify a whole nix-darwin configuration attrset (not just `config = myConfiguration.config`, or you must specify `ssh.destinationPkgs`.
 
           See also https://docs.hercules-ci.com/hercules-ci-effects/reference/nix-functions/ssh.html#param-buildOnDestination
