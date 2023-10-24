@@ -2,9 +2,8 @@
   description = "Hercules CI Effects";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  inputs.hercules-ci-agent.url = "hercules-ci-agent";
 
-  outputs = inputs@{ self, nixpkgs, hercules-ci-agent, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; }
       ({ withSystem, ... }: {
         imports = [

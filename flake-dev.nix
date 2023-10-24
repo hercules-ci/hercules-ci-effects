@@ -108,10 +108,5 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
         pkgs.python3Packages.autopep8
       ];
     };
-
-    # Quick and dirty // override. Do not recommend.
-    herculesCIEffects.pkgs = pkgs // {
-      hci = inputs'.hercules-ci-agent.packages.hercules-ci-cli;
-    };
   };
 }
