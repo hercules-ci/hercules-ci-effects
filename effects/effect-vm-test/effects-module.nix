@@ -19,8 +19,8 @@ let
     in
     pkgs.writeScriptBin "effect-${name}" ''
       #!${pkgs.runtimeShell}
-      # retaining deps: ${eff.inputDerivation}
-      hci effect run --no-token --project testforge/testorg/testrepo --as-branch main ${eff.drvPath}
+      # retaining deps: ${eff.inputDerivation} ${eff}
+      hci effect run --no-token --project testforge/testorg/testrepo --as-branch main ${builtins.unsafeDiscardOutputDependency eff.drvPath}
     '';
 
   /*

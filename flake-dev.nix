@@ -69,6 +69,14 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
   };
 
   perSystem = { pkgs, hci-effects, inputs', system, ... }: {
+    _module.args.pkgs = import inputs.nixpkgs {
+      inherit system;
+      overlays = [
+        (self: super: {
+          qemu-utils = self.qemu_test;
+        })
+      ];
+    };
     checks =
     let
       github-releases-tests =
