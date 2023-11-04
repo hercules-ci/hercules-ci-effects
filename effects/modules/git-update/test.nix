@@ -17,13 +17,16 @@ let
   };
 
 in
+
+# TODO: move some properties that are tested in flake-update to this test
+
 effectVMTest {
   imports = [
     ../../testsupport/dns.nix
     ../../testsupport/gitea.nix
     ../../testsupport/setup.nix
   ];
-  name = "flake-update";
+  name = "git-update";
   effects = {
     update = hci-effects.modularEffect {
       imports = [ baseUpdate ];
