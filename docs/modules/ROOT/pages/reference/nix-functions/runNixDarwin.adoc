@@ -36,7 +36,7 @@ hci-effects.runNixDarwin {
 
 
 [[param-buildOnDestination]]
-== `buildOnDestination`
+=== `buildOnDestination`
 
 Default: value of `ssh.buildOnDestination`, which defaults to `false`.
 

@@ -31,7 +31,7 @@ TIP: This function has a how-to guide. See xref:guide/deploy-a-nixos-machine.ado
 
 
 [[param-buildOnDestination]]
-== `buildOnDestination`
+=== `buildOnDestination`
 
 Default: value of `ssh.buildOnDestination`, which defaults to `false`.
 
