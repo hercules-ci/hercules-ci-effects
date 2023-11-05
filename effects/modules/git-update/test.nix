@@ -177,7 +177,7 @@ effectVMTest {
       assert getRev() == r1
 
     with subtest("Can rebase"):
-      client.succeed("""
+      mainUpdateRev = client.succeed("""
         (
           set -x
           cd repo
@@ -200,9 +200,24 @@ effectVMTest {
           git add other
           git commit -m 'Add other'
           git push
+
+          git log --graph --oneline --decorate update main origin/update origin/main
         ) 1>&2
+        ( cd repo;
+          git rev-parse origin/main
+        )
       """).rstrip()
       agent.succeed(f"echo {gitea_admin_password} | effect-update-rebase")
+      client.succeed(f"""
+        (
+          cd repo
+          git fetch origin
+
+          # When the update branch has been rebased onto the updated main, the
+          # updated main occurs in the history of the update branch.
+          git log --format=%H origin/update | grep {mainUpdateRev}
+        )
+      """)
 
     with subtest("rebase does not lose data when concurrent push happens"):
       agent.fail("""
