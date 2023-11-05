@@ -213,7 +213,13 @@ in
       if [[ "$rev_before" == "$rev_after" ]]; then
         echo 1>&2 'No updates to push.'
       else
-        git push origin "$HCI_GIT_UPDATE_BRANCH"
+        declare -a gitPushArgs
+        case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
+          rebase)
+            gitPushArgs+=(--force-with-lease)
+            ;;
+        esac
+        git push origin "$HCI_GIT_UPDATE_BRANCH" ''${gitPushArgs[@]}
       fi
     '' + optionalString cfg.pullRequest.enable ''
       # Too many PRs is better than to few. Ensure that the PR exists
