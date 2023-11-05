@@ -53,7 +53,19 @@ effectVMTest {
       imports = [ baseUpdate ];
       git.update.script = "";
     };
+    update-rebase = hci-effects.modularEffect {
+      imports = [ baseUpdate ];
+      git.update.script = "
+        echo updated >> file
+        git commit -m 'update from update-rebase' file
+      ";
+      git.update.baseMerge.method = "rebase";
+      git.update.baseMerge.enable = true;
+      git.update.branch = "update";
+    };
   };
+
+  skipTypeCheck = true;
 
   testCases = ''
     token = gitea_admin_token
@@ -118,5 +130,32 @@ effectVMTest {
       agent.succeed(f"echo {gitea_admin_password} | (set -x; if effect-update-uncommitted; then false; else [[ $? == 1 ]]; fi)")
       assert getRev() == r1
 
+    with subtest("Can rebase"):
+      client.succeed("""
+        (
+          set -x
+          cd repo
+          git fetch origin
+
+          # Switch to main
+          git checkout origin/main -B main
+
+          # Set up a pre-existing update branch for the effect
+          git checkout -B update
+          touch from-fake-update
+          git add from-fake-update
+          git commit -m 'from-fake-update'
+          # force to clear any updates from previous test cases
+          git push --force --set-upstream origin update
+
+          # Make main diverge from the update branch, so that a fast forward is not possible
+          git checkout main
+          echo other > other
+          git add other
+          git commit -m 'Add other'
+          git push
+        ) 1>&2
+      """).rstrip()
+      agent.succeed(f"echo {gitea_admin_password} | effect-update-rebase")
   '';
 }
