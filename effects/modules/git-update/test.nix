@@ -63,6 +63,52 @@ effectVMTest {
       git.update.baseMerge.enable = true;
       git.update.branch = "update";
     };
+    update-rebase-simulate-concurrent-update = hci-effects.modularEffect {
+      imports = [ baseUpdate ];
+      git.update.script = ''
+        # remember where the concurrent thing will start
+        git branch update-concurrent
+
+        normal_update() {
+          # this is the normal update
+          echo updated >> file
+          git commit -m 'update from update-rebase' file
+        }
+
+        # Simulate a concurrent update
+        concurrent_update() {
+          (
+            # irl this would probably be a different machine, but a separate
+            # clone is good enough.
+
+            orig=$PWD
+            cd ..
+            cp -a "$orig" update-concurrent
+            cd update-concurrent
+            new=$PWD
+            echo foo >bar.baz
+            git add bar.baz
+            git commit -m 'Add bar.baz - concurrently'
+            git push origin HEAD:update
+
+            echo "Simulated concurrent update done. Its view is:"
+            git log --graph --oneline --decorate update-concurrent main origin/update origin/main
+
+            cd ..
+            rm -rf "$new"
+          )
+        }
+
+        concurrent_update
+        normal_update
+
+        echo "Normal update mostly done (it's not pushed yet). Its view is:"
+        git log --graph --oneline --decorate update main origin/update origin/main
+      '';
+      git.update.baseMerge.method = "rebase";
+      git.update.baseMerge.enable = true;
+      git.update.branch = "update";
+    };
   };
 
   skipTypeCheck = true;
@@ -157,5 +203,36 @@ effectVMTest {
         ) 1>&2
       """).rstrip()
       agent.succeed(f"echo {gitea_admin_password} | effect-update-rebase")
+
+    with subtest("rebase does not lose data when concurrent push happens"):
+      agent.fail("""
+        # check pipefail
+        true | false
+      """)
+
+      # It would be ok for the effect to retry, in which we should change this
+      # to expect succeed, and check that both the concurrent commit and the
+      # update commit are present.
+      # For now we just check that the effect fails, and rely on the user to
+      # re-run it. It seems quite improbable to occur.
+
+      agent.succeed(f"""
+        (
+          echo {gitea_admin_password} \
+            | (! effect-update-rebase-simulate-concurrent-update 2>&1) \
+            | tee concurrent-update.log
+        )
+      """)
+      agent.succeed("""
+        grep -E '\[rejected\].+update.+stale info' concurrent-update.log
+      """)
+      client.succeed("""
+        (
+          cd repo
+          git fetch origin
+          git log --graph --oneline --decorate update main origin/update origin/main
+          git log origin/update | grep -F 'Add bar.baz - concurrently'
+        ) 1>&2
+      """)
   '';
 }
