@@ -53,14 +53,20 @@ let
   # available in pure mode, yet(?).
   # See https://github.com/NixOS/nix/issues/5868#issuecomment-1757869475
   destinationBuild = file:
+    let drv = builtins.unsafeDiscardOutputDependency file.drvPath;
     # Why `eval`? `source` would change the environment slightly.
-    ''
+    in ''
       (
-        _call_ssh_script=$(nix-store -vr ${builtins.unsafeDiscardOutputDependency file.drvPath})
+        _call_ssh_script=$(nix-store -vr ${drv})
+        _call_ssh_r=$?
+        if test 0 != $_call_ssh_r; then
+          echo 1>&2 "hci-effects.ssh: Failed to realise script file ${drv}"
+          exit $_call_ssh_r
+        fi
         eval "$(cat "$_call_ssh_script")"
-        r=$?
-        nix-store --delete "$_call_ssh_script" || echo "Failed to delete script file from store; ignoring."
-        exit $r
+        _call_ssh_r=$?
+        nix-store --delete "$_call_ssh_script" || echo 1>&2 "hci-effects.ssh: Failed to delete script file from store; ignoring."
+        exit $_call_ssh_r
       )
     '';
 
