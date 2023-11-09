@@ -8,16 +8,12 @@ let
   # TODO: use a flake.lock, so that we can CI the upstream
   #       also lib.darwinSystem would need follows to inject our own nixpkgs,
   #       so we use the one from the nix-darwin flake for testing here. Awkward.
-  darwin = builtins.getFlake "github:LnL7/nix-darwin?rev=87b9d090ad39b25b2400029c64825fc2a8868943";
+  darwin = builtins.getFlake "github:LnL7/nix-darwin?rev=8b6ea26d5d2e8359d06278364f41fbc4b903b28a";
 in
 rec {
   inherit darwin testSupport;
   inherit (inputs) flake-parts;
-  inherit (testSupport) callFlakeOutputs;
-
-  testEqDrv = drv1: drv2:
-    if drv1 == drv2 then true
-    else builtins.trace "Oh-oh, these are different! Check the differences with\nnix-diff --color=always ${drv1} ${drv2} | less -RS" false;
+  inherit (testSupport) callFlakeOutputs testEqDrv;
 
   flake1 = callFlakeOutputs (inputs:
     flake-parts.lib.mkFlake { inherit inputs; } ({ withSystem, self, ... }: {
@@ -33,7 +29,47 @@ rec {
         test.by-config = withSystem "x86_64-linux" ({ hci-effects, ... }:
           hci-effects.runNixDarwin {
             ssh.destination = "john.local";
+            configuration = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
+        test.by-config-legacy = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            config = self.darwinConfigurations."Johns-MacBook".config;
+          }
+        );
+        test.by-config-legacy-2 = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
             config = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
+        test.by-config-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            ssh.buildOnDestination = true;
+            configuration = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
+        test.by-config-buildOnDestination-override = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            buildOnDestination = true;
+            configuration = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
+        test.by-config-no-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            buildOnDestination = false;
+            configuration = self.darwinConfigurations."Johns-MacBook";
+          }
+        );
+        test.by-config-no-ssh-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            buildOnDestination = false;
+            configuration = self.darwinConfigurations."Johns-MacBook";
           }
         );
         test.by-other-args = withSystem "x86_64-linux" ({ hci-effects, ... }:
@@ -54,6 +90,26 @@ rec {
             configuration = ./test/configuration.nix;
           }
         );
+        test.by-other-args-buildOnDestination = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            buildOnDestination = true;
+            system = "x86_64-darwin";
+            nix-darwin = darwin.outPath;
+            nixpkgs = darwin.inputs.nixpkgs.outPath;
+            configuration = ./test/configuration.nix;
+          }
+        );
+        test.by-other-args-buildOnDestination2 = withSystem "x86_64-linux" ({ hci-effects, ... }:
+          hci-effects.runNixDarwin {
+            ssh.destination = "john.local";
+            ssh.buildOnDestination = true;
+            system = "x86_64-darwin";
+            nix-darwin = darwin.outPath;
+            nixpkgs = darwin.inputs.nixpkgs.outPath;
+            configuration = ./test/configuration.nix;
+          }
+        );
       };
     })
   );
@@ -68,6 +124,16 @@ rec {
       testEqDrv flake1.test.by-config.drvPath flake1.test.by-other-args.drvPath;
 
     assert
+      testEqDrv
+        flake1.test.by-config.drvPath
+        flake1.test.by-config-legacy.drvPath;
+
+    assert
+      testEqDrv
+        flake1.test.by-config.drvPath
+        flake1.test.by-config-legacy-2.drvPath;
+
+    assert
       builtins.isString flake1.test.by-other-args-pkgs.drvPath;
     # The addition of the pkgs module appears to reorder the system path, so this equality doesn't quite hold. (or it could be a flake vs legacy related difference; not sure)
     # assert
@@ -78,6 +144,26 @@ rec {
     # A custom pkgs should be used without reinvoking nixpkgs from scratch.
     assert
       flake1.test.by-other-args-pkgs.config.expose.pkgs.proof-of-overlay == "yes, overlay";
+
+    assert
+      testEqDrv
+        flake1.test.by-config.drvPath
+        flake1.test.by-config-no-buildOnDestination.drvPath;
+
+    assert
+      testEqDrv
+        flake1.test.by-config.drvPath
+        flake1.test.by-config-no-ssh-buildOnDestination.drvPath;
+
+    assert
+      testEqDrv
+        flake1.test.by-config-buildOnDestination.drvPath
+        flake1.test.by-config-buildOnDestination-override.drvPath;
+
+    assert
+      testEqDrv
+        flake1.test.by-other-args-buildOnDestination.drvPath
+        flake1.test.by-other-args-buildOnDestination2.drvPath;
 
     ok;
 

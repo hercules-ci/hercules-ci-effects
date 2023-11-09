@@ -2,7 +2,7 @@
   config = {
     defaults = {
       documentation.enable = false;
-      environment.noXlibs = true;
+      # environment.noXlibs = true;
     };
   };
 }

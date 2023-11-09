@@ -1,6 +1,19 @@
 { nixpkgsFlake, pkgs }:
 let
   effects = import ../../default.nix effects pkgs;
+
+  pkgsInsecure = import pkgs.path {
+    system = pkgs.stdenv.hostPlatform.system;
+    config = {
+      # FIXME
+      permittedInsecurePackages = [
+        "python3.10-requests-2.29.0"
+        "python3.10-cryptography-40.0.2"
+        "python3.10-cryptography-40.0.1"
+      ];
+    };
+  };
+
   inherit (effects) mkEffect nix-shell;
 
   # Flakes do not support file:../.. yet, so we can't depend on
@@ -73,7 +86,7 @@ let
 
   deploy = effects.runNixOps2 {
     flake = fakeFlake;
-    nixops = pkgs.nixopsUnstable;
+    nixops = pkgsInsecure.nixopsUnstable; # FIXME insecure flag should not be needed
     nix = pkgs.nixUnstable;
 
     # Override dynamic options for CI

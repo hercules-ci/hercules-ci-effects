@@ -1,0 +1,12 @@
+
+# Effect Modules
+
+While the low-level primitive for constructing xref:index.adoc[Effects], xref:reference/nix-functions/mkEffect.adoc[`mkEffect`], is based on `mkDerivation`, we use the module system to build a more convenient interface for defining effects.
+
+You may consume these modules indirectly through `flake-parts` modules or functions such as xref:reference/nix-functions/flakeUpdate.adoc[`flakeUpdate`], or you can turn them into effects yourself using xref:reference/nix-functions/modularEffect.adoc[`modularEffect`].
+
+The modules each have an attribute in `hci-effects.modules` and `modules.effect` in the flake. The examples will use `hci-effects.modules` which is usually most convenient.
+
+If you publish your own effect modules, you can import from `inputs.hercules-ci-effects.modules.effect.*`, so that your modules do not have to be in an unnecessary function that takes `hci-effects` and/or `pkgs` as an argument.
+
+Use the navigation menu to find the available modules.

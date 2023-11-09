@@ -26,7 +26,13 @@ let
     };
   };
 
+  checkVersion = import ./lib-version-check.nix {
+    inherit (pkgs) lib;
+    component = "hercules-ci-effects/effects/default.nix";
+  };
+
 in
+checkVersion
 {
   mkEffect = callPackage ./effect/effect.nix { };
 
@@ -39,6 +45,8 @@ in
         (lib.setDefaultModuleLocation "${name} invocation parameters module" userModule)
       ];
     });
+
+  modules = import ./modules.nix;
 
   runIf = condition: v:
     recurseIntoAttrs (

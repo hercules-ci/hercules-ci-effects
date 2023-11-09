@@ -1,4 +1,4 @@
-top@{ withSystem, lib, inputs, config, ... }: {
+top@{ withSystem, lib, inputs, config, self, ... }: {
   imports = [
     # dogfooding
     ./flake-module.nix
@@ -11,8 +11,16 @@ top@{ withSystem, lib, inputs, config, ... }: {
         (import ./flake-modules/derivationTree-type.nix { inherit lib; }).tests
           inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile;
 
+      evaluation-runNixOS =
+        let it = (import ./effects/nixos/eval-test.nix { inherit inputs; });
+        in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
       evaluation-herculesCI =
         let it = (import ./flake-modules/herculesCI-eval-test.nix { inherit inputs; });
+        in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
+      evaluation-flake-update =
+        let it = (import ./effects/flake-update/test-module-eval.nix { inherit inputs; });
         in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
 
       evaluation-mkHerculesCI =
@@ -60,19 +68,45 @@ top@{ withSystem, lib, inputs, config, ... }: {
     };
   };
 
-  perSystem = { pkgs, hci-effects, inputs', ... }: {
-    checks = {
+  perSystem = { pkgs, hci-effects, inputs', system, ... }: {
+    _module.args.pkgs = import inputs.nixpkgs {
+      inherit system;
+      overlays = [
+        (self: super: {
+          qemu-utils = self.qemu_test;
+        })
+      ];
+    };
+    checks =
+    let
+      github-releases-tests =
+        import ./flake-modules/github-releases/test.nix
+          { effectSystem = system; inherit inputs; };
+      checkModules =
+        builtins.deepSeq
+          (lib.mapAttrs
+            (_name: builtins.readFile)
+            (self.modules.effect)
+          );
+    in {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
+      git-update = hci-effects.callPackage ./effects/modules/git-update/test.nix { };
       write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
+      artifacts-tool = hci-effects.callPackage ./packages/artifacts-tool/test { };
+      artifacts-tool-typecheck = hci-effects.callPackage ./packages/artifacts-tool/mypy.nix { };
+      github-releases = github-releases-tests.test.simple;
+      github-releases-perSystem = github-releases-tests.test.perSystem;
+      module-files-readable = checkModules pkgs.emptyFile;
     };
     devShells.default = pkgs.mkShell {
-      nativeBuildInputs = [ pkgs.nixpkgs-fmt pkgs.hci ];
-    };
- 
-    # Quick and dirty // override. Do not recommend.
-    herculesCIEffects.pkgs = pkgs // {
-      hci = inputs'.hercules-ci-agent.packages.hercules-ci-cli;
+      nativeBuildInputs = [
+        pkgs.nixpkgs-fmt
+        pkgs.hci
+        pkgs.python3Packages.python
+        pkgs.python3Packages.mypy
+        pkgs.python3Packages.autopep8
+      ];
     };
   };
 }

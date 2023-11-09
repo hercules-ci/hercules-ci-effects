@@ -14,7 +14,7 @@ In a flake, or other code that calls `darwin.lib.darwinSystem`,
 ```nix
 hci-effects.runNixDarwin {
   ssh.destination = "jane.local";
-  config = self.darwinConfigurations."Janes-MacBook";
+  configuration = self.darwinConfigurations."Janes-MacBook";
 }
 ```
 
@@ -34,27 +34,26 @@ hci-effects.runNixDarwin {
 [[parameters]]
 == Parameters
 
+
+[[param-buildOnDestination]]
+=== `buildOnDestination`
+
+Default: value of `ssh.buildOnDestination`, which defaults to `false`.
+
+Overrides xref:reference/nix-functions/ssh.adoc#param-buildOnDestination[`ssh.buildOnDestination`]. Defer builds to the destination host instead of pre-building in CI.
+
+
 [[param-config]]
 === `config`
 
-An evaluated configuration to deploy, such as returned by `darwin.lib.darwinSystem`.
-
-Unlike a module, such as can be passed to <<param-configuration>>, a configuration contains all required option values, so that other parameters such as <<param-configuration>>, <<param-nix-darwin>>, <<param-nixpkgs>> and <<param-system>> can be omitted.
-
-If needed, it is sufficient to only pass the `config` attribute returned by `darwin.lib.darwinSystem`.
-
-This parameter is optional and mutually exclusive with <<param-configuration>> and aforementioned other parameters.
+Legacy parameter. Use `configuration` instead.
 
 [[param-configuration]]
 === `configuration`
 
-Optional, mutually exclusive with <<param-config>>.
-
-The main configuration module; file path or module expression.
-
-You can start out by copying `~/.nixpkgs/darwin-configuration.nix` into your
-repo.
-
+Either
+ - An evaluated configuration to deploy, such as returned by `darwin.lib.darwinSystem`.
+ - A module (path or module expression) assuming you also pass <<param-nix-darwin>> and <<param-nixpkgs>> or <<param-pkgs>>.
 
 [[param-nix-darwin]]
 === `nix-darwin`
@@ -67,7 +66,7 @@ Path of the nix-darwin sources to use.
 [[param-nixpkgs]]
 === `nixpkgs`
 
-Optional, mutually exclusive with <<param-config>>.
+Optional. Pass only when <<param-configuration>> is a module (path or module expression).
 
 Path of the Nixpkgs sources to use.
 
@@ -78,7 +77,7 @@ NOTE: This should match `pkgs.path` if both are set explicitly.
 [[param-pkgs]]
 === `pkgs`
 
-Optional, mutually exclusive with <<param-config>>.
+Optional. Pass only when <<param-configuration>> is a module (path or module expression).
 
 An evaluated Nixpkgs invocation to use.
 
@@ -157,7 +156,7 @@ The `config` parameter of the module system. This can be used to inspect the
 system configuration before committing it. For example:
 
 ```
-nix repl ci.nix
+nix repl --file ci.nix
 nix-repl> my-host.prebuilt.config.services.postgresql.enable
 false
 ```

@@ -4,9 +4,20 @@
 }:
 
 let
-  inherit (lib) optionals optionalAttrs optionalString;
+  inherit (builtins) concatStringsSep;
+  inherit (lib) attrNames forEach length mapAttrsToList optionals optionalAttrs optionalString;
+
+  genTitle = flakes:
+    let
+      names = attrNames flakes;
+      showName = name: if name == "." then "`flake.lock`" else "`${name}/flake.lock`";
+      allNames = concatStringsSep ", " (map showName names);
+      sensibleNames = if length names > 3 then "`flake.lock`" else allNames;
+    in
+      "${sensibleNames}: Update";
 in
 
+passedArgs@
 { gitRemote
 , tokenSecret ? { type = "GitToken"; }
 , user ? "git"
@@ -14,13 +25,33 @@ in
 , forgeType ? "github"
 , createPullRequest ? true
 , autoMergeMethod ? null
+  # NB: Default also specified in ./flake-module.nix
+, pullRequestTitle ? genTitle flakes
+, pullRequestBody ? null
+  # TODO [baseMerge] "HEAD" by default instead of null after real world testing
+, baseMergeBranch ? null
+, baseMergeMethod ? "merge"
+, flakes ? { "." = { inherit inputs commitSummary; }; }
+, inputs ? [ ]
+, commitSummary ? ""
+, module ? { }
 }:
 assert createPullRequest -> forgeType == "github";
 assert (autoMergeMethod != null) -> forgeType == "github";
 
+# Do not specify inputs when `flakes` is used
+assert passedArgs?flakes -> inputs == [ ];
+
+# Do not specify commitSummary when `flakes` is used
+assert passedArgs?flakes -> commitSummary == "";
+
+# If you don't specify any flakes, probably that's a mistake, or don't create the effect.
+assert flakes != { };
+
 modularEffect {
   imports = [
     ../modules/git-update.nix
+    module
   ];
 
   git.checkout.remote.url = gitRemote;
@@ -29,15 +60,12 @@ modularEffect {
 
   git.update.branch = updateBranch;
   git.update.pullRequest.enable = createPullRequest;
-  git.update.pullRequest.title = "`flake.lock`: Update";
-  git.update.pullRequest.body = ''
-    Update `flake.lock`. See the commit message(s) for details.
-
-    You may reset this branch by deleting it and re-running the update job.
-
-        git push origin :${updateBranch}
-  '';
+  git.update.pullRequest.title = pullRequestTitle;
+  git.update.pullRequest.body = pullRequestBody;
   git.update.pullRequest.autoMergeMethod = autoMergeMethod;
+  git.update.baseMerge.branch = lib.mkIf (baseMergeBranch != null) (lib.mkDefault baseMergeBranch);
+  git.update.baseMerge.method = lib.mkDefault baseMergeMethod;
+  git.update.baseMerge.enable = lib.mkDefault (baseMergeMethod != null && baseMergeBranch != null);
 
   secretsMap.token = tokenSecret;
 
@@ -46,11 +74,25 @@ modularEffect {
     pkgs.nix
   ];
 
-  git.update.script = ''
-    echo 1>&2 'Running nix flake update...'
-    nix flake update \
-      --commit-lock-file \
-      --extra-experimental-features 'nix-command flakes'
-  '';
+  git.update.script =
+    let
+      script = concatStringsSep "\n" (mapAttrsToList toScript flakes);
+      toScript = relPath: flakeCfg@{inputs ? [], commitSummary ? ""}:
+        let
+          hasSummary = commitSummary != "";
+          extraArgs = concatStringsSep " " (forEach inputs (i: "--update-input ${i}"));
+          command = if inputs != [ ] then "flake lock" else "flake update";
+        in
+        ''
+          echo 1>&2 'Running nix ${command}...'
+          nix \
+            --extra-experimental-features 'nix-command flakes' \
+            ${command} ${extraArgs} \
+            --commit-lock-file \
+            ${optionalString hasSummary "--commit-lockfile-summary \"${commitSummary}\""} \
+            ${lib.escapeShellArg ("./" + relPath)}
+        '';
+    in
+    script;
 
 }

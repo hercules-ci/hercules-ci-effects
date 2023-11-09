@@ -1,4 +1,4 @@
-{ withSystem, inputs, ... }: {
+{ withSystem, inputs, lib, ... }: {
   imports = [
     ./flake-module.nix
     ./flake-docs-render.nix
@@ -14,8 +14,15 @@
 
     lib.mkHerculesCI = import ./lib/mkHerculesCI.nix inputs;
 
+    modules = {
+      # Also available as `(lib.withPkgs pkgs).modules` aka
+      # `hci-effects.modules` when using flake-parts `perSystem` module argument.
+      effect = import ./effects/modules.nix;
+    };
+
     overlay = final: prev: {
-      effects = import ./effects/default.nix final.effects final;
+      effects = lib.warn "pkgs.effects is deprecated. Use pkgs.hci-effects instead." final.hci-effects;
+      hci-effects = import ./effects/default.nix final.effects final;
     };
 
     templates = rec {
