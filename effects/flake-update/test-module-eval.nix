@@ -65,19 +65,15 @@ rec {
   matches = regex: string: builtins.match regex string != null;
   contains = substring: matches ".*${lib.escapeRegex substring}.*";
 
-  # How the root flake reference is rendered in the script.
-  rootFlakeRef = "'./.'";
-
   tests = ok:
     
     assert basicUpdateHerculesCI.onSchedule.flake-update.when ==
       { dayOfMonth = null; dayOfWeek = null; hour = [ 23 ]; minute = 59; };
 
-    assert contains rootFlakeRef basicUpdateConfig.git.update.script;
-
-    assert contains "'./subflake'" subflakeUpdateConfig.git.update.script;
+    assert contains "cd 'subflake'" subflakeUpdateConfig.git.update.script;
     # The default (flake at root) is overridden by the user definition. Potentially not future proof because it could match some other './.' substring.
-    assert ! contains rootFlakeRef subflakeUpdateConfig.git.update.script;
+    assert ! contains "cd '.'" subflakeUpdateConfig.git.update.script;
+    assert contains "cd '.'" basicUpdateConfig.git.update.script;
 
     assert contains "--update-input nixpkgs" subflakeUpdateConfig.git.update.script;
 
