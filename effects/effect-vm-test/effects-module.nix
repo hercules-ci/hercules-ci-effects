@@ -11,16 +11,12 @@ let
   nixos-lib = import (pkgs.path + "/nixos/lib") { inherit lib; };
 
   wrapEffect = name: effect:
-    let
-      eff = effect.overrideAttrs (o: {
-        # Work around Nix bug with unsafeDiscardOutputDependency, probably in libstore.
-        makeNixSandboxBuildSucceed = true;
-      });
-    in
+    # TODO: use unsafeDiscardOutputDependency blocked on https://github.com/NixOS/nix/issues/9146
+    #       or use a different workaround that doesn't depend on build closure's outputs all the way to bootstrap
     pkgs.writeScriptBin "effect-${name}" ''
       #!${pkgs.runtimeShell}
-      # retaining deps: ${eff.inputDerivation} ${eff}
-      hci effect run --no-token --project testforge/testorg/testrepo --as-branch main ${builtins.unsafeDiscardOutputDependency eff.drvPath}
+      # retaining deps: ${effect.inputDerivation}
+      hci effect run --no-token --project testforge/testorg/testrepo --as-branch main ${effect.drvPath}
     '';
 
   /*
