@@ -35,6 +35,7 @@ passedArgs@
 , inputs ? [ ]
 , commitSummary ? ""
 , module ? { }
+, nix ? pkgs.nix
 }:
 assert createPullRequest -> forgeType == "github";
 assert (autoMergeMethod != null) -> forgeType == "github";
@@ -71,7 +72,7 @@ modularEffect {
 
   name = "flake-update";
   inputs = [
-    pkgs.nix
+    nix
   ];
 
   git.update.script =
