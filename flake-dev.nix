@@ -48,6 +48,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
     enable = true;
     when.dayOfMonth = 15;
     autoMergeMethod = "merge";
+    baseMerge.enable = true;
   };
 
   herculesCI = { config, ... }: {
