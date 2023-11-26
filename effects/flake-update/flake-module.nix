@@ -193,6 +193,17 @@ in
         NOTE: If you provide a definition for this option, it does *not* extend the default. You must specify all flakes you want to update, including the project root (`"."`) if applicable.
       '';
     };
+
+    nix.package = mkOption {
+      type = types.functionTo types.package;
+      description = ''
+        The Nix package to use for performing the lockfile updates.
+
+        The function arguments are the module arguments of `perSystem` for `hercules-ci.flake-update.effect.system`.
+      '';
+      default = { pkgs, ... }: pkgs.nix;
+      defaultText = lib.literalExpression "{ pkgs, ... }: pkgs.nix";
+    };
   };
 
   config = {
@@ -210,6 +221,7 @@ in
                 gitRemote = herculesCI.config.repo.remoteHttpUrl;
                 user = "x-access-token";
                 inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod pullRequestTitle pullRequestBody flakes;
+                nix = withSystem cfg.effect.system cfg.nix.package;
                 module = cfg.effect.settings;
               }
             );

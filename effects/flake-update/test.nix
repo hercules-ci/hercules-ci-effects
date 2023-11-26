@@ -1,7 +1,9 @@
-{ effectVMTest, hci-effects }:
+{ effectVMTest, hci-effects, nix ? null }:
 
 let
-
+  flakeUpdate =
+    if nix == null then hci-effects.flakeUpdate
+    else args: hci-effects.flakeUpdate ({ inherit nix; } // args);
 in
 effectVMTest {
   imports = [
@@ -11,13 +13,13 @@ effectVMTest {
   ];
   name = "flake-update";
   effects = {
-    update = hci-effects.flakeUpdate {
+    update = flakeUpdate {
       gitRemote = "http://gitea:3000/test/repo";
       user = "test";
       forgeType = "gitea";
       createPullRequest = false; # not supported
     };
-    update-no-pr-body = hci-effects.flakeUpdate {
+    update-no-pr-body = flakeUpdate {
       gitRemote = "http://gitea:3000/test/repo";
       user = "test";
       forgeType = "gitea";
@@ -26,7 +28,7 @@ effectVMTest {
       # TODO add test case for non-empty body
       # TODO add test case for empty body
     };
-    update-dep2input = hci-effects.flakeUpdate {
+    update-dep2input = flakeUpdate {
       gitRemote = "http://gitea:3000/test/repo";
       user = "test";
       forgeType = "gitea";
@@ -34,7 +36,7 @@ effectVMTest {
       commitSummary = "Update dep2input with custom message";
       inputs = [ "dep2input" ];
     };
-    update-subflake = hci-effects.flakeUpdate {
+    update-subflake = flakeUpdate {
       gitRemote = "http://gitea:3000/test/repo";
       user = "test";
       forgeType = "gitea";
@@ -43,7 +45,7 @@ effectVMTest {
         "sub" = { };
       };
     };
-    update-flake-and-subflake = hci-effects.flakeUpdate {
+    update-flake-and-subflake = flakeUpdate {
       gitRemote = "http://gitea:3000/test/repo";
       user = "test";
       forgeType = "gitea";
@@ -53,7 +55,7 @@ effectVMTest {
         "sub" = { };
       };
     };
-    update-custom-baseMerge-branch = hci-effects.flakeUpdate {
+    update-custom-baseMerge-branch = flakeUpdate {
       gitRemote = "http://gitea:3000/test/repo";
       user = "test";
       forgeType = "gitea";
