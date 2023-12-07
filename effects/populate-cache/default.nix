@@ -90,9 +90,10 @@
                 '';
               };
               branches = lib.mkOption {
-                type = with lib.types; listOf str;
+                type = with lib.types; nullOr (listOf str);
+                default = null;
                 description = ''
-                  Branches on which we'd like to execute the effect.
+                  Branches on which we'd like to execute the effect. Set to `nil` to execute on all branches.
                 '';
               };
             };
@@ -135,7 +136,7 @@
             '';
           };
         in
-          hci-effects.runIf (builtins.elem branch cacheOptions.branches) pushEffect
+          hci-effects.runIf ((cacheOptions.branches == null) || (builtins.elem branch cacheOptions.branches)) pushEffect
       );
 
     mkCachixPushEffect = {
