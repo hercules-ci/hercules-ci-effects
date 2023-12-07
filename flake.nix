@@ -3,12 +3,6 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
-  inputs.attic = {
-    url = "github:zhaofengli/attic";
-    inputs = {
-      nixpkgs.follows = "nixpkgs";
-    };
-  };
 
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; }

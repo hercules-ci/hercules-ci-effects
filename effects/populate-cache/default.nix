@@ -1,40 +1,47 @@
-{inputs, withSystem, ...}:
-let
-  attic-client = inputs.attic.packages."x86_64-linux".attic-client;
-  cachix = withSystem "x86_64-linux" ({pkgs, ...}: pkgs.cachix);
-  in
 {
   inputs,
   lib,
   withSystem,
   config,
   ...
-}: {
+}: let
+  pkgs-x86_64-linux = withSystem "x86_64-linux" ({pkgs, ...}: pkgs);
+  in
+  {
   imports = [
     inputs.hercules-ci-effects.flakeModule
   ];
 
   options = {
-    populate-cache-effect = {
+    push-cache-effect = {
       enable = lib.mkOption {
         type = lib.types.bool;
         default = false;
-        description = "Enables HerculesCI effects populating some external cache.";
+        description = ''
+          Enables an effect that pushes certain outputs to a different binary cache.
+
+          Hercules CI normally pushes everything to the cache(s) configured on the agent. This effect supplements that behavior by letting you push a subset of those to a different cache.
+          Note that it only pushes the output closure, and not the closures of build dependencies used during the build stage of the CI job. (Unless those closures happen to also be part of the output or "runtime" closure)
+        '';
       };
       attic-client-pkg = lib.mkOption {
         type = lib.types.package;
-        description = "Version of the attic-client package to use on \"x86_64-linux\".";
-        default = attic-client;
+        description = ''
+          Version of the attic-client package to use on \"x86_64-linux\".
+          
+          Hint: You can use `attic.packages.x86_64-linux.attic-client` from the attic flake.
+        '';
+        default = pkgs-x86_64-linux.attic-client or (throw "push-cache-effect.attic-client-pkg: It seems that attic hasn't been packaged in Nixpkgs (yet?). Please check <nixpkgs packaging request issue> or set <option> manually.");
       };
       cachix-pkg = lib.mkOption {
         type = lib.types.package;
+        default = pkgs-x86_64-linux.cachix;
         description = "Version of the cachix package to use on \"x86_64-linux\".";
-        default = cachix;
       };
       caches = lib.mkOption {
         description = "
           An attribute set, each `name: value` pair translates to an effect under
-          onPush.default.outputs.effects.populate-cache-effect.name
+          onPush.default.outputs.effects.push-cache-effect.name
         ";
         example = "
           {
@@ -157,9 +164,9 @@ let
           hci-effects.runIf (builtins.elem branch cacheOptions.branches) pushEffect
       );
   in
-    lib.mkIf config.populate-cache-effect.enable {
+    lib.mkIf config.push-cache-effect.enable {
       herculesCI = herculesConfig: {
-        onPush.default.outputs.effects.populate-cache-effect =
+        onPush.default.outputs.effects.push-cache-effect =
           lib.attrsets.mapAttrs' (_: cacheOptions: {
             inherit (cacheOptions) name;
             value = builtins.getAttr "${cacheOptions.type}" {
@@ -173,7 +180,7 @@ let
               };
             };
           })
-          config.populate-cache-effect.caches;
+          config.push-cache-effect.caches;
       };
     };
 }
