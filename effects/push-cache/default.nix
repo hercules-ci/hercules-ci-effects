@@ -95,7 +95,7 @@ in {
       withSystem "x86_64-linux" ({ hci-effects, pkgs, ... }:
         let
           pushEffect = hci-effects.mkEffect {
-            inputs = [ attic-client-pkg ];
+            inputs = [ config.push-cache-effect.attic-client-pkg ];
             secretsMap = { token-file = "${cacheOptions.secretName}"; };
             userSetupScript = ''
               attic login \
@@ -116,7 +116,7 @@ in {
       withSystem "x86_64-linux" ({ hci-effects, pkgs, ... }:
         let
           pushEffect = hci-effects.mkEffect {
-            inputs = [ cachix ];
+            inputs = [ config.push-cache-effect.cachix-pkg ];
             secretsMap = { token-file = "${cacheOptions.secretName}"; };
             userSetupScript = ''
               cachix authtoken $(readSecretString token-file .token)
