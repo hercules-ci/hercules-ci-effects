@@ -8,7 +8,7 @@
 
     flakeModule = ./flake-module.nix;
 
-    push-cache-module = ./effects/push-cache;
+    push-cache-effect = ./effects/push-cache;
 
     lib.withPkgs = pkgs:
       let effects = import ./effects/default.nix effects pkgs;

@@ -32,10 +32,20 @@ in {
           ''Version of the cachix package to use on "x86_64-linux".'';
       };
       caches = lib.mkOption {
-        description =
-          "\n          An attribute set, each `name: value` pair translates to an effect under\n          onPush.default.outputs.effects.push-cache-effect.name\n        ";
-        example =
-          "\n          {\n            our-cachix = {\n              type = \"cachix\";\n              secretName = \"our-cachix-token\";\n              branches = [ \"master\" ];\n              packages = [ pkgs.hello ];\n            };\n          }\n        ";
+        description = ''
+          An attribute set, each `name: value` pair translates to
+          an effect under `onPush.default.outputs.effects.push-cache-effect.name`.
+        '';
+        example = ''
+          {
+            our-cachix = {
+              type = \"cachix\";
+              secretName = \"our-cachix-token\";
+              branches = [ \"master\" ];
+              packages = [ pkgs.hello ];
+            };
+          }
+        '';
         type = lib.types.attrsOf (lib.types.submodule ({ name, ... }: {
           options = {
             name = lib.mkOption {
