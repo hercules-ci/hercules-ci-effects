@@ -116,6 +116,8 @@ checkVersion {
     };
   };
 
+  push-cache = import ./push-cache;
+
   effects = self;
   hci-effects = self;
 
