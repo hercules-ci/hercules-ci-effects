@@ -1,7 +1,7 @@
 { lib, withSystem, config, ... }:
 let pkgs-x86_64-linux = withSystem "x86_64-linux" ({ pkgs, ... }: pkgs);
 in {
-  imports = [ .././flake-module.nix ];
+  imports = [ ../../flake-module.nix ];
 
   options = {
     push-cache-effect = {
