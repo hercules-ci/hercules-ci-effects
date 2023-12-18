@@ -1,5 +1,4 @@
 {
-  inputs,
   lib,
   withSystem,
   config,
@@ -9,7 +8,7 @@
   in
   {
   imports = [
-    inputs.hercules-ci-effects.flakeModule
+    .././flake-module.nix
   ];
 
   options = {
