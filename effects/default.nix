@@ -92,6 +92,8 @@ checkVersion
 
   effectVMTest = callPackage ./effect-vm-test { extraModule = { config.hci = pkgs.hci; }; };
 
+  push-cache = import ./push-cache;
+
   effects = self;
   hci-effects = self;
 

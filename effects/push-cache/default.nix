@@ -92,7 +92,7 @@
                 type = with lib.types; nullOr (listOf str);
                 default = null;
                 description = ''
-                  Branches on which we'd like to execute the effect. Set to `nil` to execute on all branches.
+                  Branches on which we'd like to execute the effect. Set to `null` to execute on all branches.
                 '';
               };
             };
