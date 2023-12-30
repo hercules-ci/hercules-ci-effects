@@ -35,6 +35,7 @@ passedArgs@
 , inputs ? [ ]
 , commitSummary ? ""
 , module ? { }
+, nix ? pkgs.nix
 }:
 assert createPullRequest -> forgeType == "github";
 assert (autoMergeMethod != null) -> forgeType == "github";
@@ -71,7 +72,7 @@ modularEffect {
 
   name = "flake-update";
   inputs = [
-    pkgs.nix
+    nix
   ];
 
   git.update.script =
@@ -79,18 +80,27 @@ modularEffect {
       script = concatStringsSep "\n" (mapAttrsToList toScript flakes);
       toScript = relPath: flakeCfg@{inputs ? [], commitSummary ? ""}:
         let
+          atLeast_2_19 = lib.versionAtLeast nix.version "2.19";
           hasSummary = commitSummary != "";
-          extraArgs = concatStringsSep " " (forEach inputs (i: "--update-input ${i}"));
-          command = if inputs != [ ] then "flake lock" else "flake update";
+          extraArgs =
+            if atLeast_2_19 then
+              lib.escapeShellArgs inputs
+            else
+              concatStringsSep " " (forEach inputs (i: "--update-input ${i}"));
+          command =
+            if atLeast_2_19 then "flake update"
+            else
+              if inputs != [ ] then "flake lock" else "flake update";
         in
         ''
           echo 1>&2 'Running nix ${command}...'
-          nix \
-            --extra-experimental-features 'nix-command flakes' \
-            ${command} ${extraArgs} \
-            --commit-lock-file \
-            ${optionalString hasSummary "--commit-lockfile-summary \"${commitSummary}\""} \
-            ${lib.escapeShellArg ("./" + relPath)}
+          ( cd ${lib.escapeShellArg relPath}
+            nix \
+              --extra-experimental-features 'nix-command flakes' \
+              ${command} ${extraArgs} \
+              --commit-lock-file \
+              ${optionalString hasSummary "--commit-lockfile-summary \"${commitSummary}\""} \
+          )
         '';
     in
     script;

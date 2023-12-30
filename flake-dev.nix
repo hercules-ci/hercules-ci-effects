@@ -48,6 +48,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
     enable = true;
     when.dayOfMonth = 15;
     autoMergeMethod = "merge";
+    baseMerge.enable = true;
   };
 
   herculesCI = { config, ... }: {
@@ -90,6 +91,8 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
           );
     in {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
+      # TODO after https://github.com/NixOS/nix/issues/7730, use nix master
+      flake-update-nix-unstable = hci-effects.callPackage ./effects/flake-update/test.nix { nix = pkgs.nixVersions.unstable; };
       git-update = hci-effects.callPackage ./effects/modules/git-update/test.nix { };
       write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
