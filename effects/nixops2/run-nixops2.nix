@@ -6,29 +6,37 @@ let
 
   # We don't use this for the actual deployment.
   getNixFiles = nixops: runCommand "${nixops.name}-nix-files" {
-    inherit (nixops) plugins;
+    plugins =
+      if lib.isList nixops.plugins
+      then nixops.plugins
+      else lib.attrValues nixops.plugins;
+    inherit nixops;
   } ''
     mkdir $out
     echo "[" >$out/all-plugins.nix
     notnull() {
       [[ $# > 0 ]]
     }
-    for plugin in $plugins; do
+    for plugin in $plugins $nixops; do
       # NixOps itself
       if notnull $plugin/lib/python*/site-packages/nix; then
         echo "copying nixops nix exprs from $plugin"
         cp --no-preserve=mode -r $plugin/lib/python*/site-packages/nix/* $out
       elif notnull $plugin/lib/python*/site-packages/*/nix/default.nix; then
-        defaultNix=$plugin/lib/python*/site-packages/*/nix/default.nix
-        name=$(basename $(dirname $(dirname $defaultNix)))
-        cp --no-preserve=mode -r $plugin/lib/python*/site-packages/$name/nix $out/$name
-        echo "  ./$name" >>$out/all-plugins.nix
+
+        defaultNix="$(echo $plugin/lib/python*/site-packages/*/nix/default.nix)"
+        if grep -E '../../auto-raid' $defaultNix; then
+          # nixos-modules-contrib has upreferences, and we can't just copy it
+          # but it appears to be imported transitively anyway.
+          :
+        else
+          name=$(basename $(dirname $(dirname $defaultNix)))
+          cp --no-preserve=mode -r $plugin/lib/python*/site-packages/$name/nix $out/$name
+          echo "  ./$name" >>$out/all-plugins.nix
+        fi
       else
         echo "warning: don't know how to gather Nix expressions from plugin $plugin. Does it have Nix expressions?"
       fi
-        # echo "copying plugin nix exprs from $plugin"
-        # Plugins usually define nix/default as the only `def nixexprs()`
-        # cp $plugin/lib/python3.8/site-packages/*/nix/* $out
     done
     echo "]" >>$out/all-plugins.nix
 
