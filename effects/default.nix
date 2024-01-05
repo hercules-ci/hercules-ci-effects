@@ -63,8 +63,10 @@ checkVersion
 
   gitWriteBranch = self.modularEffectWithUserModule "gitWriteBranch" ./write-branch/effect-module.nix;
 
+  cloudflarePages = callPackage ./cloudflare-pages { };
+
   netlifyDeploy = callPackage ./netlify { };
-  netlifySetupHook = pkgs.runCommand "hercules-ci-netlify-setup-hook" {} ''
+  netlifySetupHook = pkgs.runCommand "hercules-ci-netlify-setup-hook" { } ''
     mkdir -p $out/nix-support
     cp ${./netlify/netlify-setup-hook.sh} $out/nix-support/setup-hook
   '';
