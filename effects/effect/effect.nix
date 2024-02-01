@@ -59,6 +59,8 @@ let
 in
 invokeOverride mkDrv {
 
+  invalidator = 1;
+
   preGetStatePhases = "";
   preEffectPhases = "priorCheckPhase";
 
