@@ -60,6 +60,8 @@ in
 invokeOverride mkDrv {
 
   invalidator = 1;
+  __hci_effect_virtual_uid = 42;
+  __hci_effect_virtual_gid = 42;
 
   preGetStatePhases = "";
   preEffectPhases = "priorCheckPhase";
