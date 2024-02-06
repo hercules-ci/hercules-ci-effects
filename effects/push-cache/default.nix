@@ -109,14 +109,14 @@ in {
             secretsMap = { token-file = "${cacheOptions.secretName}"; };
             userSetupScript = ''
               attic login \
-                server-name \
+                default \
                 $(readSecretString token-file .endpoint) \
                 $(readSecretString token-file .token)
             '';
             effectScript = ''
               cat ${
                 packagesFile pkgs cacheOptions.packages
-              } | xargs -s 4096 attic push server-name:$(readSecretString token-file .name)
+              } | xargs -s 4096 attic push default:$(readSecretString token-file .name)
             '';
           };
         in hci-effects.runIf ((cacheOptions.branches == null)
