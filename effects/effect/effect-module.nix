@@ -71,6 +71,21 @@ in
       default = { };
     };
 
+    mounts = mkOption {
+      type = types.lazyAttrsOf types.str;
+      description = ''
+        _Since hercules-ci-agent 0.10.1_
+
+        Mounts that are made available to the effect.
+        The keys are the mount points.
+        The values are the keys of the [`effectMountables`](https://docs.hercules-ci.com/hercules-ci-agent/agent-config#effectMountables) configured on the agents.
+      '';
+      default = { };
+      example = {
+        "/dev/kvm" = "dev-kvm";
+      };
+    };
+
     src = mkOption {
       type = types.nullOr types.path;
       description = ''
@@ -172,6 +187,7 @@ in
         getStateScript
         putStateScript
         ;
+      __hci_effect_mounts = builtins.toJSON config.mounts;
       passthru = config.extraAttributes;
     }
     // filterAttrs (k: v: v != null) {

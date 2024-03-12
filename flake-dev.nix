@@ -64,6 +64,9 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
         {
           tests = top.config.flake.tests // {
             netlifyDeploy = pkgs.callPackage ./effects/netlify/test/default.nix { inherit (config.repo) rev; };
+            dev-kvm = withSystem "x86_64-linux" ({ pkgs, hci-effects, ... }:
+              hci-effects.callPackage ./effects/effect/test/dev-kvm.nix { }
+            );
           };
         };
     };
