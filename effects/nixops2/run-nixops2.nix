@@ -1,4 +1,4 @@
-packageArgs@{ gnused, lib, mkEffect, nix, nixopsUnstable, path, system, runCommand, openssh, rsync, hci, git }:
+packageArgs@{ gnused, lib, mkEffect, nix, pkgs, path, system, runCommand, openssh, rsync, hci, git }:
 
 let
   inherit (lib)
@@ -7,9 +7,11 @@ let
   # We don't use this for the actual deployment.
   getNixFiles = nixops: runCommand "${nixops.name}-nix-files" {
     plugins =
-      if lib.isList nixops.plugins
-      then nixops.plugins
-      else lib.attrValues nixops.plugins;
+      nixops.selectedPlugins or (
+        if lib.isList nixops.plugins
+        then nixops.plugins
+        else lib.attrValues nixops.plugins
+      );
     inherit nixops;
   } ''
     mkdir $out
@@ -105,7 +107,14 @@ args@{
   forgetState ? false,
   prebuildNetworkArgs ? {},
   secretsMap ? {},
-  nixops ? nixopsUnstable,
+  nixops ? throw ''
+    runNixOps2: in recent Nixpkgs, nixops_unstable has been replaced by nixops_unstable_minimal.withPlugins
+    A nixops with a large set of plugins is not provided anymore, so hci-effects.runNixOps2 can not provide
+    a suitable default value for the nixops parameter. Please pass a nixops package. Example:
+        runNixOps {
+          nixops = nixops_unstable_minimal.withPlugins (ps: [ ps.nixops-hercules-ci ps.nixops-aws ]);
+        };
+  '',
   nix ? packageArgs.nix,
   prebuild ? true,
   prebuildOnlyNetworkFiles ? [],
