@@ -100,7 +100,7 @@ let
     pkgs.writeScriptBin "effect-${name}" ''
       #!${pkgs.runtimeShell}
       drv=${pkgs.writeText "effect-${name}-drv" (unsafeToATerm effect)}
-      hci effect run --no-token --project testforge/testorg/testrepo --as-branch main $drv
+      sudo -u test-hci-agent hci effect run --no-token --project testforge/testorg/testrepo --as-branch main $drv
     '';
 
   /*
@@ -167,7 +167,15 @@ in
       # Might actually want to use `hci secret add` instead?
       # That will support dynamic secrets, like a host key that's
       # generated on the host.
-      environment.variables.HERCULES_CI_SECRETS_JSON = "${secretsFile}";
+      environment.sessionVariables.HERCULES_CI_SECRETS_JSON = "${secretsFile}";
+
+      users.users.test-hci-agent = {
+        isSystemUser = true;
+        home = "/var/lib/test-hci-agent";
+        createHome = true;
+        group = "test-hci-agent";
+      };
+      users.groups.test-hci-agent = {};
     };
   };
 }
