@@ -212,6 +212,7 @@ in
       git.update.baseBranch = cfg.baseBranch;
     };
     herculesCI = herculesCI@{ config, ... }: optionalAttrs (cfg.enable) {
+      # NOTE: when generalizing to multiple schedules, check that the branches don't interfere.
       onSchedule.flake-update = {
         inherit (cfg) when;
         outputs = {
