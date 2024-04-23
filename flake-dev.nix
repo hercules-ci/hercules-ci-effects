@@ -49,6 +49,10 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
     when.dayOfMonth = 15;
     autoMergeMethod = "merge";
     baseMerge.enable = true;
+    flakes = {
+      "." = {};
+      "effects/nixops2/test" = {};
+    };
   };
 
   herculesCI = { config, ... }: {
