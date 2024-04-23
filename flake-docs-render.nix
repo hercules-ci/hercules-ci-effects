@@ -56,7 +56,7 @@
           documentType = "none";
           warningsAreErrors = true;
           markdownByDefault = true;
-        }).optionsDocBook;
+        }).optionsAsciiDoc;
   in
   {
     packages.generated-option-doc-modularEffect =
@@ -91,38 +91,22 @@
     packages.generated-antora-files =
       pkgs.runCommand "generated-antora-files"
         {
-          nativeBuildInputs = [ pkgs.pandoc pkgs.libxslt.bin ];
+          # nativeBuildInputs = [ pkgs.pandoc ];
           modularEffect = config.packages.generated-option-doc-modularEffect;
           gitWriteBranch = config.packages.generated-option-doc-gitWriteBranch;
           git_auth = config.packages.generated-option-doc-git-auth;
           git_update = config.packages.generated-option-doc-git-update;
         }
         ''
-          mkdir -p $out/modules/ROOT/partials/options
-
-          function convert() {
-            xsltproc --stringparam title Options \
-              -o options.db.xml ${./options.xsl} \
-              -
-            pandoc --from=docbook --to=asciidoc \
-              < options.db.xml\
-            | sed -e 's/^ *//'  -e 's/^== *$//'
+          convert() {
+            # sed -e 's/^#/##/' $1 >$2
+            cat $1 >$2
           }
-          convert \
-            < $modularEffect \
-            >$out/modules/ROOT/partials/options.adoc \
-
-          convert \
-            < $gitWriteBranch \
-            > $out/modules/ROOT/partials/options/gitWriteBranch.adoc
-
-          convert \
-            < $git_auth \
-            > $out/modules/ROOT/partials/options/git-auth.adoc
-
-           convert\
-            < $git_update \
-            > $out/modules/ROOT/partials/options/git-update.adoc
+          mkdir -p $out/modules/ROOT/partials/options
+          convert $modularEffect $out/modules/ROOT/partials/options.adoc
+          convert $gitWriteBranch $out/modules/ROOT/partials/options/gitWriteBranch.adoc
+          convert $git_auth $out/modules/ROOT/partials/options/git-auth.adoc
+          convert $git_update $out/modules/ROOT/partials/options/git-update.adoc
         '';
   };
 }

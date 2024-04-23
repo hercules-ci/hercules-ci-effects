@@ -5,4 +5,4 @@ The xref:reference/nix-functions/modularEffect.adoc[`modularEffect`] function is
 
 This page documents the options which are always available. You may add additional options using the module `imports` syntax.
 
-include::partial$options.adoc[leveloffset=-1]
+include::partial$options.adoc[leveloffset=0]
