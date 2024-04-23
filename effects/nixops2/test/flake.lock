@@ -62,11 +62,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1710779311,
-        "narHash": "sha256-fDN18WvX4hhlLUdnpSgu/DhfJCjlSTTmk+O0uQntfag=",
+        "lastModified": 1713898310,
+        "narHash": "sha256-VKRHJvjnRg47Fffwm3MMf4ceIJgyHgQrpTupBKm7Bb0=",
         "owner": "hercules-ci",
         "repo": "hercules-ci-agent",
-        "rev": "9a031b7c8e376cb46ffcf56aba2350dc6b1dac5b",
+        "rev": "2b3bb5f74cba47a7cc18df71474e66de683002ae",
         "type": "github"
       },
       "original": {
