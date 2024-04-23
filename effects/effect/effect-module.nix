@@ -1,10 +1,9 @@
-{ config, lib, hci-effects, pkgs, ... }:
+{ config, lib, hci-effects, ... }:
 let
   inherit (lib)
     filterAttrs
     literalExpression
     mkOption
-    optionalAttrs
     types
     ;
 
@@ -92,8 +91,15 @@ in
         A source to be unpacked by the `stdenv` unpack hook, like `mkDerivation` would.
       '';
       default = null;
-      example = ''
-        lib.cleanSourceWith { path = ./.; filter = path: type: f path type; }
+      example = lib.literalExpression ''
+        lib.fileset.toSource {
+          root = ./.;
+          fileset =
+            lib.fileset.unions [
+              ./config
+              ./deploy
+            ];
+        }
       '';
     };
 

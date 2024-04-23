@@ -42,7 +42,7 @@ herculesCI = { branch, primaryRepo, ... }: {
 [[effect-options]]
 == Effect Options
 
-include::partial$options/gitWriteBranch.adoc[leveloffset=0]
+include::partial$options/gitWriteBranch.adoc[leveloffset=1]
 
 [[associated-options]]
 == Associated Options

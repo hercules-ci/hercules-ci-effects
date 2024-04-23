@@ -38,7 +38,7 @@ in
         Commit message for the updated contents.
       '';
       defaultText = lib.literalMD ''
-        "Update " + the `destination` or `git.update.branch`
+        `"Update "` + the `destination` or `git.update.branch`
       '';
       default = "Update ${if config.destination == "." then config.git.update.branch else config.destination}"
         + lib.optionalString isStoreContents

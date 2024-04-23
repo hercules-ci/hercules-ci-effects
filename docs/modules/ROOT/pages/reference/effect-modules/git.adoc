@@ -1,7 +1,7 @@
 # Git-related Modules
 
 [[git-auth]]
-## `git-auth`
+## Module `git-auth`
 
 The module provides the basics for working with a git repository.
 
@@ -15,10 +15,10 @@ hci-effects.modularEffect {
 }
 ```
 
-include::partial$options/git-auth.adoc[leveloffset=0]
+include::partial$options/git-auth.adoc[leveloffset=1]
 
 [[git-update]]
-## `git-update`
+## Module `git-update`
 
 A module that facilitates the updating of a git repository.
 
@@ -32,7 +32,7 @@ hci-effects.modularEffect {
 }
 ```
 
-include::partial$options/git-update.adoc[leveloffset=0]
+include::partial$options/git-update.adoc[leveloffset=1]
 
 ## See also
 
