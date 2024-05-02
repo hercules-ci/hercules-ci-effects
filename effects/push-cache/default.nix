@@ -137,8 +137,8 @@ in {
               } | cachix push $(readSecretString token-file .name)
             '';
           };
-        in hci-effects.runIf (builtins.elem branch cacheOptions.branches)
-        pushEffect);
+        in hci-effects.runIf ((cacheOptions.branches == null)
+          || (builtins.elem branch cacheOptions.branches)) pushEffect);
   in lib.mkIf config.push-cache-effect.enable {
     herculesCI = herculesConfig: {
       onPush.default.outputs.effects.push-cache-effect = lib.attrsets.mapAttrs'
