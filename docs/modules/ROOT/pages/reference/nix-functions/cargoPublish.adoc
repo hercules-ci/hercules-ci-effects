@@ -1,0 +1,46 @@
+
+= `cargoPublish`
+
+_cargoPublish {two-colons} AttrSet -> Effect_
+
+Deploys package to https://www.crates.io[crates.io], the Rust community's crate repository.
+
+Example:
+
+```nix
+effects.cargoPublish {
+  secretName = "cargo-api-token";
+}
+```
+
+Example secret:
+
+```json
+  "cargo-api-token": {
+    "kind": "Secret",
+    "data": {
+      "token": "..."
+    },
+    "condition": {
+      "and": [
+        { "isOwner": "my-github-org" },
+        { "isRepo": "my-site-repo" }
+      ]
+    }
+  }
+```
+
+[[parameters]]
+== `Parameters`
+
+[[param-secretName]]
+=== `secretName`
+
+The secret that will be looked up in xref:hercules-ci-agent:ROOT:secrets-json.adoc[`secrets.json`].
+
+The `data` field must contain a `"token"` field, with a string value that is a Cargo API token. To make one, navigate to https://crates.io/settings/tokens[API tokens] and use btn:[New Token].
+
+[[param-extraDeployArgs]]
+=== `extraPublishArgs`
+
+Extra arguments to pass to the `cargo publish` invocation.
