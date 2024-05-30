@@ -7,6 +7,7 @@ args@{ secretName ? throw ''effects.cargo: You must provide `secretName`, the na
 , secretField ? "token"
 , secretsMap ? { }
 , manifestPath ? null
+, targetDir ? "$(mktemp -d)"
 , extraPublishArgs ? [ ]
 , ...
 }: mkEffect (args // {
@@ -18,8 +19,9 @@ args@{ secretName ? throw ''effects.cargo: You must provide `secretName`, the na
   # hooks like the userSetupScript.
   effectScript = ''
     cargo publish \
-    ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}" }
-    ${lib.escapeShellArgs extraPublishArgs}
+    ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}" } \
+    --target-dir ${targetDir} \
+    ${lib.escapeShellArgs extraPublishArgs} \
   '';
 })
 
