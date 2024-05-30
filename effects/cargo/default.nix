@@ -2,6 +2,9 @@
 , mkEffect
 , cargo
 , cargoSetupHook
+, rustc
+, clang
+, llvmPackages
 }:
 args@{ secretName ? throw ''effects.cargo: You must provide `secretName`, the name of the secret which holds the "${secretField}" field.''
 , secretField ? "token"
@@ -9,10 +12,16 @@ args@{ secretName ? throw ''effects.cargo: You must provide `secretName`, the na
 , manifestPath ? null
 , targetDir ? "$(mktemp -d)"
 , extraPublishArgs ? [ ]
+, extraBuildInputs ? [ ]
 , ...
 }: mkEffect (args // {
   buildInputs = [ cargoSetupHook ];
-  inputs = [ cargo ];
+  inputs = [
+    cargo
+    rustc
+    llvmPackages.bintools
+    clang
+  ] ++ extraBuildInputs;
   secretsMap = { "cargo" = secretName; } // secretsMap;
 
   # This style of variable passing allows overrideAttrs and modification in
