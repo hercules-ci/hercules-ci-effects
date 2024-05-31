@@ -4,5 +4,7 @@ let
   inherit (effects) cargoPublish;
 in
 cargoPublish {
+  src = ./.;
   secretName = "cargo-api-token";
+  extraPublishArgs = [ "--dry-run" ];
 }
