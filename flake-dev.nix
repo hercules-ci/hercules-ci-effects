@@ -50,8 +50,8 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
     autoMergeMethod = "merge";
     baseMerge.enable = true;
     flakes = {
-      "." = { };
-      "effects/nixops2/test" = { };
+      "." = {};
+      "effects/nixops2/test" = {};
     };
   };
 
@@ -86,31 +86,30 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
       ];
     };
     checks =
-      let
-        github-releases-tests =
-          import ./flake-modules/github-releases/test.nix
-            { effectSystem = system; inherit inputs; };
-        checkModules =
-          builtins.deepSeq
-            (lib.mapAttrs
-              (_name: builtins.readFile)
-              (self.modules.effect)
-            );
-      in
-      {
-        flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
-        # TODO after https://github.com/NixOS/nix/issues/7730, use nix master
-        flake-update-nix-unstable = hci-effects.callPackage ./effects/flake-update/test.nix { nix = pkgs.nixVersions.unstable; };
-        git-update = hci-effects.callPackage ./effects/modules/git-update/test.nix { };
-        write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
-        # Nix is broken: https://github.com/NixOS/nix/issues/9146
-        # ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
-        artifacts-tool = hci-effects.callPackage ./packages/artifacts-tool/test { };
-        artifacts-tool-typecheck = hci-effects.callPackage ./packages/artifacts-tool/mypy.nix { };
-        github-releases = github-releases-tests.test.simple;
-        github-releases-perSystem = github-releases-tests.test.perSystem;
-        module-files-readable = checkModules pkgs.emptyFile;
-      };
+    let
+      github-releases-tests =
+        import ./flake-modules/github-releases/test.nix
+          { effectSystem = system; inherit inputs; };
+      checkModules =
+        builtins.deepSeq
+          (lib.mapAttrs
+            (_name: builtins.readFile)
+            (self.modules.effect)
+          );
+    in {
+      flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
+      # TODO after https://github.com/NixOS/nix/issues/7730, use nix master
+      flake-update-nix-unstable = hci-effects.callPackage ./effects/flake-update/test.nix { nix = pkgs.nixVersions.unstable; };
+      git-update = hci-effects.callPackage ./effects/modules/git-update/test.nix { };
+      write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
+      # Nix is broken: https://github.com/NixOS/nix/issues/9146
+      # ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
+      artifacts-tool = hci-effects.callPackage ./packages/artifacts-tool/test { };
+      artifacts-tool-typecheck = hci-effects.callPackage ./packages/artifacts-tool/mypy.nix { };
+      github-releases = github-releases-tests.test.simple;
+      github-releases-perSystem = github-releases-tests.test.perSystem;
+      module-files-readable = checkModules pkgs.emptyFile;
+    };
     devShells.default = pkgs.mkShell {
       nativeBuildInputs = [
         pkgs.nixpkgs-fmt
