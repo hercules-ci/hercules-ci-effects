@@ -44,3 +44,19 @@ The `data` field must contain a `"token"` field, with a string value that is a C
 === `extraPublishArgs`
 
 Extra arguments to pass to the `cargo publish` invocation.
+
+[[param-manifestPath]]
+=== `manifestPath`
+
+Path to Cargo.toml
+
+[[param-targetDir]]
+=== `targetDir`
+
+Directory for all generated artifacts
+Default: $(mktemp -d)
+
+[[param-extraBuildInputs]]
+=== `extraBuildInput`
+
+Extra build inputs present in the environment where `cargo publish` is executed
