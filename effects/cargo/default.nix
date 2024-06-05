@@ -6,7 +6,7 @@
 args@{ secretName ? throw ''effects.cargo: You must provide `secretName`, the name of the secret which holds the "${secretField}" field.''
 , secretField ? "token"
 , secretsMap ? { }
-, manifestPath ? "${src}/Cargo.toml"
+, manifestPath ? "Cargo.toml"
 , src
 , targetDir ? "$(mktemp -d)"
 , extraPublishArgs ? [ ]

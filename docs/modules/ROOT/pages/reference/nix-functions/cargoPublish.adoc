@@ -10,6 +10,7 @@ Example:
 ```nix
 effects.cargoPublish {
   secretName = "cargo-api-token";
+  src = ./.;
 }
 ```
 
@@ -45,10 +46,21 @@ The `data` field must contain a `"token"` field, with a string value that is a C
 
 Extra arguments to pass to the `cargo publish` invocation.
 
+[[param-src]]
+=== `src`
+
+Example: `src = ./.;`
+
+Path to the source code of the package to publish.
+
+`src` is unpacked by the Nixpkgs https://nixos.org/manual/nixpkgs/stable/index.html#variables-controlling-the-unpack-phase[`unpackPhase`].
+
 [[param-manifestPath]]
 === `manifestPath`
 
-Path to Cargo.toml
+String containing the path to a `Cargo.toml`, default: `Cargo.toml`. Relative paths are relative to the unpacked `src`.
+
+A store path subpath could be passed instead, bypassing `unpackPhase`.
 
 [[param-targetDir]]
 === `targetDir`
