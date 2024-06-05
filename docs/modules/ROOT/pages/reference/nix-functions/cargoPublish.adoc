@@ -72,3 +72,12 @@ Default: $(mktemp -d)
 === `extraBuildInput`
 
 Extra build inputs present in the environment where `cargo publish` is executed
+
+[[param-registryURL]]
+=== `registryURL`
+
+Optional registry to publish to. Defaults to cargo's default behavior, which is to publish to https://doc.rust-lang.org/cargo/reference/manifest.html#the-publish-field[`package.publish`] or crates.io.
+
+If you use an alternate registry or private registry, you are recommended to store this information in `Cargo.toml`.
+
+Note that this must be the backing git repository URL, not a web or API URL.

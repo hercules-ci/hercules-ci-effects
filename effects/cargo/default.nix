@@ -12,17 +12,28 @@ args@{ secretName ? throw ''effects.cargo: You must provide `secretName`, the na
 , extraPublishArgs ? [ ]
 , extraBuildInputs ? [ ]
 , noVerify ? true
+, registryURL ? null
 , ...
-}: mkEffect (args // {
+}:
+let
+  # This must match the "custom" identifier in ./cargo-setup-hook.sh
+  customRegistryIdentifier = "CUSTOM";
+in
+mkEffect (args // {
   buildInputs = [ cargoSetupHook ];
   inputs = [ cargo ] ++ extraBuildInputs;
   secretsMap = { "cargo" = secretName; } // secretsMap;
+
+  env = args.env or { } // lib.optionalAttrs (registryURL != null) {
+    "CARGO_REGISTRIES_${customRegistryIdentifier}_INDEX" = registryURL;
+  };
 
   # This style of variable passing allows overrideAttrs and modification in
   # hooks like the userSetupScript.
   effectScript = ''
     cargo publish \
     ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}" } \
+    ${lib.optionalString (registryURL != null) "--registry ${customRegistryIdentifier}"} \
     --target-dir ${targetDir} \
     ${lib.escapeShellArgs extraPublishArgs} \
     --no-verify
