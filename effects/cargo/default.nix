@@ -27,8 +27,6 @@ mkEffect (args // {
     "CARGO_REGISTRIES_${customRegistryIdentifier}_INDEX" = registryURL;
   };
 
-  # This style of variable passing allows overrideAttrs and modification in
-  # hooks like the userSetupScript.
   effectScript = ''
     cargo publish \
     ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}" } \
