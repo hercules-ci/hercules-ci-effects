@@ -62,12 +62,6 @@ String containing the path to a `Cargo.toml`, default: `Cargo.toml`. Relative pa
 
 A store path subpath could be passed instead, bypassing `unpackPhase`.
 
-[[param-targetDir]]
-=== `targetDir`
-
-Directory for all generated artifacts
-Default: $(mktemp -d)
-
 [[param-extraBuildInputs]]
 === `extraBuildInput`
 

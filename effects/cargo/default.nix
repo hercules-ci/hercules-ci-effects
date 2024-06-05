@@ -10,7 +10,6 @@ args@{ secretName ? throw ''effects.cargo: You must provide `secretName`, the na
 , secretsMap ? { }
 , manifestPath ? "Cargo.toml"
 , src
-, targetDir ? "$(mktemp -d)"
 , extraPublishArgs ? [ ]
 , extraBuildInputs ? [ ]
 , noVerify ? true
@@ -36,7 +35,7 @@ mkEffect (args // {
     cargo publish \
     ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}" } \
     ${lib.optionalString (registryURL != null) "--registry ${customRegistryIdentifier}"} \
-    --target-dir ${targetDir} \
+    --target-dir "$(mktemp -d)" \
     ${lib.escapeShellArgs extraPublishArgs} \
     --no-verify
   '';
