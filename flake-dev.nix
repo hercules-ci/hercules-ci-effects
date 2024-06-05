@@ -71,6 +71,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
             dev-kvm = withSystem "x86_64-linux" ({ pkgs, hci-effects, ... }:
               hci-effects.callPackage ./effects/effect/test/dev-kvm.nix { }
             );
+            cargoPublish = pkgs.callPackage ./effects/cargo/test/default.nix { };
           };
         };
     };
