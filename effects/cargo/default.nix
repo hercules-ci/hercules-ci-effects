@@ -11,8 +11,6 @@ args@{ secretName ? throw ''effects.cargo: You must provide `secretName`, the na
 , manifestPath ? "Cargo.toml"
 , src
 , extraPublishArgs ? [ ]
-, extraBuildInputs ? [ ]
-, noVerify ? true
 , registryURL ? null
 , ...
 }:
@@ -22,7 +20,7 @@ let
 in
 mkEffect (args // {
   buildInputs = [ cargoSetupHook ];
-  inputs = [ cargo ] ++ extraBuildInputs;
+  inputs = [ cargo ];
   secretsMap = { "cargo" = secretName; } // secretsMap;
 
   env = args.env or { } // lib.optionalAttrs (registryURL != null) {

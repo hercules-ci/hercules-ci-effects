@@ -62,11 +62,6 @@ String containing the path to a `Cargo.toml`, default: `Cargo.toml`. Relative pa
 
 A store path subpath could be passed instead, bypassing `unpackPhase`.
 
-[[param-extraBuildInputs]]
-=== `extraBuildInput`
-
-Extra build inputs present in the environment where `cargo publish` is executed
-
 [[param-registryURL]]
 === `registryURL`
 
