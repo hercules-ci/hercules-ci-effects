@@ -3,6 +3,8 @@
 , cargo
 , cargoSetupHook
 }:
+
+# See docs/modules/ROOT/pages/reference/nix-functions/cargoPublish.adoc
 args@{ secretName ? throw ''effects.cargo: You must provide `secretName`, the name of the secret which holds the "${secretField}" field.''
 , secretField ? "token"
 , secretsMap ? { }
