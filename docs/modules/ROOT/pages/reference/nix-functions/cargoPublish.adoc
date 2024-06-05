@@ -41,7 +41,7 @@ The secret that will be looked up in xref:hercules-ci-agent:ROOT:secrets-json.ad
 
 The `data` field must contain a `"token"` field, with a string value that is a Cargo API token. To make one, navigate to https://crates.io/settings/tokens[API tokens] and use btn:[New Token].
 
-[[param-extraDeployArgs]]
+[[param-extraPublishArgs]]
 === `extraPublishArgs`
 
 Extra arguments to pass to the `cargo publish` invocation.
