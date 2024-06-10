@@ -30,6 +30,11 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
       evaluation-nix-darwin =
         let it = (import ./effects/nix-darwin/eval-test.nix { inherit inputs; });
         in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
+      evaluation-cargoPublish =
+        let it = (import ./effects/cargo/eval-test.nix (withSystem "x86_64-linux" ({ hci-effects, pkgs, ... }: { inherit hci-effects pkgs; })));
+        in it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
     };
 
     tests = withSystem "x86_64-linux" ({ hci-effects, pkgs, ... }: {
@@ -71,6 +76,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
             dev-kvm = withSystem "x86_64-linux" ({ pkgs, hci-effects, ... }:
               hci-effects.callPackage ./effects/effect/test/dev-kvm.nix { }
             );
+            cargoPublish = pkgs.callPackage ./effects/cargo/test/default.nix { };
           };
         };
     };

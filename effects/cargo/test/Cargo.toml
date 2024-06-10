@@ -1,0 +1,12 @@
+[package]
+name = "hercules-ci-effects-test-crate"
+version = "0.1.0"
+edition = "2021"
+description = "A dummy crate to test Hercules CI effects"
+license = "MIT"
+homepage = "https://docs.hercules-ci.com/hercules-ci-effects/reference/nix-functions/cargoPublish.html"
+repository = "https://github.com/hercules-ci/hercules-ci-effects"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

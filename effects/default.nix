@@ -38,7 +38,7 @@ checkVersion
 
   modularEffect = module: (evalEffectModules { modules = [ module ]; }).config.effectDerivation;
 
-  modularEffectWithUserModule = name: libraryModule: userModule: 
+  modularEffectWithUserModule = name: libraryModule: userModule:
     self.modularEffect ({ lib, ... }: {
       imports = [
         libraryModule
@@ -63,8 +63,14 @@ checkVersion
 
   gitWriteBranch = self.modularEffectWithUserModule "gitWriteBranch" ./write-branch/effect-module.nix;
 
+  cargoPublish = callPackage ./cargo { };
+  cargoSetupHook = pkgs.runCommand "hercules-ci-cargo-setup-hook" { } ''
+    mkdir -p $out/nix-support
+    cp ${./cargo/cargo-setup-hook.sh} $out/nix-support/setup-hook
+  '';
+
   netlifyDeploy = callPackage ./netlify { };
-  netlifySetupHook = pkgs.runCommand "hercules-ci-netlify-setup-hook" {} ''
+  netlifySetupHook = pkgs.runCommand "hercules-ci-netlify-setup-hook" { } ''
     mkdir -p $out/nix-support
     cp ${./netlify/netlify-setup-hook.sh} $out/nix-support/setup-hook
   '';

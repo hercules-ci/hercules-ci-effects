@@ -1,0 +1,72 @@
+
+= `cargoPublish`
+
+_cargoPublish {two-colons} AttrSet -> Effect_
+
+Deploys package to https://www.crates.io[crates.io], the Rust community's crate repository.
+
+Example:
+
+```nix
+effects.cargoPublish {
+  secretName = "cargo-api-token";
+  src = ./.;
+}
+```
+
+Example secret:
+
+```json
+  "cargo-api-token": {
+    "kind": "Secret",
+    "data": {
+      "token": "..."
+    },
+    "condition": {
+      "and": [
+        { "isOwner": "my-github-org" },
+        { "isRepo": "my-site-repo" }
+      ]
+    }
+  }
+```
+
+[[parameters]]
+== `Parameters`
+
+[[param-secretName]]
+=== `secretName`
+
+The secret that will be looked up in xref:hercules-ci-agent:ROOT:secrets-json.adoc[`secrets.json`].
+
+The `data` field must contain a `"token"` field, with a string value that is a Cargo API token. To make one, navigate to https://crates.io/settings/tokens[API tokens] and use btn:[New Token].
+
+[[param-extraPublishArgs]]
+=== `extraPublishArgs`
+
+Extra arguments to pass to the `cargo publish` invocation.
+
+[[param-src]]
+=== `src`
+
+Example: `src = ./.;`
+
+Path to the source code of the package to publish.
+
+`src` is unpacked by the Nixpkgs https://nixos.org/manual/nixpkgs/stable/index.html#variables-controlling-the-unpack-phase[`unpackPhase`].
+
+[[param-manifestPath]]
+=== `manifestPath`
+
+String containing the path to a `Cargo.toml`, default: `Cargo.toml`. Relative paths are relative to the unpacked `src`.
+
+A store path subpath could be passed instead, bypassing `unpackPhase`.
+
+[[param-registryURL]]
+=== `registryURL`
+
+Optional registry to publish to. Defaults to cargo's default behavior, which is to publish to https://doc.rust-lang.org/cargo/reference/manifest.html#the-publish-field[`package.publish`] or crates.io.
+
+If you use an alternate registry or private registry, you are recommended to store this information in `Cargo.toml`.
+
+Note that this must be the backing git repository URL, not a web or API URL.
