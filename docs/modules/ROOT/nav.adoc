@@ -25,6 +25,7 @@
 ** xref:reference/nix-functions/nix-shell.adoc[`nix-shell`]
 ** xref:reference/nix-functions/ssh.adoc[`ssh`]
 ** _Deployment Functions_
+** xref:reference/nix-functions/cargoPublish.adoc[`cargoPublish`]
 ** xref:reference/nix-functions/netlifyDeploy.adoc[`netlifyDeploy`]
 ** xref:reference/nix-functions/gitWriteBranch.adoc[`gitWriteBranch`]
 ** xref:reference/nix-functions/runArion.adoc[`runArion`]
