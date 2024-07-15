@@ -91,9 +91,10 @@ modularEffect {
             if atLeast_2_19 then "flake update"
             else
               if inputs != [ ] then "flake lock" else "flake update";
+          locationContext = if attrNames flakes != ["."] then " in '${relPath}'" else "";
         in
         ''
-          echo 1>&2 'Running nix ${command}...'
+          echo 1>&2 'Running nix ${command}${locationContext}...'
           ( cd ${lib.escapeShellArg relPath}
             nix \
               --extra-experimental-features 'nix-command flakes' \
