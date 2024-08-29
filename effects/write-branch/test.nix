@@ -157,5 +157,27 @@ effectVMTest {
         )
       """)
 
+    with subtest("Files and directories can be put in a directory without replacing everything, also when removing the destination removes its parent directories"):
+      # Since www/public is the only entry in www, git will remove www as well
+      # This must be handled by the effect, by creating the parent: www
+      agent.succeed(f"echo {gitea_admin_password} | effect-write-contents-destination")
+      client.succeed("""
+        (
+          set -x
+          cd repo
+          git pull
+          test index.md
+          ! test -e bin
+          ! test -e .i-am-hidden
+          test -r www/public/index.md
+          test -r www/public/.i-am-hidden
+          test -x www/public/bin/hello
+          test -L www/public/bin/greet
+
+          lines=$(git log | grep -F 'Update www/public' | wc -l)
+          [[ 1 == $lines ]]
+        )
+      """)
+
   '';
 }

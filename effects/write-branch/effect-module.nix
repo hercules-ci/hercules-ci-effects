@@ -71,9 +71,8 @@ in
 
       if test -e "$destination"; then
         git rm -rf "$destination"
-      else
-        mkdir -p "$(dirname "$destination")"
       fi
+      mkdir -p "$(dirname "$destination")"
 
       if test -d "''${contents}"; then
         contents="''${contents}/."
