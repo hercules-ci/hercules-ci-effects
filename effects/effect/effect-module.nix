@@ -159,6 +159,32 @@ in
       default = null;
     };
 
+    uid = mkOption {
+      type = types.int;
+      description = ''
+        _Since hercules-ci-agent 0.10.1_
+
+        The virtual user id, which processes in the contain think they have.
+
+        The real user id is always that of the hercules-ci-agent that runs the effect, or that of the user calling [`hci effect run`](https://docs.hercules-ci.com/hercules-ci-agent/hci/effect/run).
+
+        See also [`gid`](https://docs.hercules-ci.com/hercules-ci-effects/reference/effect-modules/core.html#_gid).
+      '';
+      default = 0;
+    };
+
+    gid = mkOption {
+      type = types.int;
+      description = ''
+        _Since hercules-ci-agent 0.10.1_
+
+        The virtual group id, which processes in the contain think they have.
+
+        See [`uid`](https://docs.hercules-ci.com/hercules-ci-effects/reference/effect-modules/core.html#_uid).
+      '';
+      default = 0;
+    };
+
     extraAttributes = mkOption {
       description = ''
         Attributes to add to the returned effect. These only exist at the expression level and do not become part of the executable effect.
@@ -194,6 +220,8 @@ in
         putStateScript
         ;
       __hci_effect_mounts = builtins.toJSON config.mounts;
+      __hci_effect_virtual_uid = config.uid;
+      __hci_effect_virtual_gid = config.gid;
       passthru = config.extraAttributes;
     }
     // filterAttrs (k: v: v != null) {
