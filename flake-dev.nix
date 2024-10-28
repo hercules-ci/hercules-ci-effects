@@ -105,7 +105,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
     in {
       flake-update = hci-effects.callPackage ./effects/flake-update/test.nix { };
       # TODO after https://github.com/NixOS/nix/issues/7730, use nix master
-      flake-update-nix-unstable = hci-effects.callPackage ./effects/flake-update/test.nix { nix = pkgs.nixVersions.unstable; };
+      flake-update-nix-git = hci-effects.callPackage ./effects/flake-update/test.nix { nix = pkgs.nixVersions.git; };
       git-update = hci-effects.callPackage ./effects/modules/git-update/test.nix { };
       write-branch = hci-effects.callPackage ./effects/write-branch/test.nix { };
       # Nix is broken: https://github.com/NixOS/nix/issues/9146
