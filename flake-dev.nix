@@ -46,6 +46,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
       cachix-deploy = pkgs.callPackage ./effects/cachix-deploy/test.nix { };
       mkEffect = pkgs.callPackage ./effects/effect/test.nix { };
       nixos = hci-effects.callPackage ./effects/nixos/test.nix { };
+      uid = hci-effects.callPackage ./effects/effect/test/uid.nix { };
     });
   };
 
