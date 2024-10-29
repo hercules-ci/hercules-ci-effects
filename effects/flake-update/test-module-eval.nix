@@ -70,10 +70,10 @@ rec {
     assert basicUpdateHerculesCI.onSchedule.flake-update.when ==
       { dayOfMonth = null; dayOfWeek = null; hour = [ 23 ]; minute = 59; };
 
-    assert contains "cd 'subflake'" subflakeUpdateConfig.git.update.script;
+    assert contains "cd subflake" subflakeUpdateConfig.git.update.script;
     # The default (flake at root) is overridden by the user definition. Potentially not future proof because it could match some other './.' substring.
-    assert ! contains "cd '.'" subflakeUpdateConfig.git.update.script;
-    assert contains "cd '.'" basicUpdateConfig.git.update.script;
+    assert ! contains "cd ." subflakeUpdateConfig.git.update.script;
+    assert contains "cd ." basicUpdateConfig.git.update.script;
 
     assert contains "--update-input nixpkgs" subflakeUpdateConfig.git.update.script;
 
