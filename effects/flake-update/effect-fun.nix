@@ -96,7 +96,8 @@ modularEffect {
         ''
           echo 1>&2 'Running nix ${command}${locationContext}...'
           ( cd ${lib.escapeShellArg relPath}
-            nix \
+            # yes n: Say "n" to questions about accepting nixConfig
+            (yes n || :) | nix \
               --extra-experimental-features 'nix-command flakes' \
               ${command} ${extraArgs} \
               --commit-lock-file \
