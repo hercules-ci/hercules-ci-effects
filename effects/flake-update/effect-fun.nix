@@ -97,6 +97,7 @@ modularEffect {
           echo 1>&2 'Running nix ${command}${locationContext}...'
           ( cd ${lib.escapeShellArg relPath}
             # yes n: Say "n" to questions about accepting nixConfig
+            # works around https://github.com/NixOS/nix/pull/11816
             (yes n || :) | nix \
               --extra-experimental-features 'nix-command flakes' \
               ${command} ${extraArgs} \
