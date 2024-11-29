@@ -6,5 +6,6 @@
     ./flake-modules/github-pages.nix
     ./flake-modules/github-releases
     ./effects/flake-update/flake-module.nix
+    ./effects/netlify/flake-module.nix
   ];
 }
