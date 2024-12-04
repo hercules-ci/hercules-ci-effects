@@ -75,7 +75,7 @@ rec {
     assert ! contains "cd ." subflakeUpdateConfig.git.update.script;
     assert contains "cd ." basicUpdateConfig.git.update.script;
 
-    assert contains "--update-input nixpkgs" subflakeUpdateConfig.git.update.script;
+    assert contains "flake update nixpkgs" subflakeUpdateConfig.git.update.script;
 
     ok;
 
