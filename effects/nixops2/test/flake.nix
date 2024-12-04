@@ -2,7 +2,7 @@
   description = "Deploy with NixOps and Hercules CI";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # TODO change when merged
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     # !!!: This isn't supported yet, so constructing the effect is done outside this flake.
     #      It is not representative of how you would wire it up normally.
     # hercules-ci-effects.url = "path:../..";

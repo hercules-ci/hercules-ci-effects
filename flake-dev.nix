@@ -57,6 +57,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
     baseMerge.enable = true;
     flakes = {
       "." = {};
+      "dev" = {};
       "effects/nixops2/test" = {};
     };
   };
