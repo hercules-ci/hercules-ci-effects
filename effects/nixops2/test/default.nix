@@ -76,7 +76,7 @@ let
       ps.nixops-hercules-ci
       ps.nixops-aws
     ]);
-    nix = pkgs.nixUnstable;
+    nix = pkgs.nix;
 
     # Override dynamic options for CI
     prebuildOnlyNetworkFiles = [

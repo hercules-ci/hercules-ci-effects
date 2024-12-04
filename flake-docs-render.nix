@@ -55,7 +55,6 @@
           };
           documentType = "none";
           warningsAreErrors = true;
-          markdownByDefault = true;
         }).optionsAsciiDoc;
   in
   {

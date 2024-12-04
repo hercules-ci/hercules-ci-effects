@@ -1,5 +1,6 @@
 { lib, pkgs, ... }:
 {
+  system.stateVersion = 5;
   environment.systemPackages = [ pkgs.hello ];
   services.nix-daemon.enable = true;
   nix.package = pkgs.nix;
