@@ -37,12 +37,12 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
 
     };
 
-    tests = withSystem "x86_64-linux" ({ hci-effects, pkgs, ... }: {
+    tests = withSystem "x86_64-linux" ({ hci-effects, pkgs, system, ... }: {
       git-crypt-hook = pkgs.callPackage ./effects/git-crypt-hook/test.nix { };
       # pyjwt is marked insecure; skip
       # nixops = pkgs.callPackage ./effects/nixops/test/default.nix {};
       nix-shell = pkgs.callPackage ./effects/nix-shell/test.nix { };
-      nixops2 = pkgs.callPackage ./effects/nixops2/test/default.nix { nixpkgsFlake = inputs.nixpkgs; };
+      nixops2 = pkgs.callPackage ./effects/nixops2/test/default.nix { nixpkgsFlake = inputs.nixpkgs-nixops2; pkgs = inputs.nixpkgs-nixops2.legacyPackages.${system}; };
       cachix-deploy = pkgs.callPackage ./effects/cachix-deploy/test.nix { };
       mkEffect = pkgs.callPackage ./effects/effect/test.nix { };
       nixos = hci-effects.callPackage ./effects/nixos/test.nix { };
