@@ -8,7 +8,7 @@ let
   # TODO: use a flake.lock, so that we can CI the upstream
   #       also lib.darwinSystem would need follows to inject our own nixpkgs,
   #       so we use the one from the nix-darwin flake for testing here. Awkward.
-  darwin = builtins.getFlake "github:LnL7/nix-darwin?rev=8b6ea26d5d2e8359d06278364f41fbc4b903b28a";
+  darwin = builtins.getFlake "github:LnL7/nix-darwin?rev=c6b65d946097baf3915dd51373251de98199280d";
 in
 rec {
   inherit darwin testSupport;
@@ -120,8 +120,11 @@ rec {
     assert flake1.darwinConfigurations."Johns-MacBook".system
       == flake1.darwinConfigurations."Johns-MacBook".config.system.build.toplevel;
 
-    assert 
-      testEqDrv flake1.test.by-config.drvPath flake1.test.by-other-args.drvPath;
+    assert flake1.darwinConfigurations."Johns-MacBook".system.drvPath == flake1.test.by-config.config.system.build.toplevel.drvPath;
+
+    # produces flake vs non-flake config
+    # assert
+    #   testEqDrv flake1.test.by-config.drvPath flake1.test.by-other-args.drvPath;
 
     assert
       testEqDrv
