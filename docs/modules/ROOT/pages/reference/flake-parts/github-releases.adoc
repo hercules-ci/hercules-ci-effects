@@ -1,0 +1,8 @@
+
+# `hercules-ci.github-releases`
+
+These options configure a GitHub Release to be created when a tag is pushed.
+
+Artifact https://flake.parts/options/hercules-ci-effects#opt-hercules-ci.github-releases.files[files] can be added to the release.
+
+See all the https://flake.parts/options/hercules-ci-effects#opt-hercules-ci.github-releases.checkArtifacts[options].

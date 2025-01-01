@@ -16,6 +16,7 @@
 * Flake Parts Module Reference
 ** xref:reference/flake-parts/flake-update.adoc[`flake-update`]
 ** xref:reference/flake-parts/github-pages.adoc[`github-pages`]
+** xref:reference/flake-parts/github-releases.adoc[`github-releases`]
 * Nix Functions Reference
 ** _General Functions_
 ** xref:reference/nix-functions/mkEffect.adoc[`mkEffect`]
