@@ -132,7 +132,7 @@ mkEffect (removeAttrs args [ "configuration" "ssh" "config" "system" "nix-darwin
       echo >&2 "remote nix version:"
       nix-env --version >&2
       if [ "$USER" != root ] && [ ! -w $(dirname "${profilePath}") ]; then
-        sudo nix-env -p ${profilePath} --set ${toplevel}
+        sudo -H nix-env -p ${profilePath} --set ${toplevel}
       else
         nix-env -p ${profilePath} --set ${toplevel}
       fi
