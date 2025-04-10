@@ -3,6 +3,27 @@
 # ----------------------------------------------------------------------------
 # prepare headers file for curl to talk to Hercules CI
 
+installBinSh() {
+  if ! [[ -e /bin/sh ]] && [[ -n "$__hci_effect_binsh" ]]; then
+    (
+      mkdir -p /bin
+      ln -s "$__hci_effect_binsh" /bin/sh
+    ) ||
+      {
+        echo -e "\e[31m" # RED
+        echo "Failed to create /bin/sh symlink"
+        echo -e "\e[0m"
+        echo "This error can be avoided with one of:"
+        echo "  - __hci_effect_root_read_only = true;"
+        echo "    This may make the installation of /bin/sh work."
+        echo "  - __hci_effect_binsh = null;"
+        echo "    This removes /bin/sh, but may break certain programs."
+        echo "Not all effects need /bin/sh, so we'll continue without it."
+        echo
+      }
+  fi
+}
+preInitHooks+=("installBinSh")
 
 initHerculesCIAPI() {
   herculesCIHeaders=$PWD/hercules-ci.headers

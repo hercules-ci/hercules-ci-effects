@@ -114,6 +114,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
       # ssh = hci-effects.callPackage ./effects/ssh/test.nix { };
       artifacts-tool = hci-effects.callPackage ./packages/artifacts-tool/test { };
       artifacts-tool-typecheck = hci-effects.callPackage ./packages/artifacts-tool/mypy.nix { };
+      setup = hci-effects.callPackage ./effects/effect/test/setup.nix { };
       github-releases = github-releases-tests.test.simple;
       github-releases-perSystem = github-releases-tests.test.perSystem;
       module-files-readable = checkModules pkgs.emptyFile;

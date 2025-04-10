@@ -1,4 +1,4 @@
-{ config, lib, hci-effects, ... }:
+{ config, lib, hci-effects, pkgs, ... }:
 let
   inherit (lib)
     filterAttrs
@@ -185,6 +185,19 @@ in
       default = 0;
     };
 
+    binsh = mkOption {
+      type = types.nullOr types.str;
+      description = ''
+        The target for the `/bin/sh` symlink.
+
+        If set to `null`, `/bin/sh` will not be created.
+      '';
+      defaultText = lib.literalMD ''
+        `lib.getExe pkgs.bash`, where `pkgs` is the `pkgs` argument that was [passed to the library](https://docs.hercules-ci.com/hercules-ci-effects/guide/import-or-pin).
+      '';
+      default = lib.getExe pkgs.bash;
+    };
+
     extraAttributes = mkOption {
       description = ''
         Attributes to add to the returned effect. These only exist at the expression level and do not become part of the executable effect.
@@ -222,6 +235,7 @@ in
       __hci_effect_mounts = builtins.toJSON config.mounts;
       __hci_effect_virtual_uid = config.uid;
       __hci_effect_virtual_gid = config.gid;
+      __hci_effect_binsh = config.binsh;
       passthru = config.extraAttributes;
     }
     // filterAttrs (k: v: v != null) {
