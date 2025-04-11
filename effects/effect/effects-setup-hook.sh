@@ -1,15 +1,28 @@
+###
+### Nixpkgs / stdenv / setup.sh hook for Hercules CI Effects
+###
+### hercules-ci-effects uses stdenv and setup.sh to structure its effects.
+### This file is sourced by setup.sh and contains the logic to set up the
+### environment for the effect.
+###
+### The effect sandbox environment is similar to that of a Nix build, but
+### with some differences. This file closes that gap a bit and provides
+### some effect-specific utilities.
 
 
 # ----------------------------------------------------------------------------
-# prepare headers file for curl to talk to Hercules CI
+# compat logic for hercules-ci-agent <= 0.10.5 to support __hci_effect_fsroot_copy
 
 installFSRootFiles() {
-  # Compatibility hook: hercules-ci-agent <= 0.10.5 does not copy for us. Requires rw root.
+  # Requires rw root or hercules-ci-agent > 0.10.5 (TBD)
   if [[ -z "${__hci_effect_fsroot_copied:-}" && -n "${__hci_effect_fsroot_copy:-}" ]]; then
     cp --no-preserve=ownership --recursive --reflink=auto -T "$__hci_effect_fsroot_copy"/ /;
   fi
 }
 preInitHooks+=("installFSRootFiles")
+
+# ----------------------------------------------------------------------------
+# prepare headers file for curl to talk to Hercules CI
 
 initHerculesCIAPI() {
   herculesCIHeaders=$PWD/hercules-ci.headers
