@@ -283,6 +283,7 @@ in
 
     fsRoot = pkgs.runCommand "effect-fs-root" { } config.fsRootBuildCommands;
 
+    # NB: Sync with mkEffect
     fsRootBuildCommands =
       lib.mkMerge [
         (lib.mkIf (config.binsh != null) ''
