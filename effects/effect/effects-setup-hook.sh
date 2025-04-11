@@ -3,27 +3,13 @@
 # ----------------------------------------------------------------------------
 # prepare headers file for curl to talk to Hercules CI
 
-installBinSh() {
-  if ! [[ -e /bin/sh ]] && [[ -n "$__hci_effect_binsh" ]]; then
-    (
-      mkdir -p /bin
-      ln -s "$__hci_effect_binsh" /bin/sh
-    ) ||
-      {
-        echo -e "\e[31m" # RED
-        echo "Failed to create /bin/sh symlink"
-        echo -e "\e[0m"
-        echo "This error can be avoided with one of:"
-        echo "  - __hci_effect_root_read_only = true;"
-        echo "    This may make the installation of /bin/sh work."
-        echo "  - __hci_effect_binsh = null;"
-        echo "    This removes /bin/sh, but may break certain programs."
-        echo "Not all effects need /bin/sh, so we'll continue without it."
-        echo
-      }
+installFSRootFiles() {
+  # Compatibility hook: hercules-ci-agent <= 0.10.5 does not copy for us. Requires rw root.
+  if [[ -z "${__hci_effect_fsroot_copied:-}" && -n "${__hci_effect_fsroot_copy:-}" ]]; then
+    cp --no-preserve=ownership --recursive --reflink=auto -T "$__hci_effect_fsroot_copy"/ /;
   fi
 }
-preInitHooks+=("installBinSh")
+preInitHooks+=("installFSRootFiles")
 
 initHerculesCIAPI() {
   herculesCIHeaders=$PWD/hercules-ci.headers

@@ -7,8 +7,15 @@ hci-effects.effectVMTest {
       effectScript = ''
       (
         set -x
+
+        : "bash is available"
+        bash -c 'echo "Hello world"' | grep -q "Hello world"
+
         : "/bin/sh works"
         /bin/sh -c 'echo "Hello world"' | grep -q "Hello world"
+
+        : "/usr/bin/env works"
+        /usr/bin/env bash -c 'echo "Hello world"' | grep -q "Hello world"
       )
       '';
     };

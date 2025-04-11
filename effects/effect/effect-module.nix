@@ -198,6 +198,39 @@ in
       default = lib.getExe pkgs.bash;
     };
 
+    usrbinenv = mkOption {
+      type = types.nullOr types.str;
+      description = ''
+        The target for the `/usr/bin/env` symlink.
+
+        If set to `null`, `/usr/bin/env` will not be created.
+      '';
+      defaultText = lib.literalMD ''
+        `"''${pkgs.coreutils}/bin/env"`, where `pkgs` is the `pkgs` argument that was [passed to the library](https://docs.hercules-ci.com/hercules-ci-effects/guide/import-or-pin).
+      '';
+      default = "${pkgs.coreutils}/bin/env";
+    };
+
+    fsRoot = mkOption {
+      type = types.path;
+      description = ''
+        A store path whose contents will be copied to the effect's filesystem root.
+      '';
+      defaultText = lib.literalExpression ''
+        pkgs.runCommand "effect-fs-root" { } fsRootBuildCommands
+      '';
+    };
+
+    fsRootBuildCommands = mkOption {
+      type = types.lines;
+      description = ''
+        The build commands to run to create the filesystem root.
+
+        This is a list of bash statements, which are run as a Nix build - _not_ in the effect sandbox but beforehand.
+      '';
+      defaultText = lib.literalMD "Add `binsh` and `usrbinenv` to `$out`. This default has normal priority so that any user-defined statements are added to it.";
+    };
+
     extraAttributes = mkOption {
       description = ''
         Attributes to add to the returned effect. These only exist at the expression level and do not become part of the executable effect.
@@ -235,7 +268,7 @@ in
       __hci_effect_mounts = builtins.toJSON config.mounts;
       __hci_effect_virtual_uid = config.uid;
       __hci_effect_virtual_gid = config.gid;
-      __hci_effect_binsh = config.binsh;
+      __hci_effect_fsroot_copy = config.fsRoot;
       passthru = config.extraAttributes;
     }
     // filterAttrs (k: v: v != null) {
@@ -247,6 +280,20 @@ in
     }
     // config.env # TODO warn about collisions
     ;
+
+    fsRoot = pkgs.runCommand "effect-fs-root" { } config.fsRootBuildCommands;
+
+    fsRootBuildCommands =
+      lib.mkMerge [
+        (lib.mkIf (config.binsh != null) ''
+          mkdir -p $out/bin
+          ln -s ${lib.escapeShellArg config.binsh} $out/bin/sh
+        '')
+        (lib.mkIf (config.usrbinenv != null) ''
+          mkdir -p $out/usr/bin
+          ln -s ${lib.escapeShellArg config.usrbinenv} $out/usr/bin/env
+        '')
+      ];
 
     extraAttributes.tests.buildable =
       (config.effectDerivation.overrideAttrs (o: { isEffect = false; })).inputDerivation;
