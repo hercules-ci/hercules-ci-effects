@@ -1,4 +1,4 @@
-{ hci-effects, nix ? null }:
+{ hci-effects }:
 
 hci-effects.effectVMTest {
   name = "uid";

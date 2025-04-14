@@ -1,4 +1,4 @@
-{ cacert, curl, jq, lib, runCommand, stdenvNoCC,
+{ bash, cacert, coreutils, curl, jq, lib, runCommand, stdenvNoCC,
 
   # Optional, used by nixpkgs version check.
   revInfo ? "",
@@ -58,6 +58,14 @@ let
 
 in
 invokeOverride mkDrv {
+
+  /** If you'd like to customize this, use modularEffect instead. */
+  # NB: Sync with modularEffect
+  __hci_effect_fsroot_copy = runCommand "mkEffect-root" {} ''
+    mkdir -p $out/bin $out/usr/bin
+    ln -s ${lib.getExe bash} $out/bin/sh
+    ln -s ${coreutils}/bin/env $out/usr/bin/env
+  '';
 
   preGetStatePhases = "";
   preEffectPhases = "priorCheckPhase";
