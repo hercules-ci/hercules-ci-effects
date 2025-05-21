@@ -79,6 +79,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
               hci-effects.callPackage ./effects/effect/test/dev-kvm.nix { }
             );
             cargoPublish = pkgs.callPackage ./effects/cargo/test/default.nix { };
+            cargoPublishDryRun = pkgs.callPackage ./effects/cargo/test/default.nix { dryRun = true;};
           };
         };
     };
