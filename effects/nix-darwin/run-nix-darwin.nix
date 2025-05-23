@@ -1,4 +1,4 @@
-{ effects, mkEffect, lib, openssh, path }:
+{ effects, mkEffect, lib, gnugrep, openssh, path }:
 
 let
   inherit (lib) optionalAttrs;
@@ -120,7 +120,7 @@ mutEx "config" "pkgs"
 
 mkEffect (removeAttrs args [ "configuration" "ssh" "config" "system" "nix-darwin" "nixpkgs" "pkgs" "buildOnDestination" ] // {
   name = "nix-darwin${suffix}";
-  inputs = [ openssh ];
+  inputs = [ gnugrep openssh ];
   dontUnpack = true;
   passthru = passthru // {
     prebuilt = toplevel // { inherit config; };
@@ -131,12 +131,25 @@ mkEffect (removeAttrs args [ "configuration" "ssh" "config" "system" "nix-darwin
       set -eu
       echo >&2 "remote nix version:"
       nix-env --version >&2
-      if [ "$USER" != root ] && [ ! -w $(dirname "${profilePath}") ]; then
-        sudo -H nix-env -p ${profilePath} --set ${toplevel}
+      if
+        [[ -x ${toplevel}/activate-user ]] \
+        && ! grep -q '^# nix-darwin: deprecated$' ${toplevel}/activate-user
+      then
+        if [ "$USER" != root ] && [ ! -w $(dirname "${profilePath}") ]; then
+          sudo -H nix-env -p ${profilePath} --set ${toplevel}
+        else
+          nix-env -p ${profilePath} --set ${toplevel}
+        fi
+        ${toplevel}/sw/bin/darwin-rebuild activate
       else
-        nix-env -p ${profilePath} --set ${toplevel}
+        if [ "$USER" != root ] && [ ! -w $(dirname "${profilePath}") ]; then
+          sudo -H nix-env -p ${profilePath} --set ${toplevel}
+          sudo -H ${toplevel}/sw/bin/darwin-rebuild activate
+        else
+          nix-env -p ${profilePath} --set ${toplevel}
+          ${toplevel}/sw/bin/darwin-rebuild activate
+        fi
       fi
-      ${toplevel}/sw/bin/darwin-rebuild activate
     ''}
   '';
 })
