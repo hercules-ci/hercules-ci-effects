@@ -123,10 +123,20 @@ else:
                             check=True
                         )
                 rename("archive.zip", spec.label)
-    execlp(
-        "gh",
-        "gh", "release", "create",
-        "--repo", f"{environ['owner']}/{environ['repo']}",
-        environ["releaseTag"],
-        *(spec.label for spec in specs)
+    existingRelease = subprocess.run(
+        [
+            "gh", "release", "view",
+            "--repo", f"{environ['owner']}/{environ['repo']}",
+            "--json=url", environ["releaseTag"]
+        ]
     )
+    if existingRelease.returncode == 0:
+        eprint(f"Release {environ['releaseTag']} already exists, skipping")
+    else:
+        execlp(
+            "gh",
+            "gh", "release", "create",
+            "--repo", f"{environ['owner']}/{environ['repo']}",
+            environ["releaseTag"],
+            *(spec.label for spec in specs)
+        )
