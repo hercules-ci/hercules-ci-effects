@@ -22,7 +22,7 @@ in
     r="$(curl -v ${baseUrl})"
     [[ "$r" == "<h1>hi</h1>${rev}" ]]
 
-    r="$(curl -v ${baseUrl}/foo)"
+    r="$(curl -vL ${baseUrl}/foo)"
     [[ "$r" == "<h1>bar</h1>${rev}" ]]
 
     set +x
