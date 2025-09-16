@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }:
@@ -17,6 +18,16 @@ let
 
   githubAutoMerge =
     (cfg.pullRequest.autoMergeMethod != null) && config.git.checkout.forgeType == "github";
+
+  baseMergeMessageOnce = lib.warn "hercules-ci-effects/git-update: `baseMerge.enable` is unset. It will be enabled by default soon. You may silence this warning by setting `baseMerge.enable = true;`. See also `baseMerge.method` to customize how the update branch is brought up to date with the base (\"target\") branch: https://docs.hercules-ci.com/hercules-ci-effects/reference/effect-modules/git#_git_update_basemerge_method" null;
+
+  withBaseMergeMessage =
+    if
+      options.git.update.baseMerge.enable.highestPrio == (lib.modules.mkOptionDefault null).priority
+    then
+      builtins.seq baseMergeMessageOnce
+    else
+      x: x;
 
 in
 {
@@ -180,7 +191,7 @@ in
     // optionalAttrs (cfg.pullRequest.enable && cfg.pullRequest.body != null) {
       HCI_GIT_UPDATE_PR_BODY = cfg.pullRequest.body;
     }
-    // optionalAttrs cfg.baseMerge.enable {
+    // withBaseMergeMessage optionalAttrs cfg.baseMerge.enable {
       HCI_GIT_UPDATE_BASE_MERGE_METHOD = cfg.baseMerge.method;
     };
 

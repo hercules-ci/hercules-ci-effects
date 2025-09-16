@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   withSystem,
   ...
 }:
@@ -29,6 +30,16 @@ let
       };
     };
   };
+
+  baseMergeEnableOpt = options.hercules-ci.flake-update.baseMerge.enable;
+
+  baseMergeMessageOnce = lib.warn "hercules-ci-effects/flake-update: `${baseMergeEnableOpt}` is unset. It will be enabled by default soon. You may silence this warning by setting `baseMerge.enable = true;`. See also `baseMerge.method` to customize how the update branch is brought up to date with the base (\"target\") branch: https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.flake-update.baseMerge.method" null;
+
+  withBaseMergeMessage =
+    if baseMergeEnableOpt.highestPrio == (lib.modules.mkOptionDefault null).priority then
+      builtins.seq baseMergeMessageOnce
+    else
+      x: x;
 
 in
 {
@@ -238,7 +249,7 @@ in
 
   config = {
     hercules-ci.flake-update.effect.settings = {
-      git.update.baseMerge = cfg.baseMerge;
+      git.update.baseMerge = withBaseMergeMessage cfg.baseMerge;
       git.update.baseBranch = cfg.baseBranch;
     };
     herculesCI =
@@ -275,6 +286,8 @@ in
             };
           };
         };
+        # Make the warning visible in jobs like config and onPush.default too.
+        onPush = withBaseMergeMessage { };
       };
   };
 }
