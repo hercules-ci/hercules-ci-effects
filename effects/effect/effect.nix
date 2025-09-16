@@ -1,4 +1,12 @@
-{ bash, cacert, coreutils, curl, jq, lib, runCommand, stdenvNoCC,
+{
+  bash,
+  cacert,
+  coreutils,
+  curl,
+  jq,
+  lib,
+  runCommand,
+  stdenvNoCC,
 
   # Optional, used by nixpkgs version check.
   revInfo ? "",
@@ -17,51 +25,57 @@ let
     jq
   ];
 
-  mkDrv = args:
+  mkDrv =
+    args:
     let
       mkDerivation =
-        lib.throwIf (args?imports) "`mkEffect` does not support `imports`. Did you mean `modularEffect` instead of `mkEffect`?"
-        stdenvNoCC.mkDerivation;
+        lib.throwIf (args ? imports)
+          "`mkEffect` does not support `imports`. Did you mean `modularEffect` instead of `mkEffect`?"
+          stdenvNoCC.mkDerivation;
 
-    in checkVersion mkDerivation (args // {
+    in
+    checkVersion mkDerivation (
+      args
+      // {
 
+        phases =
+          args.phases
+            or "initPhase unpackPhase patchPhase ${args.preGetStatePhases or ""} getStatePhase userSetupPhase ${args.preEffectPhases or ""} effectPhase putStatePhase ${args.postEffectPhases or ""}";
 
-    phases = args.phases or "initPhase unpackPhase patchPhase ${args.preGetStatePhases or ""} getStatePhase userSetupPhase ${args.preEffectPhases or ""} effectPhase putStatePhase ${args.postEffectPhases or ""}";
+        name = lib.strings.sanitizeDerivationName (if args ? name then "effect-${args.name}" else "effect");
 
-    name = lib.strings.sanitizeDerivationName (if args?name then "effect-${args.name}" else "effect");
+        # nativeBuildInputs normally corresponds to what the building machine can
+        # execute. Likewise, effects are executed on the machine type that would
+        # otherwise perform the build.
+        # To keep things simple and avoid "build" terminology, we alias this as "inputs".
+        nativeBuildInputs =
+          (args.defaultInputs or defaultInputs) ++ (args.inputs or [ ]) ++ (args.nativeBuildInputs or [ ]);
 
-    # nativeBuildInputs normally corresponds to what the building machine can
-    # execute. Likewise, effects are executed on the machine type that would
-    # otherwise perform the build.
-    # To keep things simple and avoid "build" terminology, we alias this as "inputs".
-    nativeBuildInputs =
-      (args.defaultInputs or defaultInputs) 
-      ++ (args.inputs or [])
-      ++ (args.nativeBuildInputs or []);
+        isEffect = true;
 
-    isEffect = true;
+        # TODO: Use structured attrs instead
+        secretsMap = builtins.toJSON (args.secretsMap or { });
 
-    # TODO: Use structured attrs instead
-    secretsMap = builtins.toJSON (args.secretsMap or {});
+        dontUnpack = args.dontUnpack or (!(args ? src || args ? srcs));
 
-    dontUnpack = args.dontUnpack or (!(args?src || args?srcs));
-
-  });
+      }
+    );
 
   invokeOverride = f: defaults: (lib.makeOverridable f defaults).override;
 
-  effectSetupHook = runCommand "hercules-ci-effect-sh" {} ''
+  effectSetupHook = runCommand "hercules-ci-effect-sh" { } ''
     mkdir -p $out/nix-support
     cp ${./effects-setup-hook.sh} $out/nix-support/setup-hook
   '';
 
-
 in
 invokeOverride mkDrv {
 
-  /** If you'd like to customize this, use modularEffect instead. */
+  /**
+    If you'd like to customize this, use modularEffect instead.
+  */
   # NB: Sync with modularEffect
-  __hci_effect_fsroot_copy = runCommand "mkEffect-root" {} ''
+  __hci_effect_fsroot_copy = runCommand "mkEffect-root" { } ''
     mkdir -p $out/bin $out/usr/bin
     ln -s ${lib.getExe bash} $out/bin/sh
     ln -s ${coreutils}/bin/env $out/usr/bin/env
@@ -95,7 +109,6 @@ invokeOverride mkDrv {
     runHook postUserSetup
   '';
   userSetupScript = "";
-
 
   # TODO Read a variable to optionally bail out if not already ok. That won't
   #      permit a commit to fix a problem, which is why that isn't the current

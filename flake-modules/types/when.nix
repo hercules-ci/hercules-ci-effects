@@ -2,7 +2,7 @@
 let
   inherit (lib) types mkOption submodule;
 
-  coercedToList = t: types.coercedTo t (x: [x]) (types.listOf t);
+  coercedToList = t: types.coercedTo t (x: [ x ]) (types.listOf t);
 
   option = mkOption {
     description = ''
@@ -11,7 +11,7 @@ let
       Each subattribute represents an equality, all of which will hold at the next planned time. The time zone is UTC.
 
       The `minute` or `hour` attributes can be omitted, in which case Hercules CI will pick an arbitrary time for you.
-      
+
       See the `when.*` options below for details.
     '';
     inherit type;
@@ -42,7 +42,19 @@ let
         '';
       };
       dayOfWeek = mkOption {
-        type = types.nullOr (coercedToList (types.enum [ "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun" ]));
+        type = types.nullOr (
+          coercedToList (
+            types.enum [
+              "Mon"
+              "Tue"
+              "Wed"
+              "Thu"
+              "Fri"
+              "Sat"
+              "Sun"
+            ]
+          )
+        );
         default = null;
         description = ''
           An optional list of week days during which to create a job.
@@ -63,4 +75,6 @@ let
   };
 
 in
-{ inherit option type module; }
+{
+  inherit option type module;
+}

@@ -1,9 +1,15 @@
-{ effectVMTest, hci-effects, nix ? null }:
+{
+  effectVMTest,
+  hci-effects,
+  nix ? null,
+}:
 
 let
   flakeUpdate =
-    if nix == null then hci-effects.flakeUpdate
-    else args: hci-effects.flakeUpdate ({ inherit nix; } // args);
+    if nix == null then
+      hci-effects.flakeUpdate
+    else
+      args: hci-effects.flakeUpdate ({ inherit nix; } // args);
 in
 effectVMTest {
   imports = [
@@ -264,7 +270,7 @@ effectVMTest {
           grep {dep2Rev} <flake.lock
         ) 1>&2
       """)
-    
+
     with subtest("Can update subflake"):
       depRev = updateRepo("dep")
       agent.succeed(f"echo {gitea_admin_password} | effect-update-subflake")

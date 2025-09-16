@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   inherit (lib)
     mkOption
@@ -11,8 +16,7 @@ let
   cfg = config.git.update;
 
   githubAutoMerge =
-    (cfg.pullRequest.autoMergeMethod != null)
-    && config.git.checkout.forgeType == "github";
+    (cfg.pullRequest.autoMergeMethod != null) && config.git.checkout.forgeType == "github";
 
 in
 {
@@ -81,7 +85,10 @@ in
 
           Used when `git.update.baseMerge.enable` is true.
         '';
-        type = types.enum [ "merge" "rebase" ];
+        type = types.enum [
+          "merge"
+          "rebase"
+        ];
         default = "merge";
       };
       pullRequest = {
@@ -106,7 +113,12 @@ in
           example = "develop";
         };
         autoMergeMethod = mkOption {
-          type = types.enum [ null "merge" "rebase" "squash" ];
+          type = types.enum [
+            null
+            "merge"
+            "rebase"
+            "squash"
+          ];
           default = null;
           description = ''
             Whether to enable auto-merge on new pull requests, and how to merge it.
@@ -221,7 +233,8 @@ in
         esac
         git push origin "$HCI_GIT_UPDATE_BRANCH" ''${gitPushArgs[@]}
       fi
-    '' + optionalString cfg.pullRequest.enable ''
+    ''
+    + optionalString cfg.pullRequest.enable ''
       # Too many PRs is better than to few. Ensure that the PR exists
       if git rev-parse "refs/remotes/origin/$HCI_GIT_UPDATE_BRANCH" &>/dev/null; then
         prCreateArgs=()
@@ -246,7 +259,12 @@ in
                   > $TMPDIR/pr.out
         then
           cat $TMPDIR/pr.out
-          ${optionalString githubAutoMerge (import ./github-auto-merge.nix { inherit lib; inherit (cfg.pullRequest) autoMergeMethod; })}
+          ${optionalString githubAutoMerge (
+            import ./github-auto-merge.nix {
+              inherit lib;
+              inherit (cfg.pullRequest) autoMergeMethod;
+            }
+          )}
         else
           # Expect an error if the PR already exists.
           if grep -E 'a pull request for branch .* already exists' <$TMPDIR/pr.err >/dev/null; then

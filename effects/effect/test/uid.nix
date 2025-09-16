@@ -7,13 +7,13 @@ hci-effects.effectVMTest {
       uid = 123;
       gid = 456;
       effectScript = ''
-      (
-        set -x
-        : "Checking UID"
-        test "$(id -u)" -eq 123
-        : "Checking GID"
-        test "$(id -g)" -eq 456
-      )
+        (
+          set -x
+          : "Checking UID"
+          test "$(id -u)" -eq 123
+          : "Checking GID"
+          test "$(id -g)" -eq 456
+        )
       '';
     };
   };
