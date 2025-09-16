@@ -37,6 +37,7 @@ effectVMTest {
         git add file
         git commit -m update
       '';
+      git.update.baseMerge.enable = false;
     };
     update-uncommitted = hci-effects.modularEffect {
       imports = [ baseUpdate ];
@@ -44,16 +45,19 @@ effectVMTest {
         echo updated >> file
         git add file
       '';
+      git.update.baseMerge.enable = false;
     };
     update-unstaged = hci-effects.modularEffect {
       imports = [ baseUpdate ];
       git.update.script = ''
         echo updated >> file
       '';
+      git.update.baseMerge.enable = false;
     };
     update-no-commit = hci-effects.modularEffect {
       imports = [ baseUpdate ];
       git.update.script = "";
+      git.update.baseMerge.enable = false;
     };
     update-rebase = hci-effects.modularEffect {
       imports = [ baseUpdate ];

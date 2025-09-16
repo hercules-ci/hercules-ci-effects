@@ -89,7 +89,9 @@ in
         git commit -m "''${message}"
       fi
     '';
-
+    # This is a direct push on a single branch, so the base is not expected to proceed unless a concurrent write
+    # happens, in which case we probably want to fail and let the user decide.
+    git.update.baseMerge.enable = mkDefault false;
     git.update.pullRequest.enable = mkDefault false;
   };
 }
