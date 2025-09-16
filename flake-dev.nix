@@ -2,6 +2,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
   imports = [
     # dogfooding
     ./flake-module.nix
+    inputs.git-hooks.flakeModule
   ];
   systems = [ "x86_64-linux" "aarch64-linux" ];
   flake = {
@@ -84,7 +85,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
     };
   };
 
-  perSystem = { pkgs, hci-effects, inputs', system, ... }: {
+  perSystem = { config, pkgs, hci-effects, inputs', system, ... }: {
     _module.args.pkgs = import inputs.nixpkgs {
       inherit system;
       overlays = [
@@ -120,6 +121,12 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
       github-releases-perSystem = github-releases-tests.test.perSystem;
       module-files-readable = checkModules pkgs.emptyFile;
     };
+
+    # https://flake.parts/options/git-hooks-nix.html#opt-perSystem.pre-commit.settings
+    pre-commit.settings.hooks = {
+      nixfmt-rfc-style.enable = true;
+    };
+
     devShells.default = pkgs.mkShell {
       nativeBuildInputs = [
         pkgs.nixpkgs-fmt
@@ -128,6 +135,7 @@ top@{ withSystem, lib, inputs, config, self, ... }: {
         pkgs.python3Packages.mypy
         pkgs.python3Packages.autopep8
       ];
+      shellHook = config.pre-commit.installationScript;
     };
   };
 }
