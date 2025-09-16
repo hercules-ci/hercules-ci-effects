@@ -79,11 +79,13 @@ in
 
     baseMerge.enable = mkOption {
       description = ''
-        Whether to merge the base branch into the update branch before running the update.
+        Whether to update an existing update branch with changes from the base branch before running the update.
 
-        This is useful to ensure that the update branch is up to date with the base branch.
+        This option only applies when the update branch already exists from a previous run.
+        The existing branch is likely stale, so enabling this ensures it includes recent changes from the base branch.
 
-        If this option is `false`, you may have to merge or rebase the update branch manually sometimes.
+        If disabled and the update branch exists, the update will run from the branch's current state,
+        which may be missing recent changes from the base branch.
       '';
       type = types.bool;
       default = false;
@@ -91,9 +93,10 @@ in
 
     baseMerge.branch = mkOption {
       description = ''
-        Branch name on the remote to merge into the update branch before running the update.
+        Branch name on the remote to update the existing update branch from.
 
-        Used when `hercules-ci.flake-update.baseMerge.enable` is true.
+        Typically this should be the same as the target branch for pull requests.
+        Used when `hercules-ci.flake-update.baseMerge.enable` is true and the update branch exists.
       '';
       type = types.str;
       default = cfg.baseBranch;
@@ -104,11 +107,19 @@ in
       description = ''
         How to merge the base branch into the update branch before running the update.
 
+        - `"merge"`: Create a merge commit, preserving the branch history.
+        - `"rebase"`: Rebase the update branch commits onto the base branch.
+        - `"fast-forward"`: Fast-forward the update branch to the base branch if possible, otherwise fail.
+
+        The `"fast-forward"` method is the most conservative, equivalent to deleting the stale
+        update branch and recreating it from the base branch.
+
         Used when `hercules-ci.flake-update.baseMerge.enable` is true.
       '';
       type = types.enum [
         "merge"
         "rebase"
+        "fast-forward"
       ];
       default = "merge";
     };

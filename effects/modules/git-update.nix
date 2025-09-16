@@ -57,11 +57,13 @@ in
       };
       baseMerge.enable = mkOption {
         description = ''
-          Whether to merge the base branch into the update branch before running `git.update.script`.
+          Whether to update an existing update branch with changes from the base branch before running `git.update.script`.
 
-          This is useful to ensure that the update branch is up to date with the base branch.
+          This option only applies when the update branch already exists from a previous run.
+          The existing branch is likely stale, so enabling this ensures it includes recent changes from the base branch.
 
-          If this option is `false`, you may have to merge or rebase the update branch manually sometimes.
+          If disabled and the update branch exists, the update script will run from the branch's current state,
+          which may be missing recent changes from the base branch.
         '';
         type = types.bool;
         # TODO [baseMerge] enable by default after real world testing
@@ -69,9 +71,10 @@ in
       };
       baseMerge.branch = mkOption {
         description = ''
-          Branch name on the remote to merge into the update branch before running `git.update.script`.
+          Branch name on the remote to update the existing update branch from.
 
-          Used when `git.update.baseMerge.enable` is true.
+          Typically this should be the same as the target branch for pull requests.
+          Used when `git.update.baseMerge.enable` is true and the update branch exists.
         '';
         type = types.str;
         default = cfg.baseBranch;
@@ -81,13 +84,27 @@ in
       };
       baseMerge.method = mkOption {
         description = ''
-          How to merge the base branch into the update branch before running `git.update.script`.
+          How to update an existing update branch with changes from the base branch.
 
-          Used when `git.update.baseMerge.enable` is true.
+          - `"merge"`: Create a merge commit, preserving both branch histories.
+            Safe but creates additional merge commits in the update branch.
+
+          - `"rebase"`: Rebase existing update branch commits onto the current base branch.
+            Creates a linear history but rewrites commit hashes (requires force push).
+
+          - `"fast-forward"`: Only proceed if the update branch can fast-forward to the base branch.
+            Fails if the update branch has any commits not present in the base branch.
+            This is the most conservative option, preventing complex merge scenarios.
+
+          The `"fast-forward"` method is recommended for automated workflows where you prefer
+          explicit failures over automatic conflict resolution.
+
+          Used when `git.update.baseMerge.enable` is true and the update branch exists.
         '';
         type = types.enum [
           "merge"
           "rebase"
+          "fast-forward"
         ];
         default = "merge";
       };
@@ -206,6 +223,46 @@ in
             echo "Rebasing $HCI_GIT_UPDATE_BRANCH onto $baseDescr ..."
             git rebase "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH" || die_conflict
             ;;
+          fast-forward)
+            echo "Fast-forwarding $HCI_GIT_UPDATE_BRANCH to $baseDescr ..."
+            if ! git merge --ff-only "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"; then
+              echo 1>&2 ""
+              echo 1>&2 "Current branch state:"
+              mergeBase=$(git merge-base "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH" "refs/remotes/origin/$HCI_GIT_UPDATE_BRANCH" 2>/dev/null || echo "")
+              if [ -z "$mergeBase" ]; then
+                echo 1>&2 "ERROR: Branches '$HCI_GIT_UPDATE_BRANCH' and '$baseDescr' share no common history!"
+                echo 1>&2 "This indicates a serious repository problem. The update branch appears to be"
+                echo 1>&2 "from a completely different repository or was created incorrectly."
+                echo 1>&2 ""
+                echo 1>&2 "Recent commits on each branch:"
+                echo 1>&2 "=== $HCI_GIT_UPDATE_BRANCH ==="
+                git log --oneline -5 "refs/remotes/origin/$HCI_GIT_UPDATE_BRANCH" >&2 || true
+                echo 1>&2 "=== $baseDescr ==="
+                git log --oneline -5 "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH" >&2 || true
+                false
+              fi
+
+              git log --oneline --graph --decorate "$mergeBase^.." "refs/remotes/origin/$HCI_GIT_UPDATE_BRANCH" "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH" >&2 || true
+
+              echo 1>&2 ""
+              echo 1>&2 "Fast-forward failed: '$HCI_GIT_UPDATE_BRANCH' has commits that are not in '$baseDescr'."
+              echo 1>&2 ""
+              echo 1>&2 "The update branch has diverged from the base branch and cannot be fast-forwarded."
+              echo 1>&2 "This happens when:"
+              echo 1>&2 "  - previous update branch was never merged"
+              echo 1>&2 "  - and base branch has new commits since the last update"
+              echo 1>&2 "  - or multiple update jobs ran concurrently"
+              echo 1>&2 ""
+              echo 1>&2 "One-off solutions:"
+              echo 1>&2 "  a. Delete the update branch and re-run the effect: git push origin :$HCI_GIT_UPDATE_BRANCH"
+              echo 1>&2 "  b. Merge or rebase $HCI_GIT_UPDATE_BRANCH"
+              echo 1>&2 "Structural solutions:"
+              echo 1>&2 "  a. Change baseMerge.method to 'merge' (creates merge commits)"
+              echo 1>&2 "  b. Change baseMerge.method to 'rebase' (rewrites history)"
+              echo 1>&2 "See https://docs.hercules-ci.com/hercules-ci-effects/reference/effect-modules/git#_git_update_basemerge_method"
+              exit 1
+            fi
+            ;;
         esac
         unset baseDescr
       fi
@@ -229,6 +286,9 @@ in
         case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
           rebase)
             gitPushArgs+=(--force-with-lease)
+            ;;
+          fast-forward)
+            # Fast-forward never requires force push since it only moves forward
             ;;
         esac
         git push origin "$HCI_GIT_UPDATE_BRANCH" ''${gitPushArgs[@]}
