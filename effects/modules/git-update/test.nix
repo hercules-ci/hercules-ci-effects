@@ -239,7 +239,7 @@ effectVMTest {
         )
       """)
       agent.succeed("""
-        grep -E '\[rejected\].+update.+stale info' concurrent-update.log
+        grep -E '\\[rejected\\].+update.+stale info' concurrent-update.log
       """)
       client.succeed("""
         (
