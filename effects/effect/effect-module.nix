@@ -1,4 +1,10 @@
-{ config, lib, hci-effects, pkgs, ... }:
+{
+  config,
+  lib,
+  hci-effects,
+  pkgs,
+  ...
+}:
 let
   inherit (lib)
     filterAttrs
@@ -130,7 +136,7 @@ in
       default = { };
     };
 
-    /* Semi-internal options */
+    # Semi-internal options
 
     effectDerivationArgs = mkOption {
       type = types.lazyAttrsOf types.unspecified;
@@ -284,20 +290,21 @@ in
     fsRoot = pkgs.runCommand "effect-fs-root" { } config.fsRootBuildCommands;
 
     # NB: Sync with mkEffect
-    fsRootBuildCommands =
-      lib.mkMerge [
-        (lib.mkIf (config.binsh != null) ''
-          mkdir -p $out/bin
-          ln -s ${lib.escapeShellArg config.binsh} $out/bin/sh
-        '')
-        (lib.mkIf (config.usrbinenv != null) ''
-          mkdir -p $out/usr/bin
-          ln -s ${lib.escapeShellArg config.usrbinenv} $out/usr/bin/env
-        '')
-      ];
+    fsRootBuildCommands = lib.mkMerge [
+      (lib.mkIf (config.binsh != null) ''
+        mkdir -p $out/bin
+        ln -s ${lib.escapeShellArg config.binsh} $out/bin/sh
+      '')
+      (lib.mkIf (config.usrbinenv != null) ''
+        mkdir -p $out/usr/bin
+        ln -s ${lib.escapeShellArg config.usrbinenv} $out/usr/bin/env
+      '')
+    ];
 
     extraAttributes.tests.buildable =
-      (config.effectDerivation.overrideAttrs (o: { isEffect = false; })).inputDerivation;
+      (config.effectDerivation.overrideAttrs (o: {
+        isEffect = false;
+      })).inputDerivation;
     extraAttributes.config = config;
   };
 }

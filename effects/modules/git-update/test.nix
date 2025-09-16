@@ -11,7 +11,9 @@ let
     git.update.branch = "update";
     git.update.pullRequest.enable = false;
 
-    secretsMap.token = { type = "GitToken"; };
+    secretsMap.token = {
+      type = "GitToken";
+    };
 
     name = "update";
   };

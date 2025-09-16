@@ -1,26 +1,33 @@
-{ lib, ... }: {
+{ lib, ... }:
+{
   imports = [
     ../testsupport/dns.nix
     ../testsupport/setup.nix
   ];
   nodes = {
-    gitea = { pkgs, ... }: {
-      services.gitea.enable = true;
-      services.gitea.settings.service.DISABLE_REGISTRATION = true;
-      # services.gitea.settings.log.LEVEL = "Trace";
-      # services.gitea.settings.databas.LOG_SQL = true;
-      services.gitea.settings.log.LEVEL = "Info";
-      services.gitea.settings.database.LOG_SQL = false;
-      networking.firewall.allowedTCPPorts = [ 3000 ];
-      environment.systemPackages = [ pkgs.gitea ];
-    };
-    client = { pkgs, ... }: {
-      environment.systemPackages = [ pkgs.git ];
-    };
+    gitea =
+      { pkgs, ... }:
+      {
+        services.gitea.enable = true;
+        services.gitea.settings.service.DISABLE_REGISTRATION = true;
+        # services.gitea.settings.log.LEVEL = "Trace";
+        # services.gitea.settings.databas.LOG_SQL = true;
+        services.gitea.settings.log.LEVEL = "Info";
+        services.gitea.settings.database.LOG_SQL = false;
+        networking.firewall.allowedTCPPorts = [ 3000 ];
+        environment.systemPackages = [ pkgs.gitea ];
+      };
+    client =
+      { pkgs, ... }:
+      {
+        environment.systemPackages = [ pkgs.git ];
+      };
   };
-  defaults = { pkgs, ... }: {
-    environment.systemPackages = [ pkgs.jq ];
-  };
+  defaults =
+    { pkgs, ... }:
+    {
+      environment.systemPackages = [ pkgs.jq ];
+    };
 
   setupScript = ''
     import shlex

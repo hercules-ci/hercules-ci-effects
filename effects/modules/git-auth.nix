@@ -1,4 +1,10 @@
-{ config, lib, options, pkgs, ... }:
+{
+  config,
+  lib,
+  options,
+  pkgs,
+  ...
+}:
 let
   inherit (lib)
     mkOption
@@ -7,13 +13,19 @@ let
   cfg = config.git.checkout;
   opt = options.git.checkout;
 
-  parseURL = gitRemote:
-    let m = builtins.match "([a-z]*)://([^/]*)(/?.*)" gitRemote;
-    in if m == null then throw "Could not parse ${opt.remote} as a url. Value: ${gitRemote}" else {
-      scheme = lib.elemAt m 0;
-      host = lib.elemAt m 1;
-      path = lib.elemAt m 2;
-    };
+  parseURL =
+    gitRemote:
+    let
+      m = builtins.match "([a-z]*)://([^/]*)(/?.*)" gitRemote;
+    in
+    if m == null then
+      throw "Could not parse ${opt.remote} as a url. Value: ${gitRemote}"
+    else
+      {
+        scheme = lib.elemAt m 0;
+        host = lib.elemAt m 1;
+        path = lib.elemAt m 2;
+      };
 
   remote = parseURL cfg.remote.url;
 

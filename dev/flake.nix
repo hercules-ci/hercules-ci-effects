@@ -10,7 +10,9 @@
     };
   };
 
-  outputs = { ... }: {
-    # deps only; use ../flake.nix for everything
-  };
+  outputs =
+    { ... }:
+    {
+      # deps only; use ../flake.nix for everything
+    };
 }

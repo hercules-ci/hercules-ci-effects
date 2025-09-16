@@ -1,17 +1,24 @@
-flakeParts@{ lib, config, self, ... }:
+flakeParts@{
+  lib,
+  config,
+  self,
+  ...
+}:
 let
   inherit (lib)
     types
     mkOption
     ;
 
-  herculesCIModule = { config, ... }: {
-    config = {
-      out = {
-        _debug = config;
+  herculesCIModule =
+    { config, ... }:
+    {
+      config = {
+        out = {
+          _debug = config;
+        };
       };
     };
-  };
 
 in
 {

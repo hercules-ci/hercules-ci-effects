@@ -1,8 +1,16 @@
-{ mkEffect, curl, cacert }:
+{
+  mkEffect,
+  curl,
+  cacert,
+}:
 
 # A simple demonstration of an effect
 # TODO: add authentication
-args@{ name, url, file }:
+args@{
+  name,
+  url,
+  file,
+}:
 mkEffect {
   name = "put-url-${name}";
   # inputs = [ curl ]; # already in default input

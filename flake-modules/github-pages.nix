@@ -1,4 +1,13 @@
-top@{ config, options, lib, inputs, withSystem, getSystem, flake-parts-lib, ... }:
+top@{
+  config,
+  options,
+  lib,
+  inputs,
+  withSystem,
+  getSystem,
+  flake-parts-lib,
+  ...
+}:
 let
   inherit (lib)
     mkIf
@@ -24,23 +33,26 @@ let
 in
 {
   options = {
-    perSystem = mkPerSystemOption ({ config, ... }: {
-      options = {
-        hercules-ci.github-pages.settings = lib.mkOption {
-          type = types.deferredModule;
-          description = ''
-            Modular settings for the GitHub Pages effect.
+    perSystem = mkPerSystemOption (
+      { config, ... }:
+      {
+        options = {
+          hercules-ci.github-pages.settings = lib.mkOption {
+            type = types.deferredModule;
+            description = ''
+              Modular settings for the GitHub Pages effect.
 
-            See [`gitWriteBranch`](https://docs.hercules-ci.com/hercules-ci-effects/reference/nix-functions/gitWriteBranch.html#effect_options) for options.
-          '';
-          example = lib.literalExpression ''
-            {
-              contents = config.packages.docs + "/share/doc/mypkg/html";
-            }
-          '';
+              See [`gitWriteBranch`](https://docs.hercules-ci.com/hercules-ci-effects/reference/nix-functions/gitWriteBranch.html#effect_options) for options.
+            '';
+            example = lib.literalExpression ''
+              {
+                contents = config.packages.docs + "/share/doc/mypkg/html";
+              }
+            '';
+          };
         };
-      };
-    });
+      }
+    );
 
     hercules-ci.github-pages = {
       branch = lib.mkOption {
@@ -64,7 +76,7 @@ in
         type = types.str;
         description = ''
           The Hercules CI job in which to perform the deployment.
-          
+
           By default the GitHub pages deployment is triggered by the `onPush.default` job,
           so that the deployment only proceeds when the default builds are successful.
         '';
@@ -89,16 +101,16 @@ in
   };
 
   config = mkIf enable {
-    perSystem = { hci-effects, system, ... }:
+    perSystem =
+      { hci-effects, system, ... }:
       let
-        deploy =
-          hci-effects.gitWriteBranch {
-            imports = [
-              githubPagesSettings
-              cfg.settings
-            ];
-            git.checkout.remote.url = "https://fake-repo-for.checks.github-pages-effect-is-buildable";
-          };
+        deploy = hci-effects.gitWriteBranch {
+          imports = [
+            githubPagesSettings
+            cfg.settings
+          ];
+          git.checkout.remote.url = "https://fake-repo-for.checks.github-pages-effect-is-buildable";
+        };
       in
       {
         checks = lib.optionalAttrs (system == defaultEffectSystem) {
@@ -106,11 +118,14 @@ in
         };
       };
 
-    hercules-ci.github-pages.settings = (getSystem defaultEffectSystem).hercules-ci.github-pages.settings;
+    hercules-ci.github-pages.settings =
+      (getSystem defaultEffectSystem).hercules-ci.github-pages.settings;
 
-    herculesCI = herculesCI@{ config, ... }:
+    herculesCI =
+      herculesCI@{ config, ... }:
       let
-        deploy = withSystem defaultEffectSystem ({ config, hci-effects, ... }:
+        deploy = withSystem defaultEffectSystem (
+          { config, hci-effects, ... }:
           hci-effects.gitWriteBranch {
             imports = [
               githubPagesSettings
@@ -124,18 +139,14 @@ in
         onPush = mkMerge [
           # deploy
           {
-            ${cfg.pushJob}.outputs.effects.gh-pages =
-              lib.throwIf (cfg.branch == "gh-pages") ''
-                The option `hercules-ci.github-pages.branch` refers to the branch
-                that serves as a source for the GitHub Pages deployment. You've set
-                it to "gh-pages" which is the output. You'll probably want to
-                specify a branch like your default branch, such as "main", "develop"
-                or "master", or some other branch that isn't occupied by the build
-                output.
-              ''
-              lib.optionalAttrs
-                (herculesCI.config.repo.branch == cfg.branch)
-                deploy;
+            ${cfg.pushJob}.outputs.effects.gh-pages = lib.throwIf (cfg.branch == "gh-pages") ''
+              The option `hercules-ci.github-pages.branch` refers to the branch
+              that serves as a source for the GitHub Pages deployment. You've set
+              it to "gh-pages" which is the output. You'll probably want to
+              specify a branch like your default branch, such as "main", "develop"
+              or "master", or some other branch that isn't occupied by the build
+              output.
+            '' lib.optionalAttrs (herculesCI.config.repo.branch == cfg.branch) deploy;
           }
         ];
       };

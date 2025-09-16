@@ -1,8 +1,8 @@
-test@
-{ config
-, lib
-, pkgs
-, ...
+test@{
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 # pkgs, hci, runtimeShell, writeScriptBin, writeTextFile, writeText, runCommand, writeReferencesToFile }:
 let
@@ -11,7 +11,8 @@ let
     mapAttrs
     mapAttrsToList
     mkOption
-    types;
+    types
+    ;
 
   nixos-lib = import (pkgs.path + "/nixos/lib") { inherit lib; };
 
@@ -30,52 +31,50 @@ let
       };
       stringify = x: stringifiers.${builtins.typeOf x} x;
 
-      drvOutput = o:
+      drvOutput =
+        o:
         # { outputs = o.outputs; dynamicOutputs = []; };
         o.outputs;
 
-      ctxToDrv = k: v:
-        if v?outputs then { "${k}" = drvOutput v; }
-        else { };
+      ctxToDrv = k: v: if v ? outputs then { "${k}" = drvOutput v; } else { };
 
-      ctxToSrc = k: v:
-        if v.path or false then ["${k}"]
-        else [ ];
+      ctxToSrc = k: v: if v.path or false then [ "${k}" ] else [ ];
 
     in
     drvPackage:
     let
       env =
-        mapAttrs
-          (k: v:
-            builtins.addErrorContext
-              "while evaluating derivation attribute ${k}"
-              (stringify v))
-          (lib.filterAttrs
-            (k: v:
-              builtins.addErrorContext
-                "while evaluating derivation attribute ${k}" (v != null))
-                drvPackage.drvAttrs);
+        mapAttrs (k: v: builtins.addErrorContext "while evaluating derivation attribute ${k}" (stringify v))
+          (
+            lib.filterAttrs (
+              k: v: builtins.addErrorContext "while evaluating derivation attribute ${k}" (v != null)
+            ) drvPackage.drvAttrs
+          );
 
       beforeInputs = {
         args = drvPackage.args;
         builder = drvPackage.builder;
         env = env;
         name = drvPackage.name;
-        outputs = { "out" = {}; };
+        outputs = {
+          "out" = { };
+        };
         system = drvPackage.system;
       };
       context = builtins.getContext (builtins.toJSON beforeInputs);
       inputDrvs = lib.concatMapAttrs ctxToDrv context;
       inputSrcs = lib.concatLists (lib.mapAttrsToList ctxToSrc context);
     in
-      beforeInputs // {
-        inherit inputDrvs inputSrcs;
-      };
+    beforeInputs
+    // {
+      inherit inputDrvs inputSrcs;
+    };
 
   # Produce a derivation ATerm without dependencies or outputs
-  unsafeToATerm = pkg:
-    let o = derivationObject pkg;
+  unsafeToATerm =
+    pkg:
+    let
+      o = derivationObject pkg;
       outPath = "/nix/store/00000000000000000000000000000000-effect-vm-test-fake-output";
       outputs = ''[("out",${escape outPath},"","")]'';
       inputDrvs = "[]";
@@ -84,15 +83,19 @@ let
       system = escape o.system;
       builder = escape o.builder;
       args = escape o.args;
-      env = "["
-        + lib.concatStringsSep "," (lib.mapAttrsToList (k: v: "(${escape k},${escape v})") (o.env // { "out" = outPath; }))
+      env =
+        "["
+        + lib.concatStringsSep "," (
+          lib.mapAttrsToList (k: v: "(${escape k},${escape v})") (o.env // { "out" = outPath; })
+        )
         + "]";
     in
-      "Derive(${outputs},${inputDrvs},${inputSrcs},${system},${builder},${args},${env})";
+    "Derive(${outputs},${inputDrvs},${inputSrcs},${system},${builder},${args},${env})";
 
   # derivationJSON = pkg: builtins.toJSON (derivationObject pkg);
 
-  wrapEffect = name: effect:
+  wrapEffect =
+    name: effect:
     # TODO: use unsafeDiscardOutputDependency blocked on https://github.com/NixOS/nix/issues/9146
     #       or use a different workaround that doesn't depend on build closure's outputs all the way to bootstrap
     #
@@ -107,8 +110,10 @@ let
     Return a store path with a closure containing everything including
     derivations and all build dependency outputs, all the way down.
   */
-  allDrvOutputs = pkg:
-    let name = "allDrvOutputs-${pkg.pname or pkg.name or "unknown"}";
+  allDrvOutputs =
+    pkg:
+    let
+      name = "allDrvOutputs-${pkg.pname or pkg.name or "unknown"}";
     in
     pkgs.runCommand name { refs = pkgs.writeReferencesToFile pkg.drvPath; } ''
       touch $out
@@ -121,13 +126,19 @@ let
       done <$refs
     '';
 
-  secrets2 = lib.mapAttrs
-    (k: v:
-      lib.throwIfNot (v?data) "secret `${k}` does not have a `data` attribute in test `${config.name}`" (
-        { kind = "Secret"; condition = { and = [ ]; }; } // v
+  secrets2 = lib.mapAttrs (
+    k: v:
+    lib.throwIfNot (v ? data) "secret `${k}` does not have a `data` attribute in test `${config.name}`"
+      (
+        {
+          kind = "Secret";
+          condition = {
+            and = [ ];
+          };
+        }
+        // v
       )
-    )
-    config.secrets;
+  ) config.secrets;
   secretsFile = pkgs.writeText "fake-secrets-${config.name}" (builtins.toJSON secrets2);
 
 in
@@ -157,7 +168,7 @@ in
         A collection of secrets available on the mock agent.
       '';
       type = types.lazyAttrsOf (types.lazyAttrsOf types.raw);
-      default = {};
+      default = { };
     };
   };
 
@@ -175,7 +186,7 @@ in
         createHome = true;
         group = "test-hci-agent";
       };
-      users.groups.test-hci-agent = {};
+      users.groups.test-hci-agent = { };
     };
   };
 }

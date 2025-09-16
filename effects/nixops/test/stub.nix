@@ -1,5 +1,7 @@
 {
-  defaults = {...}: {
-    config.networking.publicIPv4 = "stub-public-ipv4";
-  };
+  defaults =
+    { ... }:
+    {
+      config.networking.publicIPv4 = "stub-public-ipv4";
+    };
 }

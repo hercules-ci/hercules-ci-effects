@@ -1,4 +1,9 @@
-{ config, lib, withSystem, ... }:
+{
+  config,
+  lib,
+  withSystem,
+  ...
+}:
 let
   inherit (lib) mkOption types optionalAttrs;
   cfg = config.hercules-ci.flake-update;
@@ -7,7 +12,7 @@ let
     options = {
       inputs = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         example = ''["nixpkgs" "nixpkgs-unstable"]'';
         description = ''
           Flake inputs to update. The default, `[]` means to update all inputs.
@@ -101,7 +106,10 @@ in
 
         Used when `hercules-ci.flake-update.baseMerge.enable` is true.
       '';
-      type = types.enum [ "merge" "rebase" ];
+      type = types.enum [
+        "merge"
+        "rebase"
+      ];
       default = "merge";
     };
 
@@ -114,7 +122,12 @@ in
     };
 
     autoMergeMethod = mkOption {
-      type = types.enum [ null "merge" "rebase" "squash" ];
+      type = types.enum [
+        null
+        "merge"
+        "rebase"
+        "squash"
+      ];
       default = null;
       description = ''
         Whether to enable auto-merge on new pull requests, and how to merge it.
@@ -142,7 +155,7 @@ in
 
     effect.settings = mkOption {
       type = types.deferredModule;
-      default = {};
+      default = { };
       description = ''
         A module that extends the flake-update effect arbitrarily.
 
@@ -178,10 +191,16 @@ in
 
     flakes = mkOption {
       type = types.attrsOf (types.submodule flakeConfigModule);
-      default = { "." = { }; };
+      default = {
+        "." = { };
+      };
       example = {
-        "." = { commitSummary = "/flake.lock: Update"; };
-        "path/to/subflake" = { inputs = [ "nixpkgs" ]; };
+        "." = {
+          commitSummary = "/flake.lock: Update";
+        };
+        "path/to/subflake" = {
+          inputs = [ "nixpkgs" ];
+        };
       };
       description = ''
         Flakes to update.
@@ -211,24 +230,40 @@ in
       git.update.baseMerge = cfg.baseMerge;
       git.update.baseBranch = cfg.baseBranch;
     };
-    herculesCI = herculesCI@{ config, ... }: optionalAttrs (cfg.enable) {
-      # NOTE: when generalizing to multiple schedules, check that the branches don't interfere.
-      onSchedule.flake-update = {
-        inherit (cfg) when;
-        outputs = {
-          effects = {
-            flake-update = withSystem cfg.effect.system ({ config, pkgs, hci-effects, ... }:
-              hci-effects.flakeUpdate {
-                gitRemote = herculesCI.config.repo.remoteHttpUrl;
-                user = "x-access-token";
-                inherit (cfg) updateBranch forgeType createPullRequest autoMergeMethod pullRequestTitle pullRequestBody flakes;
-                nix = withSystem cfg.effect.system cfg.nix.package;
-                module = cfg.effect.settings;
-              }
-            );
+    herculesCI =
+      herculesCI@{ config, ... }:
+      optionalAttrs (cfg.enable) {
+        # NOTE: when generalizing to multiple schedules, check that the branches don't interfere.
+        onSchedule.flake-update = {
+          inherit (cfg) when;
+          outputs = {
+            effects = {
+              flake-update = withSystem cfg.effect.system (
+                {
+                  config,
+                  pkgs,
+                  hci-effects,
+                  ...
+                }:
+                hci-effects.flakeUpdate {
+                  gitRemote = herculesCI.config.repo.remoteHttpUrl;
+                  user = "x-access-token";
+                  inherit (cfg)
+                    updateBranch
+                    forgeType
+                    createPullRequest
+                    autoMergeMethod
+                    pullRequestTitle
+                    pullRequestBody
+                    flakes
+                    ;
+                  nix = withSystem cfg.effect.system cfg.nix.package;
+                  module = cfg.effect.settings;
+                }
+              );
+            };
           };
         };
       };
-    };
   };
 }
