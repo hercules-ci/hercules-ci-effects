@@ -1,4 +1,8 @@
-{ effectVMTest, hci-effects, runCommand }:
+{
+  effectVMTest,
+  hci-effects,
+  runCommand,
+}:
 
 let
   contents = runCommand "contents" { } ''
@@ -13,14 +17,16 @@ let
     mkdir -p $out
     echo hi >$out/index.md
   '';
-  defaults = { lib, ... }: {
-    _file = "${__curPos.file}:let defaults";
-    git.checkout.remote.url = "http://gitea:3000/test/repo";
-    git.checkout.forgeType = "gitea";
-    git.checkout.user = "test";
-    git.update.branch = "my-test-branch";
-    contents = lib.mkDefault contents;
-  };
+  defaults =
+    { lib, ... }:
+    {
+      _file = "${__curPos.file}:let defaults";
+      git.checkout.remote.url = "http://gitea:3000/test/repo";
+      git.checkout.forgeType = "gitea";
+      git.checkout.user = "test";
+      git.update.branch = "my-test-branch";
+      contents = lib.mkDefault contents;
+    };
 in
 effectVMTest {
   imports = [

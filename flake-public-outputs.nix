@@ -1,16 +1,28 @@
-{ withSystem, inputs, lib, ... }: {
+{
+  withSystem,
+  inputs,
+  lib,
+  ...
+}:
+{
   imports = [
     ./flake-module.nix
     ./flake-docs-render.nix
   ];
-  systems = [ "x86_64-linux" "aarch64-linux" ];
+  systems = [
+    "x86_64-linux"
+    "aarch64-linux"
+  ];
   flake = {
 
     flakeModule = ./flake-module.nix;
 
-    lib.withPkgs = pkgs:
-      let effects = import ./effects/default.nix effects pkgs;
-      in effects;
+    lib.withPkgs =
+      pkgs:
+      let
+        effects = import ./effects/default.nix effects pkgs;
+      in
+      effects;
 
     lib.mkHerculesCI = import ./lib/mkHerculesCI.nix inputs;
 

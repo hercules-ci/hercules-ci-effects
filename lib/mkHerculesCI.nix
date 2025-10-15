@@ -2,10 +2,17 @@
 hercules-ci-effects-inputs@{ flake-parts, ... }:
 
 # User arguments
-{ inputs }: module:
+{ inputs }:
+module:
 let
-  flake =
-    flake-parts.lib.mkFlake { inherit inputs; } ({ lib, config, self, ... }: {
+  flake = flake-parts.lib.mkFlake { inherit inputs; } (
+    {
+      lib,
+      config,
+      self,
+      ...
+    }:
+    {
       options = {
         selfAttributesDefinedViaMkHerculesCI = lib.mkOption {
           description = ''
@@ -27,16 +34,18 @@ let
       config = {
         systems = lib.mkDefault [ config.defaultEffectSystem ];
         # We're doing things the other way around...
-        herculesCI.flakeForOnPushDefault = { outputs = config.flake; };
+        herculesCI.flakeForOnPushDefault = {
+          outputs = config.flake;
+        };
 
         # self.herculesCI is supposed to be defined by mkHerculesCI.
         # If we were to set it here, that would cause it to
         # recursively merge itself with itself, infinitely.
         selfAttributesDefinedViaMkHerculesCI = [ "herculesCI" ];
 
-        flake =
-          builtins.removeAttrs (self.outputs or self) config.selfAttributesDefinedViaMkHerculesCI;
+        flake = builtins.removeAttrs (self.outputs or self) config.selfAttributesDefinedViaMkHerculesCI;
       };
-    });
+    }
+  );
 in
 flake.herculesCI

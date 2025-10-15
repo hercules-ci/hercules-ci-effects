@@ -1,4 +1,8 @@
-{ lib, pkgs, runCommand }:
+{
+  lib,
+  pkgs,
+  runCommand,
+}:
 let
   effects = import ../default.nix effects pkgs;
   inherit (effects) mkEffect;

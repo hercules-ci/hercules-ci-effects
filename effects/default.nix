@@ -13,18 +13,21 @@ let
     mkDefault
     ;
 
-  evalEffectModules = { modules }: evalModules {
-    modules = [
-      ./effect/effect-module.nix
-      {
-        _file = __curPos.file;
-        _module.args.pkgs = mkDefault pkgs;
-      }
-    ] ++ modules;
-    specialArgs = {
-      hci-effects = self;
+  evalEffectModules =
+    { modules }:
+    evalModules {
+      modules = [
+        ./effect/effect-module.nix
+        {
+          _file = __curPos.file;
+          _module.args.pkgs = mkDefault pkgs;
+        }
+      ]
+      ++ modules;
+      specialArgs = {
+        hci-effects = self;
+      };
     };
-  };
 
   checkVersion = import ./lib-version-check.nix {
     inherit (pkgs) lib;
@@ -32,29 +35,40 @@ let
   };
 
 in
-checkVersion
-{
+checkVersion {
   mkEffect = callPackage ./effect/effect.nix { };
 
   modularEffect = module: (evalEffectModules { modules = [ module ]; }).config.effectDerivation;
 
-  modularEffectWithUserModule = name: libraryModule: userModule:
-    self.modularEffect ({ lib, ... }: {
-      imports = [
-        libraryModule
-        (lib.setDefaultModuleLocation "${name} invocation parameters module" userModule)
-      ];
-    });
+  modularEffectWithUserModule =
+    name: libraryModule: userModule:
+    self.modularEffect (
+      { lib, ... }:
+      {
+        imports = [
+          libraryModule
+          (lib.setDefaultModuleLocation "${name} invocation parameters module" userModule)
+        ];
+      }
+    );
 
   modules = import ./modules.nix;
 
-  runIf = condition: v:
+  runIf =
+    condition: v:
     recurseIntoAttrs (
       (
-        if condition
-        then { run = v; }
-        else { dependencies = v.inputDerivation // { isEffect = false; buildDependenciesOnly = true; }; }
-      ) // optionalAttrs (v ? prebuilt) {
+        if condition then
+          { run = v; }
+        else
+          {
+            dependencies = v.inputDerivation // {
+              isEffect = false;
+              buildDependenciesOnly = true;
+            };
+          }
+      )
+      // optionalAttrs (v ? prebuilt) {
         inherit (v) prebuilt;
       }
     );
@@ -96,7 +110,11 @@ checkVersion
 
   ssh = callPackage ./ssh/call-ssh.nix { };
 
-  effectVMTest = callPackage ./effect-vm-test { extraModule = { config.hci = pkgs.hci; }; };
+  effectVMTest = callPackage ./effect-vm-test {
+    extraModule = {
+      config.hci = pkgs.hci;
+    };
+  };
 
   effects = self;
   hci-effects = self;

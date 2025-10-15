@@ -8,7 +8,6 @@
   Alternative:
 
       hci-effects.modules.*
-
 */
 {
   /*
@@ -18,9 +17,7 @@
   */
   git-auth = ./modules/git-auth.nix;
 
-  /*
-    GitHub authentication for the `gh` command. Not needed if you only use git.
-  */
+  # GitHub authentication for the `gh` command. Not needed if you only use git.
   git-auth-gh = ./modules/git-auth-gh.nix;
 
   /*
@@ -30,8 +27,6 @@
   */
   git-update = ./modules/git-update.nix;
 
-  /*
-    Very basic git configuration; default author, adding git to PATH, etc.
-  */
+  # Very basic git configuration; default author, adding git to PATH, etc.
   git = ./modules/git.nix;
 }

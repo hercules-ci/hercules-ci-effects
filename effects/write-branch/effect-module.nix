@@ -40,9 +40,9 @@ in
       defaultText = lib.literalMD ''
         `"Update "` + the `destination` or `git.update.branch`
       '';
-      default = "Update ${if config.destination == "." then config.git.update.branch else config.destination}"
-        + lib.optionalString isStoreContents
-          "\n\nStore path: ${config.contents}";
+      default =
+        "Update ${if config.destination == "." then config.git.update.branch else config.destination}"
+        + lib.optionalString isStoreContents "\n\nStore path: ${config.contents}";
     };
     allowExecutableFiles = mkOption {
       type = types.bool;
