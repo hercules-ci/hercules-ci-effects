@@ -8,6 +8,7 @@ let
     bool
     raw
     enum
+    addCheck
     ;
 
   derivationTree =
@@ -22,15 +23,7 @@ let
       description = "a tree of attribute sets and derivations";
     };
   lazyTraversedAttrs =
-    { recurseByDefault }:
-    t:
-    let
-      o = lazyAttrsOf t;
-    in
-    o
-    // {
-      check = v: o.check v && v.recurseForDerivations or recurseByDefault;
-    };
+    { recurseByDefault }: t: addCheck (lazyAttrsOf t) (v: v.recurseForDerivations or recurseByDefault);
 
   merge =
     t: vs:
