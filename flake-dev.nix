@@ -132,6 +132,10 @@ top@{
           aarch64-linux.netlify-cli = inputs.nixpkgs.legacyPackages.aarch64-linux.netlify-cli;
           x86_64-darwin.netlify-cli = inputs.nixpkgs.legacyPackages.x86_64-darwin.netlify-cli;
           aarch64-darwin.netlify-cli = inputs.nixpkgs.legacyPackages.aarch64-darwin.netlify-cli;
+          x86_64-linux.netlify-cli-tests = inputs.nixpkgs.legacyPackages.x86_64-linux.netlify-cli.tests;
+          aarch64-linux.netlify-cli-tests = inputs.nixpkgs.legacyPackages.aarch64-linux.netlify-cli.tests;
+          x86_64-darwin.netlify-cli-tests = inputs.nixpkgs.legacyPackages.x86_64-darwin.netlify-cli.tests;
+          aarch64-darwin.netlify-cli-tests = inputs.nixpkgs.legacyPackages.aarch64-darwin.netlify-cli.tests;
         };
       };
     };
