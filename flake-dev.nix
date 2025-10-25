@@ -127,6 +127,12 @@ top@{
               cargoPublish = pkgs.callPackage ./effects/cargo/test/default.nix { };
             };
           };
+        outputs.ad-hoc = {
+          x86_64-linux.netlify-cli = inputs.nixpkgs.legacyPackages.x86_64-linux.netlify-cli;
+          aarch64-linux.netlify-cli = inputs.nixpkgs.legacyPackages.aarch64-linux.netlify-cli;
+          x86_64-darwin.netlify-cli = inputs.nixpkgs.legacyPackages.x86_64-darwin.netlify-cli;
+          aarch64-darwin.netlify-cli = inputs.nixpkgs.legacyPackages.aarch64-darwin.netlify-cli;
+        };
       };
     };
 
