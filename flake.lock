@@ -21,16 +21,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1760284886,
-        "narHash": "sha256-TK9Kr0BYBQ/1P5kAsnNQhmWWKgmZXwUQr4ZMjCzWf2c=",
-        "owner": "NixOS",
+        "lastModified": 1761396030,
+        "narHash": "sha256-Hin3/r72Ou9EUdUCFt+2d033G17pCixZ9x4nvt0p+aI=",
+        "owner": "r-ryantm",
         "repo": "nixpkgs",
-        "rev": "cf3f5c4def3c7b5f1fc012b3d839575dbe552d43",
+        "rev": "359be3ca984e58e9eda3a5e4dd78aa1bd9a686d5",
         "type": "github"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
+        "owner": "r-ryantm",
+        "ref": "auto-update/netlify-cli",
         "repo": "nixpkgs",
         "type": "github"
       }

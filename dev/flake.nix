@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs-nixops2.url = "github:NixOS/nixpkgs/nixos-24.05";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # match ../flake.nix (usually); improve after nix#7730
+    nixpkgs.url = "github:r-ryantm/nixpkgs/auto-update/netlify-cli";
     git-hooks = {
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";

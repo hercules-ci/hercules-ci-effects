@@ -1,7 +1,7 @@
 {
   description = "Hercules CI Effects";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:r-ryantm/nixpkgs/auto-update/netlify-cli";
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
 
   outputs =
