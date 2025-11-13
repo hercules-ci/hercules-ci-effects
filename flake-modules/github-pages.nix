@@ -28,6 +28,7 @@ let
     git.checkout.forgeType = "github";
     git.checkout.user = "x-access-token";
     git.update.branch = "gh-pages";
+    git.update.baseMerge.enable = false;
   };
 
 in
