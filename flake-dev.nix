@@ -125,7 +125,7 @@ top@{
                 { pkgs, hci-effects, ... }: hci-effects.callPackage ./effects/effect/test/dev-kvm.nix { }
               );
               cargoPublish = pkgs.callPackage ./effects/cargo/test/default.nix { };
-              cargoPublishDryRun = pkgs.callPackage ./effects/cargo/test/default.nix { dryRun = true;};
+              cargoPublishDryRun = pkgs.callPackage ./effects/cargo/test/default.nix { dryRun = true; };
             };
           };
       };

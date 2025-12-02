@@ -1,4 +1,7 @@
-{ pkgs, dryRun ? false }:
+{
+  pkgs,
+  dryRun ? false,
+}:
 let
   effects = import ../../default.nix effects pkgs;
   inherit (effects) cargoPublish;

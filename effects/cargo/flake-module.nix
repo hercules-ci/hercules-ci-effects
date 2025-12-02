@@ -1,4 +1,10 @@
-{ config, lib, self, withSystem, ... }:
+{
+  config,
+  lib,
+  self,
+  withSystem,
+  ...
+}:
 let
   inherit (lib) mkOption types;
   cfg = config.hercules-ci.cargo-publish;
@@ -40,7 +46,7 @@ in
       };
       extraPublishArgs = mkOption {
         type = types.listOf types.str;
-        default = [];
+        default = [ ];
         description = ''
           Extra arguments to pass to `cargo publish`.
         '';
@@ -63,25 +69,31 @@ in
     };
   };
   config = lib.mkIf (config.hercules-ci.cargo-publish.enable) {
-    herculesCI = { config, ... }: {
-      onPush.default = {
-        outputs = {
-          effects = {
-            cargoPublish = withSystem defaultEffectSystem ({ hci-effects, pkgs, ... }:
-              hci-effects.cargoPublish {
-                inherit (cfg) secretName registryURL src;
-                dryRun = config.repo.tag == null;
-                assertVersions = lib.optionalAttrs (cfg.packageName != null && config.repo.tag != null) {
-                  ${cfg.packageName} = config.repo.tag;
-                };
-                extraPublishArgs = cfg.extraPublishArgs ++ lib.optionals (cfg.packageName != null) [
-                  "--package" cfg.packageName
-                ];
-              }
-            );
+    herculesCI =
+      { config, ... }:
+      {
+        onPush.default = {
+          outputs = {
+            effects = {
+              cargoPublish = withSystem defaultEffectSystem (
+                { hci-effects, pkgs, ... }:
+                hci-effects.cargoPublish {
+                  inherit (cfg) secretName registryURL src;
+                  dryRun = config.repo.tag == null;
+                  assertVersions = lib.optionalAttrs (cfg.packageName != null && config.repo.tag != null) {
+                    ${cfg.packageName} = config.repo.tag;
+                  };
+                  extraPublishArgs =
+                    cfg.extraPublishArgs
+                    ++ lib.optionals (cfg.packageName != null) [
+                      "--package"
+                      cfg.packageName
+                    ];
+                }
+              );
+            };
           };
         };
       };
-    };
   };
 }

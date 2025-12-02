@@ -13,10 +13,9 @@ args@{
   manifestPath ? "Cargo.toml",
   src,
   extraPublishArgs ? [ ],
-  registryURL ? null
-, dryRun ? false
-, assertVersions ? { }
-,
+  registryURL ? null,
+  dryRun ? false,
+  assertVersions ? { },
   ...
 }:
 let
@@ -24,7 +23,8 @@ let
   customRegistryIdentifier = "CUSTOM";
 in
 mkEffect (
-  builtins.removeAttrs args ["assertVersions"] // {
+  builtins.removeAttrs args [ "assertVersions" ]
+  // {
     buildInputs = [ cargoSetupHook ];
     inputs = [ cargo ];
     secretsMap = {
@@ -47,22 +47,30 @@ mkEffect (
         local actual
         actual="$(
           cargo metadata --format-version 1 \
-            ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}" } \
+            ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}"} \
             | jq -r '.packages.[] | select (.name == $package) | .version' --arg package $package
         )"
         if [[ "$actual" != "$expected" ]]; then
           echo Version mismatch. Dumping metadata:
           cargo metadata --format-version 1 \
-            ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}" } \
+            ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}"} \
             | jq
           echo -e "\033[1;31mVersion mismatch for $package: expected $(hciQuote "$expected"), got $(hciQuote "$actual")\033[0m"
           exit 1
         fi
         echo "Version check passed for $package: $actual"
       }
-      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value:
-        ''hciCheckCargoVersion ${lib.escapeShellArgs [ name value ]}''
-      ) assertVersions)}
+      ${lib.concatStringsSep "\n" (
+        lib.mapAttrsToList (
+          name: value:
+          ''hciCheckCargoVersion ${
+            lib.escapeShellArgs [
+              name
+              value
+            ]
+          }''
+        ) assertVersions
+      )}
       ${lib.optionalString dryRun ''
         echo
         # Bold blue text
@@ -70,7 +78,7 @@ mkEffect (
         echo
       ''}
       cargo publish \
-      ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}" } \
+      ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}"} \
       ${lib.optionalString (registryURL != null) "--registry ${customRegistryIdentifier}"} \
       ${lib.optionalString dryRun "--dry-run"} \
       --target-dir "$(mktemp -d)" \
