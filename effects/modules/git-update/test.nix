@@ -11,7 +11,9 @@ let
     git.update.branch = "update";
     git.update.pullRequest.enable = false;
 
-    secretsMap.token = { type = "GitToken"; };
+    secretsMap.token = {
+      type = "GitToken";
+    };
 
     name = "update";
   };
@@ -239,7 +241,7 @@ effectVMTest {
         )
       """)
       agent.succeed("""
-        grep -E '\[rejected\].+update.+stale info' concurrent-update.log
+        grep -E '\\[rejected\\].+update.+stale info' concurrent-update.log
       """)
       client.succeed("""
         (

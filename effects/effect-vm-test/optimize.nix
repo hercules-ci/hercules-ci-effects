@@ -1,4 +1,5 @@
-{ hostPkgs, ... }: {
+{ hostPkgs, ... }:
+{
   config = {
     defaults = {
       documentation.enable = false;

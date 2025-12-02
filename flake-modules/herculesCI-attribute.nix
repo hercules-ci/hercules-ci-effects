@@ -1,4 +1,9 @@
-flakeParts@{ lib, config, self, ... }:
+flakeParts@{
+  lib,
+  config,
+  self,
+  ...
+}:
 let
   inherit (lib)
     types
@@ -116,105 +121,112 @@ let
     };
   };
 
-  outputsModule = { ... }: {
-    options = {
-      outputs = mkOption {
-        type = derivationTree;
-        description = ''
-          A collection of builds and effects. These may be nested recursively into attribute sets.
+  outputsModule =
+    { ... }:
+    {
+      options = {
+        outputs = mkOption {
+          type = derivationTree;
+          description = ''
+            A collection of builds and effects. These may be nested recursively into attribute sets.
 
-          Hercules CI's traversal of nested sets can be cancelled with `lib.dontRecurseIntoAttrs`.
+            Hercules CI's traversal of nested sets can be cancelled with `lib.dontRecurseIntoAttrs`.
 
-          See the parent option for details about when the job runs.
-        '';
+            See the parent option for details about when the job runs.
+          '';
+        };
       };
     };
-  };
 
-  onPushModule = { ... }: {
-    imports = [ outputsModule ];
-  };
-
-  onScheduleModule = { ... }: {
-    imports = [ outputsModule ];
-    options = {
-      when = (import ./types/when.nix { inherit lib; }).option;
+  onPushModule =
+    { ... }:
+    {
+      imports = [ outputsModule ];
     };
-  };
 
-  herculesCIModule = { config, ... }: {
-    options = {
-      repo = mkOption {
-        type = types.submodule repoModule;
-        readOnly = true;
-        description = ''
-          The repository and checkout metadata of the current checkout, provided by Hercules CI.
-          These options are read-only.
-
-          You may read options by querying the `config` module argument.
-        '';
-      };
-      out = mkOption {
-        type = types.lazyAttrsOf types.raw;
-        internal = true;
-        description = ''
-          The return value of the `herculesCI` function in the flake.
-          All attributes in this return value should be represented by options
-          that write to this internal option.
-        '';
-      };
-      onPush = mkOption {
-        type = types.lazyAttrsOf (types.submoduleWith { modules = [ onPushModule ]; });
-        description = ''
-          This declares what to do when a Git ref is updated, such as when you push a commit or after you merge a pull request.
-
-          By default `onPush.default` defines a job that builds the known flake output attributes.
-          It can be disabled by setting `onPush.default.enable = false;`.
-
-          The name of the job (from `onPush.<name>`) will be used as part of the commit status of the resulting job.
-        '';
-        default = {};
-      };
-      onSchedule = mkOption {
-        type = types.lazyAttrsOf (types.submoduleWith { modules = [ onScheduleModule ]; });
-        description = ''
-          _Since hercules-ci-agent 0.9.8_
-
-          Behaves similar to onPush, but is responsible for jobs that respond to the passing of time rather than to a git push or equivalent.
-        '';
-        default = {};
-      };
-      ciSystems = mkOption {
-        type = types.listOf types.str;
-        default = flakeParts.config.systems;
-        defaultText = lib.literalExpression "config.systems  # from flake parts";
-        description = ''
-          Flake systems for which to generate attributes in `herculesCI.onPush.default.outputs`.
-        '';
-      };
-      flakeForOnPushDefault = mkOption {
-        type = types.raw;
-        default = self;
-        defaultText = lib.literalExpression "self";
-        description = ''
-          The flake to use when automatically deriving the onPush.default job.
-
-          If you use mkFlake (you should), you have no reason to set this.
-          This is primarily an extension point for `mkHerculesCI`.
-        '';
-        internal = true;
+  onScheduleModule =
+    { ... }:
+    {
+      imports = [ outputsModule ];
+      options = {
+        when = (import ./types/when.nix { inherit lib; }).option;
       };
     };
-    config = {
-      onPush.default.outputs =
-        default-hci-for-flake.flakeToOutputs
-          config.flakeForOnPushDefault
-          { ciSystems = lib.genAttrs config.ciSystems (system: {}); };
-      out = {
-        inherit (config) onPush onSchedule ciSystems;
+
+  herculesCIModule =
+    { config, ... }:
+    {
+      options = {
+        repo = mkOption {
+          type = types.submodule repoModule;
+          readOnly = true;
+          description = ''
+            The repository and checkout metadata of the current checkout, provided by Hercules CI.
+            These options are read-only.
+
+            You may read options by querying the `config` module argument.
+          '';
+        };
+        out = mkOption {
+          type = types.lazyAttrsOf types.raw;
+          internal = true;
+          description = ''
+            The return value of the `herculesCI` function in the flake.
+            All attributes in this return value should be represented by options
+            that write to this internal option.
+          '';
+        };
+        onPush = mkOption {
+          type = types.lazyAttrsOf (types.submoduleWith { modules = [ onPushModule ]; });
+          description = ''
+            This declares what to do when a Git ref is updated, such as when you push a commit or after you merge a pull request.
+
+            By default `onPush.default` defines a job that builds the known flake output attributes.
+            It can be disabled by setting `onPush.default.enable = false;`.
+
+            The name of the job (from `onPush.<name>`) will be used as part of the commit status of the resulting job.
+          '';
+          default = { };
+        };
+        onSchedule = mkOption {
+          type = types.lazyAttrsOf (types.submoduleWith { modules = [ onScheduleModule ]; });
+          description = ''
+            _Since hercules-ci-agent 0.9.8_
+
+            Behaves similar to onPush, but is responsible for jobs that respond to the passing of time rather than to a git push or equivalent.
+          '';
+          default = { };
+        };
+        ciSystems = mkOption {
+          type = types.listOf types.str;
+          default = flakeParts.config.systems;
+          defaultText = lib.literalExpression "config.systems  # from flake parts";
+          description = ''
+            Flake systems for which to generate attributes in `herculesCI.onPush.default.outputs`.
+          '';
+        };
+        flakeForOnPushDefault = mkOption {
+          type = types.raw;
+          default = self;
+          defaultText = lib.literalExpression "self";
+          description = ''
+            The flake to use when automatically deriving the onPush.default job.
+
+            If you use mkFlake (you should), you have no reason to set this.
+            This is primarily an extension point for `mkHerculesCI`.
+          '';
+          internal = true;
+        };
+      };
+      config = {
+        onPush.default.outputs = default-hci-for-flake.flakeToOutputs config.flakeForOnPushDefault {
+          ciSystems = lib.genAttrs config.ciSystems (system: { });
+        };
+        out = {
+          inherit (config) onPush onSchedule ciSystems;
+        };
       };
     };
-  };
 
 in
 {
@@ -237,12 +249,14 @@ in
   };
 
   config = {
-    flake.herculesCI = {
-      # These are lazy errors in order to allow some exploration in nix repl.
-      # hci repl: https://github.com/hercules-ci/hercules-ci-agent/issues/459
-      herculesCI ? throw "`<flake>.outputs.herculesCI` requires an `herculesCI` argument.",
-      primaryRepo ? throw "`<flake>.outputs.herculesCI` requires a `primaryRepo` argument.",
-      ... }:
+    flake.herculesCI =
+      {
+        # These are lazy errors in order to allow some exploration in nix repl.
+        # hci repl: https://github.com/hercules-ci/hercules-ci-agent/issues/459
+        herculesCI ? throw "`<flake>.outputs.herculesCI` requires an `herculesCI` argument.",
+        primaryRepo ? throw "`<flake>.outputs.herculesCI` requires a `primaryRepo` argument.",
+        ...
+      }:
       let
         paramModule = {
           _file = "herculesCI parameters";
@@ -255,7 +269,8 @@ in
               tag = primaryRepo.tag or null;
               rev = primaryRepo.rev;
               shortRev = primaryRepo.shortRev;
-            } // lib.filterAttrs (k: v: v != null) {
+            }
+            // lib.filterAttrs (k: v: v != null) {
               remoteHttpUrl = primaryRepo.remoteHttpUrl or null;
               remoteSshUrl = primaryRepo.remoteSshUrl or null;
               webUrl = primaryRepo.webUrl or null;
@@ -265,9 +280,14 @@ in
             };
           };
         };
-        eval = lib.evalModules { modules = [ paramModule config.herculesCI ]; };
+        eval = lib.evalModules {
+          modules = [
+            paramModule
+            config.herculesCI
+          ];
+        };
       in
-        eval.config.out;
+      eval.config.out;
   };
 
 }

@@ -1,6 +1,7 @@
-args@
-{ inputs ? hercules-ci-effects.inputs
-, hercules-ci-effects ? if args?inputs then inputs.self else builtins.getFlake "git+file://${toString ./..}"
+args@{
+  inputs ? hercules-ci-effects.inputs,
+  hercules-ci-effects ?
+    if args ? inputs then inputs.self else builtins.getFlake "git+file://${toString ./..}",
 }:
 let
   testSupport = import ../lib/testSupport.nix args;
@@ -9,7 +10,8 @@ rec {
   inherit (inputs) flake-parts;
   inherit (testSupport) callFlakeOutputs;
 
-  emptyFlake = callFlakeOutputs (inputs:
+  emptyFlake = callFlakeOutputs (
+    inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         ../flake-module.nix
@@ -36,20 +38,42 @@ rec {
   };
   fakeHerculesCI = repo: {
     primaryRepo = repo;
-    inherit (repo) branch ref tag rev shortRev remoteHttpUrl;
+    inherit (repo)
+      branch
+      ref
+      tag
+      rev
+      shortRev
+      remoteHttpUrl
+      ;
   };
 
-  example1 =
-    callFlakeOutputs (inputs:
-      flake-parts.lib.mkFlake { inherit inputs; }
-      ({ ... }: {
+  example1 = callFlakeOutputs (
+    inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } (
+      { ... }:
+      {
         imports = [
           ../flake-module.nix
         ];
         herculesCI.onSchedule.scheduledJob1.when = {
-          dayOfMonth = [ 1 3 5 7 31 ];
-          dayOfWeek = [ "Mon" "Wed" "Fri" ];
-          hour = [ 0 1 23 ];
+          dayOfMonth = [
+            1
+            3
+            5
+            7
+            31
+          ];
+          dayOfWeek = [
+            "Mon"
+            "Wed"
+            "Fri"
+          ];
+          hour = [
+            0
+            1
+            23
+          ];
           minute = 32;
         };
         herculesCI.onSchedule.scheduledJob2.when = {
@@ -59,29 +83,45 @@ rec {
           minute = 59;
         };
         herculesCI.onSchedule.scheduledJob3 = { };
-      })
-    );
+      }
+    )
+  );
 
-  tests = ok:
+  tests =
+    ok:
 
-    assert (example1.herculesCI { }).onSchedule.scheduledJob1.when ==
-      {
-        dayOfMonth = [ 1 3 5 7 31 ];
-        dayOfWeek = [ "Mon" "Wed" "Fri" ];
-        hour = [ 0 1 23 ];
+    assert
+      (example1.herculesCI { }).onSchedule.scheduledJob1.when == {
+        dayOfMonth = [
+          1
+          3
+          5
+          7
+          31
+        ];
+        dayOfWeek = [
+          "Mon"
+          "Wed"
+          "Fri"
+        ];
+        hour = [
+          0
+          1
+          23
+        ];
         minute = 32;
       };
 
-    assert (example1.herculesCI { }).onSchedule.scheduledJob2.when ==
-      {
+    assert
+      (example1.herculesCI { }).onSchedule.scheduledJob2.when == {
         dayOfMonth = [ 31 ];
         dayOfWeek = [ "Fri" ];
         hour = [ 23 ];
         minute = 59;
       };
 
-    assert (example1.herculesCI { }).onSchedule.scheduledJob3.when ==
-      {
+    assert
+      (example1.herculesCI { }).onSchedule.scheduledJob3.when == {
         dayOfMonth = null;
         dayOfWeek = null;
         hour = null;
@@ -97,4 +137,3 @@ rec {
     ok;
 
 }
-
