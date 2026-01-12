@@ -59,13 +59,6 @@ in
           The path to the source code to publish.
         '';
       };
-      packageName = mkOption {
-        type = types.nullOr types.str;
-        default = null;
-        description = ''
-          The name of the package to publish. If set, it will be checked that the tag matches the package version.
-        '';
-      };
     };
   };
   config = lib.mkIf (config.hercules-ci.cargo-publish.enable) {
@@ -76,19 +69,15 @@ in
           outputs = {
             effects = {
               cargoPublish = withSystem defaultEffectSystem (
-                { hci-effects, pkgs, ... }:
+                { hci-effects, ... }:
                 hci-effects.cargoPublish {
-                  inherit (cfg) secretName registryURL src;
+                  inherit (cfg)
+                    secretName
+                    registryURL
+                    src
+                    extraPublishArgs
+                    ;
                   dryRun = config.repo.tag == null;
-                  assertVersions = lib.optionalAttrs (cfg.packageName != null && config.repo.tag != null) {
-                    ${cfg.packageName} = config.repo.tag;
-                  };
-                  extraPublishArgs =
-                    cfg.extraPublishArgs
-                    ++ lib.optionals (cfg.packageName != null) [
-                      "--package"
-                      cfg.packageName
-                    ];
                 }
               );
             };
