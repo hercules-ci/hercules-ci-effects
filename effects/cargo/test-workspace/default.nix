@@ -12,4 +12,6 @@ cargoPublish {
   src = ./.;
   # secretName not needed for dry-run
   dryRun = true;
+  # Check all packages match this version
+  assertVersions = "0.1.0";
 }

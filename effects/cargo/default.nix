@@ -61,17 +61,34 @@ mkEffect (
         fi
         echo "Version check passed for $package: $actual"
       }
-      ${lib.concatStringsSep "\n" (
-        lib.mapAttrsToList (
-          name: value:
-          ''hciCheckCargoVersion ${
-            lib.escapeShellArgs [
-              name
-              value
-            ]
-          }''
-        ) assertVersions
-      )}
+      hciCheckAllCargoVersions() {
+        local expected="$1"
+        local packages
+        packages="$(
+          cargo metadata --format-version 1 \
+            ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}"} \
+            | jq -r '.packages.[].name'
+        )"
+        for package in $packages; do
+          hciCheckCargoVersion "$package" "$expected"
+        done
+      }
+      ${
+        if builtins.isString assertVersions then
+          "hciCheckAllCargoVersions ${lib.escapeShellArg assertVersions}"
+        else
+          lib.concatStringsSep "\n" (
+            lib.mapAttrsToList (
+              name: value:
+              ''hciCheckCargoVersion ${
+                lib.escapeShellArgs [
+                  name
+                  value
+                ]
+              }''
+            ) assertVersions
+          )
+      }
       ${lib.optionalString dryRun ''
         echo
         # Bold blue text

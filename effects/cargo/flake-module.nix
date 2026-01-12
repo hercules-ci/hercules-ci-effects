@@ -59,6 +59,16 @@ in
           The path to the source code to publish.
         '';
       };
+      assertVersions = mkOption {
+        type = types.bool;
+        default = false;
+        description = ''
+          Whether to check that all package versions match the git tag.
+
+          When `true`, all packages in the workspace must have a version
+          matching the tag name. When `false`, no version checking is performed.
+        '';
+      };
     };
   };
   config = lib.mkIf (config.hercules-ci.cargo-publish.enable) {
@@ -78,6 +88,7 @@ in
                     extraPublishArgs
                     ;
                   dryRun = config.repo.tag == null;
+                  assertVersions = if cfg.assertVersions && config.repo.tag != null then config.repo.tag else { };
                 }
               );
             };
