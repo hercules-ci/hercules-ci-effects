@@ -68,6 +68,12 @@ top@{
         in
         it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
 
+      evaluation-cargoPublishModule =
+        let
+          it = (import ./effects/cargo/test-module-eval.nix { inherit inputs; });
+        in
+        it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
     };
 
     tests = withSystem "x86_64-linux" (

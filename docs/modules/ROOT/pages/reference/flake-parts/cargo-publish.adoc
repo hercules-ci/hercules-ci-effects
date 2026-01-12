@@ -1,0 +1,38 @@
+
+# `hercules-ci.cargo-publish`
+
+The https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.cargo-publish.enable[options] in `hercules-ci.cargo-publish` automate publishing Rust crates to https://crates.io[crates.io] or a custom registry.
+
+In its default configuration, this will run `cargo publish --dry-run` on every branch push, and perform an actual publish when a tag is pushed.
+
+## Complete Example
+
+```nix
+{
+  description = "A Rust project with automated publishing";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+  };
+
+  outputs = inputs@{ self, flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        inputs.hercules-ci-effects.flakeModule
+      ];
+      systems = [ "x86_64-linux" ];
+      hercules-ci.cargo-publish = {
+        enable = true;
+        secretName = "crates-io";
+        assertVersions = true;  # Check all packages match the tag version
+      };
+    };
+}
+```
+
+See also
+
+* xref:reference/nix-functions/cargoPublish.adoc[`cargoPublish`] function reference for more options
+* https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.cargo-publish.enable[`hercules-ci.cargo-publish`] options reference
+* https://flake.parts/getting-started.html[Getting Started] with flake-parts

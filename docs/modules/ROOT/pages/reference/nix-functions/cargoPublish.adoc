@@ -70,3 +70,29 @@ Optional registry to publish to. Defaults to cargo's default behavior, which is 
 If you use an alternate registry or private registry, you are recommended to store this information in `Cargo.toml`.
 
 Note that this must be the backing git repository URL, not a web or API URL.
+
+[[param-dryRun]]
+=== `dryRun`
+
+Boolean, default `false`. When `true`, runs `cargo publish --dry-run` which packages and verifies the crate(s) without uploading.
+
+When `dryRun` is `true`, the `secretName` is not required.
+
+[[param-assertVersions]]
+=== `assertVersions`
+
+Verify package versions before publishing. This can be:
+
+* An empty attribute set `{}` (default): no version checking
+* A string like `"1.0.0"`: check that all packages in the workspace have this version
+* An attribute set mapping package names to versions: `{ my-crate = "1.0.0"; }`
+
+Example for workspace with synchronized versions:
+
+```nix
+effects.cargoPublish {
+  src = ./.;
+  secretName = "cargo-api-token";
+  assertVersions = "1.0.0";  # All packages must be version 1.0.0
+}
+```
