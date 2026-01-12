@@ -210,9 +210,10 @@ in
       else
         updateBranchExisted=false
       fi
-      if [[ "$updateBranchExisted" == "true" ]]; then
+      if [[ "$updateBranchExisted" == "true" && "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" != "reset" ]]; then
         git checkout "$HCI_GIT_UPDATE_BRANCH"
       else
+        # Start fresh from the base branch (either no prior branch, or reset method)
         git checkout -b "$HCI_GIT_UPDATE_BRANCH" "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
       fi
 
@@ -233,7 +234,8 @@ in
         exit 1
       }
 
-      if [[ "$updateBranchExisted" == "true" ]]; then
+      # For reset, we already started fresh from the base branch above
+      if [[ "$updateBranchExisted" == "true" && "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" != "reset" ]]; then
         baseDescr="$(git rev-parse --abbrev-ref "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH")"
         case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
           merge)
@@ -284,10 +286,7 @@ in
               exit 1
             fi
             ;;
-          reset)
-            echo "Resetting $HCI_GIT_UPDATE_BRANCH to $baseDescr ..."
-            git reset --hard "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
-            ;;
+          # "reset" case unreachable
         esac
         unset baseDescr
       fi
