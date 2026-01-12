@@ -25,12 +25,13 @@ in
 mkEffect (
   builtins.removeAttrs args [ "assertVersions" ]
   // {
-    buildInputs = [ cargoSetupHook ];
+    buildInputs = lib.optional (!dryRun) cargoSetupHook;
     inputs = [ cargo ];
-    secretsMap = {
-      "cargo" = secretName;
-    }
-    // secretsMap;
+    secretsMap =
+      lib.optionalAttrs (!dryRun) {
+        "cargo" = secretName;
+      }
+      // secretsMap;
 
     env =
       args.env or { }

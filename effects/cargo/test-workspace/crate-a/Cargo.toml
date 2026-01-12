@@ -1,0 +1,9 @@
+[package]
+name = "hercules-ci-effects-test-crate-a"
+version = "0.1.0"
+edition = "2021"
+description = "A dummy crate to test Hercules CI effects workspace publishing (leaf)"
+license = "MIT"
+repository = "https://github.com/hercules-ci/hercules-ci-effects"
+
+[dependencies]

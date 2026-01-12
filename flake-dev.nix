@@ -126,6 +126,8 @@ top@{
               );
               cargoPublish = pkgs.callPackage ./effects/cargo/test/default.nix { };
               cargoPublishDryRun = pkgs.callPackage ./effects/cargo/test/default.nix { dryRun = true; };
+              # Manual test: hci effect run onPush.default.effects.tests.cargoPublishWorkspaceDryRun
+              # cargoPublishWorkspaceDryRun = pkgs.callPackage ./effects/cargo/test-workspace/default.nix { };
             };
           };
       };
