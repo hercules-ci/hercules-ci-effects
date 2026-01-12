@@ -32,7 +32,6 @@ in
       };
       secretName = mkOption {
         type = types.str;
-        default = null;
         description = ''
           The name of the secret containing the token for the registry.
         '';
