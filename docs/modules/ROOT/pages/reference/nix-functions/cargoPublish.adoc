@@ -96,3 +96,29 @@ effects.cargoPublish {
   assertVersions = "1.0.0";  # All packages must be version 1.0.0
 }
 ```
+
+// Keep in sync with: ../flake-parts/cargo-publish.adoc#rate-limits
+[[rate-limits]]
+== Rate Limits
+
+When publishing a workspace with many crates for the first time, you may hit crates.io rate limits. The registry limits new crate registrations more strictly than updates to existing crates. At the time of writing, crates.io allows a burst of about 5 new packages, then requires a wait of approximately 10 minutes before publishing more.
+
+If you encounter rate limit errors during an initial release:
+
+1. Wait for the rate limit to reset (approximately 10 minutes)
+2. Use `extraPublishArgs` to publish remaining crates individually:
++
+```nix
+effects.cargoPublish {
+  src = ./.;
+  secretName = "cargo-api-token";
+  extraPublishArgs = [ "--package" "my-unpublished-crate" ];
+}
+```
+3. Run locally with `hci effect run` to iterate through remaining crates:
++
+```shell
+hci effect run onPush.default.effects.cargoPublish --pretend-ref refs/tags/0.1.0
+```
+
+After the initial release, subsequent version updates are less likely to hit rate limits.
