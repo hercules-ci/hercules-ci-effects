@@ -121,6 +121,8 @@ in
         - `"merge"`: Create a merge commit, preserving the branch history.
         - `"rebase"`: Rebase the update branch commits onto the base branch.
         - `"fast-forward"`: Fast-forward the update branch to the base branch if possible, otherwise fail.
+        - `"reset"`: Always discard the existing update branch and start fresh from the base branch.
+          Any manual changes to the update branch will be lost.
 
         The `"fast-forward"` method is the most conservative, equivalent to deleting the stale
         update branch and recreating it from the base branch.
@@ -131,6 +133,7 @@ in
         "merge"
         "rebase"
         "fast-forward"
+        "reset"
       ];
       default = "merge";
     };

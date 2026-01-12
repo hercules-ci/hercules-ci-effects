@@ -107,6 +107,12 @@ in
             Fails if the update branch has any commits not present in the base branch.
             This is the most conservative option, preventing complex merge scenarios.
 
+          - `"reset"`: Always discard the existing update branch and start fresh from the base branch.
+            This treats the update branch as fully regeneratable from the update script.
+            Useful for automated updates (like flake.lock) where the update script output
+            is deterministic and conflicts should be resolved by regenerating.
+            Any manual changes to the update branch will be lost.
+
           The `"fast-forward"` method is recommended for automated workflows where you prefer
           explicit failures over automatic conflict resolution.
 
@@ -116,6 +122,7 @@ in
           "merge"
           "rebase"
           "fast-forward"
+          "reset"
         ];
         default = "merge";
       };
@@ -199,11 +206,15 @@ in
       git clone "$HCI_GIT_REMOTE_URL" repo
       cd repo
       if git rev-parse "refs/remotes/origin/$HCI_GIT_UPDATE_BRANCH" &>/dev/null; then
-        git checkout "$HCI_GIT_UPDATE_BRANCH"
         updateBranchExisted=true
       else
-        git checkout -b "$HCI_GIT_UPDATE_BRANCH" "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
         updateBranchExisted=false
+      fi
+      if [[ "$updateBranchExisted" == "true" && "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" != "reset" ]]; then
+        git checkout "$HCI_GIT_UPDATE_BRANCH"
+      else
+        # Start fresh from the base branch (either no prior branch, or reset method)
+        git checkout -b "$HCI_GIT_UPDATE_BRANCH" "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
       fi
 
       function die_conflict(){
@@ -223,7 +234,8 @@ in
         exit 1
       }
 
-      if [[ "$updateBranchExisted" == "true" ]]; then
+      # For reset, we already started fresh from the base branch above
+      if [[ "$updateBranchExisted" == "true" && "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" != "reset" ]]; then
         baseDescr="$(git rev-parse --abbrev-ref "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH")"
         case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
           merge)
@@ -274,6 +286,7 @@ in
               exit 1
             fi
             ;;
+          # "reset" case unreachable
         esac
         unset baseDescr
       fi
@@ -297,6 +310,10 @@ in
         case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
           rebase)
             gitPushArgs+=(--force-with-lease)
+            ;;
+          reset)
+            # When resetting, we discard prior changes, so we also discard concurrent changes
+            gitPushArgs+=(--force)
             ;;
           fast-forward)
             # Fast-forward never requires force push since it only moves forward
