@@ -78,7 +78,7 @@ in
         onPush.default = {
           outputs = {
             effects = {
-              cargoPublish = withSystem defaultEffectSystem (
+              cargo-publish = withSystem defaultEffectSystem (
                 { hci-effects, ... }:
                 hci-effects.cargoPublish {
                   inherit (cfg)

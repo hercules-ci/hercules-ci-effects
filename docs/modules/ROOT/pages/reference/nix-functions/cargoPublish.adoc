@@ -118,7 +118,7 @@ effects.cargoPublish {
 3. Run locally with `hci effect run` to iterate through remaining crates:
 +
 ```shell
-hci effect run onPush.default.effects.cargoPublish --pretend-ref refs/tags/0.1.0
+hci effect run onPush.default.effects.cargo-publish --pretend-ref refs/tags/0.1.0
 ```
 
 After the initial release, subsequent version updates are less likely to hit rate limits.

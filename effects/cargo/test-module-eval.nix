@@ -96,12 +96,12 @@ rec {
   assertVersionsBranchHerculesCI = assertVersionsOutputs.herculesCI (fakeHerculesCI fakeRepoBranch);
   assertVersionsTagHerculesCI = assertVersionsOutputs.herculesCI (fakeHerculesCI fakeRepoTag);
 
-  # Get the cargoPublish effects
-  branchEffect = basicBranchHerculesCI.onPush.default.outputs.effects.cargoPublish;
-  tagEffect = basicTagHerculesCI.onPush.default.outputs.effects.cargoPublish;
+  # Get the cargo-publish effects
+  branchEffect = basicBranchHerculesCI.onPush.default.outputs.effects.cargo-publish;
+  tagEffect = basicTagHerculesCI.onPush.default.outputs.effects.cargo-publish;
   assertVersionsBranchEffect =
-    assertVersionsBranchHerculesCI.onPush.default.outputs.effects.cargoPublish;
-  assertVersionsTagEffect = assertVersionsTagHerculesCI.onPush.default.outputs.effects.cargoPublish;
+    assertVersionsBranchHerculesCI.onPush.default.outputs.effects.cargo-publish;
+  assertVersionsTagEffect = assertVersionsTagHerculesCI.onPush.default.outputs.effects.cargo-publish;
 
   tests =
     ok:
