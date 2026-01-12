@@ -64,10 +64,11 @@ mkEffect (
       hciCheckAllCargoVersions() {
         local expected="$1"
         local packages
+        # Filter to workspace members only (not dependencies)
         packages="$(
           cargo metadata --format-version 1 \
             ${lib.optionalString (manifestPath != null) "--manifest-path ${manifestPath}"} \
-            | jq -r '.packages.[].name'
+            | jq -r '.workspace_members as $wm | .packages[] | select(.id as $id | $wm | index($id)) | .name'
         )"
         for package in $packages; do
           hciCheckCargoVersion "$package" "$expected"
