@@ -125,6 +125,16 @@ effectVMTest {
       git.update.baseMerge.enable = true;
       git.update.branch = "update";
     };
+    update-reset = hci-effects.modularEffect {
+      imports = [ baseUpdate ];
+      git.update.script = ''
+        echo updated >> file
+        git commit -m 'update from update-reset' file
+      '';
+      git.update.baseMerge.method = "reset";
+      git.update.baseMerge.enable = true;
+      git.update.branch = "update";
+    };
   };
 
   skipTypeCheck = true;
@@ -391,6 +401,97 @@ effectVMTest {
           # Main should have the divergent commit
           git checkout origin/main
           git log | grep 'Conflicting change on main'
+        ) 1>&2
+      """)
+
+    with subtest("Reset succeeds even when branches have conflicting changes"):
+      # This tests the scenario from feature request https://github.com/hercules-ci/hercules-ci-effects/issues/202:
+      # 1. Update branch exists with flake.lock changes
+      # 2. Someone pushes conflicting flake.lock changes to main
+      # 3. Next scheduled run should succeed by resetting to main
+
+      # Clean slate
+      client.succeed("""
+        (
+          set -x
+          cd repo
+          git fetch origin
+          git push origin :update || true
+          git branch -D update || true
+          git checkout origin/main -B main
+          git reset --hard origin/main
+        ) 1>&2
+      """)
+
+      # Create initial update branch (simulates first scheduled run)
+      agent.succeed(f"echo {gitea_admin_password} | effect-update")
+
+      # Add a manual commit to the update branch (simulates someone making changes to the PR)
+      client.succeed("""
+        (
+          set -x
+          cd repo
+          git fetch origin
+          git checkout origin/update -B update
+
+          # Manual change that should be lost after reset
+          echo 'manual PR change' > manual-file
+          git add manual-file
+          git commit -m 'Manual commit on update branch - should be lost'
+          git push origin update
+
+          git log --oneline origin/update
+        ) 1>&2
+      """)
+
+      # Now simulate conflicting change on main (e.g., someone manually updates flake.lock)
+      # This modifies the SAME file that the update script modifies
+      mainNewRev = client.succeed("""
+        (
+          set -x
+          cd repo
+          git fetch origin
+          git checkout origin/main -B main
+
+          # Conflicting change: modify the same file the update script modifies
+          echo 'manual change that conflicts' > file
+          git add file
+          git commit -m 'Manual conflicting change on main'
+          git push
+
+          git log --graph --oneline --decorate origin/update origin/main
+        ) 1>&2
+        ( cd repo; git rev-parse HEAD )
+      """).rstrip()
+
+      # Reset method should succeed where merge/rebase/fast-forward would fail
+      agent.succeed(f"echo {gitea_admin_password} | effect-update-reset")
+
+      # Verify the result
+      client.succeed(f"""
+        (
+          set -x
+          cd repo
+          git fetch origin
+
+          git log --graph --oneline --decorate origin/update origin/main
+
+          # The update branch should be based on the NEW main (with the conflicting change)
+          git checkout origin/update
+
+          # Should have the update commit
+          git log | grep 'update from update-reset'
+
+          # The main's conflicting commit should be an ancestor
+          git log --format=%H | grep {mainNewRev}
+
+          # The file should have the update script's content, not the old update branch content
+          # (because we reset to main and re-ran the update script)
+          grep updated file
+
+          # Verify that manual changes to the update branch are lost
+          ! test -f manual-file
+          ! git log | grep 'Manual commit on update branch'
         ) 1>&2
       """)
   '';

@@ -107,6 +107,12 @@ in
             Fails if the update branch has any commits not present in the base branch.
             This is the most conservative option, preventing complex merge scenarios.
 
+          - `"reset"`: Always discard the existing update branch and start fresh from the base branch.
+            This treats the update branch as fully regeneratable from the update script.
+            Useful for automated updates (like flake.lock) where the update script output
+            is deterministic and conflicts should be resolved by regenerating.
+            Any manual changes to the update branch will be lost.
+
           The `"fast-forward"` method is recommended for automated workflows where you prefer
           explicit failures over automatic conflict resolution.
 
@@ -116,6 +122,7 @@ in
           "merge"
           "rebase"
           "fast-forward"
+          "reset"
         ];
         default = "merge";
       };
@@ -274,6 +281,10 @@ in
               exit 1
             fi
             ;;
+          reset)
+            echo "Resetting $HCI_GIT_UPDATE_BRANCH to $baseDescr ..."
+            git reset --hard "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
+            ;;
         esac
         unset baseDescr
       fi
@@ -297,6 +308,10 @@ in
         case "''${HCI_GIT_UPDATE_BASE_MERGE_METHOD:-}" in
           rebase)
             gitPushArgs+=(--force-with-lease)
+            ;;
+          reset)
+            # When resetting, we discard prior changes, so we also discard concurrent changes
+            gitPushArgs+=(--force)
             ;;
           fast-forward)
             # Fast-forward never requires force push since it only moves forward
