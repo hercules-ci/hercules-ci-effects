@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  options,
   withSystem,
   ...
 }:
@@ -29,6 +30,16 @@ let
       };
     };
   };
+
+  baseMergeEnableOpt = options.hercules-ci.flake-update.baseMerge.enable;
+
+  baseMergeMessageOnce = lib.warn "hercules-ci-effects/flake-update: `${baseMergeEnableOpt}` is unset. It will be enabled by default soon. You may silence this warning by setting `baseMerge.enable = true;`. See also `baseMerge.method` to customize how the update branch is brought up to date with the base (\"target\") branch: https://flake.parts/options/hercules-ci-effects.html#opt-hercules-ci.flake-update.baseMerge.method" null;
+
+  withBaseMergeMessage =
+    if baseMergeEnableOpt.highestPrio == (lib.modules.mkOptionDefault null).priority then
+      builtins.seq baseMergeMessageOnce
+    else
+      x: x;
 
 in
 {
@@ -79,11 +90,13 @@ in
 
     baseMerge.enable = mkOption {
       description = ''
-        Whether to merge the base branch into the update branch before running the update.
+        Whether to update an existing update branch with changes from the base branch before running the update.
 
-        This is useful to ensure that the update branch is up to date with the base branch.
+        This option only applies when the update branch already exists from a previous run.
+        The existing branch is likely stale, so enabling this ensures it includes recent changes from the base branch.
 
-        If this option is `false`, you may have to merge or rebase the update branch manually sometimes.
+        If disabled and the update branch exists, the update will run from the branch's current state,
+        which may be missing recent changes from the base branch.
       '';
       type = types.bool;
       default = false;
@@ -91,9 +104,10 @@ in
 
     baseMerge.branch = mkOption {
       description = ''
-        Branch name on the remote to merge into the update branch before running the update.
+        Branch name on the remote to update the existing update branch from.
 
-        Used when `hercules-ci.flake-update.baseMerge.enable` is true.
+        Typically this should be the same as the target branch for pull requests.
+        Used when `hercules-ci.flake-update.baseMerge.enable` is true and the update branch exists.
       '';
       type = types.str;
       default = cfg.baseBranch;
@@ -104,11 +118,19 @@ in
       description = ''
         How to merge the base branch into the update branch before running the update.
 
+        - `"merge"`: Create a merge commit, preserving the branch history.
+        - `"rebase"`: Rebase the update branch commits onto the base branch.
+        - `"fast-forward"`: Fast-forward the update branch to the base branch if possible, otherwise fail.
+
+        The `"fast-forward"` method is the most conservative, equivalent to deleting the stale
+        update branch and recreating it from the base branch.
+
         Used when `hercules-ci.flake-update.baseMerge.enable` is true.
       '';
       type = types.enum [
         "merge"
         "rebase"
+        "fast-forward"
       ];
       default = "merge";
     };
@@ -227,7 +249,7 @@ in
 
   config = {
     hercules-ci.flake-update.effect.settings = {
-      git.update.baseMerge = cfg.baseMerge;
+      git.update.baseMerge = withBaseMergeMessage cfg.baseMerge;
       git.update.baseBranch = cfg.baseBranch;
     };
     herculesCI =
@@ -264,6 +286,8 @@ in
             };
           };
         };
+        # Make the warning visible in jobs like config and onPush.default too.
+        onPush = withBaseMergeMessage { };
       };
   };
 }

@@ -49,6 +49,7 @@ rec {
         ];
         systems = [ "x86_64-linux" ];
         hercules-ci.flake-update.enable = true;
+        hercules-ci.flake-update.baseMerge.enable = true;
         hercules-ci.flake-update.when = {
           hour = 23;
           minute = 59;
@@ -70,6 +71,7 @@ rec {
         ];
         systems = [ "x86_64-linux" ];
         hercules-ci.flake-update.enable = true;
+        hercules-ci.flake-update.baseMerge.enable = true;
         hercules-ci.flake-update.when = {
           hour = 23;
           minute = 59;

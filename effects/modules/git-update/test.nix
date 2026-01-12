@@ -37,6 +37,7 @@ effectVMTest {
         git add file
         git commit -m update
       '';
+      git.update.baseMerge.enable = false;
     };
     update-uncommitted = hci-effects.modularEffect {
       imports = [ baseUpdate ];
@@ -44,16 +45,19 @@ effectVMTest {
         echo updated >> file
         git add file
       '';
+      git.update.baseMerge.enable = false;
     };
     update-unstaged = hci-effects.modularEffect {
       imports = [ baseUpdate ];
       git.update.script = ''
         echo updated >> file
       '';
+      git.update.baseMerge.enable = false;
     };
     update-no-commit = hci-effects.modularEffect {
       imports = [ baseUpdate ];
       git.update.script = "";
+      git.update.baseMerge.enable = false;
     };
     update-rebase = hci-effects.modularEffect {
       imports = [ baseUpdate ];
@@ -108,6 +112,16 @@ effectVMTest {
         git log --graph --oneline --decorate update main origin/update origin/main
       '';
       git.update.baseMerge.method = "rebase";
+      git.update.baseMerge.enable = true;
+      git.update.branch = "update";
+    };
+    update-fast-forward = hci-effects.modularEffect {
+      imports = [ baseUpdate ];
+      git.update.script = "
+        echo updated >> file
+        git commit -m 'update from update-fast-forward' file
+      ";
+      git.update.baseMerge.method = "fast-forward";
       git.update.baseMerge.enable = true;
       git.update.branch = "update";
     };
@@ -249,6 +263,134 @@ effectVMTest {
           git fetch origin
           git log --graph --oneline --decorate update main origin/update origin/main
           git log origin/update | grep -F 'Add bar.baz - concurrently'
+        ) 1>&2
+      """)
+
+    with subtest("Can fast-forward when update branch is behind"):
+      # Clean slate: delete any existing update branch and ensure clean main
+      client.succeed("""
+        (
+          set -x
+          cd repo
+          git fetch origin
+          git push origin :update || true  # Delete remote update branch if it exists
+          git branch -D update || true     # Delete local update branch if it exists
+
+          # Ensure we're on a clean main branch
+          git checkout origin/main -B main
+          git reset --hard origin/main
+
+          git status
+        ) 1>&2
+      """)
+
+      # Run simple update to create fresh update branch
+      agent.succeed(f"echo {gitea_admin_password} | effect-update")
+
+      # Merge the update branch to main (simulating PR merge)
+      client.succeed("""
+        (
+          set -x
+          cd repo
+          git fetch origin
+          git merge origin/update --no-ff -m 'Merge update branch'
+          git push
+        ) 1>&2
+      """)
+
+      # Now make main move forward (new commits since last update)
+      mainUpdateRev = client.succeed("""
+        (
+          set -x
+          cd repo
+          # Create a simple new file
+          echo "new feature content" > new-feature-file
+          git add new-feature-file
+          git commit -m 'Add new feature to main'
+          git push
+
+          git log --graph --oneline --decorate main origin/main || true
+        ) 1>&2
+        ( cd repo; git rev-parse HEAD )
+      """).rstrip()
+
+      # Now fast-forward should succeed - update branch can fast-forward to main
+      agent.succeed(f"echo {gitea_admin_password} | effect-update-fast-forward")
+
+      client.succeed("""
+        (
+          cd repo
+          git fetch origin
+
+          # After fast-forward, update branch should include main's new commit plus the update
+          git checkout origin/update
+          test -f new-feature-file
+          git log | grep 'update from update-fast-forward'
+          git log | grep 'Add new feature to main'
+
+          git log --graph --oneline --decorate origin/update origin/main
+        ) 1>&2
+      """)
+
+    with subtest("Fast-forward fails when update branch has divergent commits"):
+      # Clean slate and create update branch again
+      client.succeed("""
+        (
+          set -x
+          cd repo
+          git fetch origin
+          git push origin :update || true
+          git branch -D update || true
+        ) 1>&2
+      """)
+
+      # Create update branch with commits
+      agent.succeed(f"echo {gitea_admin_password} | effect-update")
+
+      # Save the hash of the update branch before main diverges
+      updateBranchHash = client.succeed("""
+        (
+          cd repo
+          git fetch origin
+          git rev-parse origin/update
+        )
+      """).rstrip()
+
+      # DON'T merge to main this time - let main diverge instead
+      client.succeed("""
+        (
+          set -x
+          cd repo
+          git fetch origin
+          git checkout origin/main -B main
+
+          # Add divergent commit to main (different from what's in update branch)
+          echo "main branch change" > main-divergent-file
+          git add main-divergent-file
+          git commit -m 'Conflicting change on main'
+          git push
+
+          git log --graph --oneline --decorate origin/update origin/main
+        ) 1>&2
+      """)
+
+      # Fast-forward should fail because branches have diverged
+      agent.fail(f"echo {gitea_admin_password} | effect-update-fast-forward")
+
+      client.succeed("""
+        (
+          cd repo
+          git fetch origin
+
+          # Verify the branches are in diverged state
+          git log --graph --oneline --decorate origin/update origin/main
+
+          # Update branch should still exist (fast-forward failed, so no changes)
+          git checkout origin/update
+
+          # Main should have the divergent commit
+          git checkout origin/main
+          git log | grep 'Conflicting change on main'
         ) 1>&2
       """)
   '';
