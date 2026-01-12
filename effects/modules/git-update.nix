@@ -206,11 +206,14 @@ in
       git clone "$HCI_GIT_REMOTE_URL" repo
       cd repo
       if git rev-parse "refs/remotes/origin/$HCI_GIT_UPDATE_BRANCH" &>/dev/null; then
-        git checkout "$HCI_GIT_UPDATE_BRANCH"
         updateBranchExisted=true
       else
-        git checkout -b "$HCI_GIT_UPDATE_BRANCH" "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
         updateBranchExisted=false
+      fi
+      if [[ "$updateBranchExisted" == "true" ]]; then
+        git checkout "$HCI_GIT_UPDATE_BRANCH"
+      else
+        git checkout -b "$HCI_GIT_UPDATE_BRANCH" "refs/remotes/origin/$HCI_GIT_UPDATE_BASE_BRANCH"
       fi
 
       function die_conflict(){
