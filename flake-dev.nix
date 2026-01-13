@@ -68,6 +68,12 @@ top@{
         in
         it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
 
+      evaluation-cargoPublishModule =
+        let
+          it = (import ./effects/cargo/test-module-eval.nix { inherit inputs; });
+        in
+        it.tests inputs.nixpkgs.legacyPackages.x86_64-linux.emptyFile // { debug = it; };
+
     };
 
     tests = withSystem "x86_64-linux" (
@@ -125,6 +131,9 @@ top@{
                 { pkgs, hci-effects, ... }: hci-effects.callPackage ./effects/effect/test/dev-kvm.nix { }
               );
               cargoPublish = pkgs.callPackage ./effects/cargo/test/default.nix { };
+              cargoPublishDryRun = pkgs.callPackage ./effects/cargo/test/default.nix { dryRun = true; };
+              # Manual test: hci effect run onPush.default.effects.tests.cargoPublishWorkspaceDryRun
+              # cargoPublishWorkspaceDryRun = pkgs.callPackage ./effects/cargo/test-workspace/default.nix { };
             };
           };
       };

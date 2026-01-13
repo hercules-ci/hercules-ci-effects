@@ -70,3 +70,59 @@ Optional registry to publish to. Defaults to cargo's default behavior, which is 
 If you use an alternate registry or private registry, you are recommended to store this information in `Cargo.toml`.
 
 Note that this must be the backing git repository URL, not a web or API URL.
+
+[[param-dryRun]]
+=== `dryRun`
+
+Boolean, default `false`. When `true`, runs `cargo publish --dry-run` which packages and verifies the crate(s) without uploading.
+
+When `dryRun` is `true`, the `secretName` is not required.
+
+[[param-assertVersions]]
+=== `assertVersions`
+
+Verify package versions before publishing. This can be:
+
+* An empty attribute set `{}` (default): no version checking
+* A string like `"1.0.0"`: check that all packages in the workspace have this version
+* An attribute set mapping package names to versions: `{ my-crate = "1.0.0"; }`
+
+Example for workspace with synchronized versions:
+
+```nix
+effects.cargoPublish {
+  src = ./.;
+  secretName = "cargo-api-token";
+  assertVersions = "1.0.0";  # All packages must be version 1.0.0
+}
+```
+
+== Workflow
+
+include::partial$cargo-publish-workflow.adoc[]
+
+// Keep in sync with: ../flake-parts/cargo-publish.adoc#rate-limits
+[[rate-limits]]
+== Rate Limits
+
+When publishing a workspace with many crates for the first time, you may hit crates.io rate limits. The registry limits new crate registrations more strictly than updates to existing crates. At the time of writing, crates.io allows a burst of about 5 new packages, then requires a wait of approximately 10 minutes before publishing more.
+
+If you encounter rate limit errors during an initial release:
+
+1. Wait for the rate limit to reset (approximately 10 minutes)
+2. Use `extraPublishArgs` to publish remaining crates individually:
++
+```nix
+effects.cargoPublish {
+  src = ./.;
+  secretName = "cargo-api-token";
+  extraPublishArgs = [ "--package" "my-unpublished-crate" ];
+}
+```
+3. Run locally with `hci effect run` to iterate through remaining crates:
++
+```shell
+hci effect run onPush.default.effects.cargo-publish --pretend-ref refs/tags/0.1.0
+```
+
+After the initial release, subsequent version updates are less likely to hit rate limits.

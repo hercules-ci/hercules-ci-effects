@@ -14,6 +14,7 @@
 ** xref:reference/effect-modules/core.adoc[Core Options]
 ** xref:reference/effect-modules/git.adoc[Git Options]
 * Flake Parts Module Reference
+** xref:reference/flake-parts/cargo-publish.adoc[`cargo-publish`]
 ** xref:reference/flake-parts/flake-update.adoc[`flake-update`]
 ** xref:reference/flake-parts/github-pages.adoc[`github-pages`]
 ** xref:reference/flake-parts/github-releases.adoc[`github-releases`]
