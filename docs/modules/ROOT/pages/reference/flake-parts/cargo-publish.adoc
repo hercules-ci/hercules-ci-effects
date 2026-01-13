@@ -31,6 +31,10 @@ In its default configuration, this will run `cargo publish --dry-run` on every b
 }
 ```
 
+== Workflow
+
+include::partial$cargo-publish-workflow.adoc[]
+
 // Keep in sync with: ../nix-functions/cargoPublish.adoc#rate-limits
 ## Rate Limits
 

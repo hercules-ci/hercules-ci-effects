@@ -1,0 +1,20 @@
+=== Initial Setup
+
+1. **Enable the module** in your `flake.nix` with `hercules-ci.cargo-publish.enable = true`
+2. **Set the version** in `Cargo.toml` to a version that doesn't exist on crates.io yet (e.g., `0.1.0`)
+3. On each push, Hercules CI runs `cargo publish --dry-run` to verify the package is publishable
+
+=== Releasing a Version
+
+1. **Review the version** — the version in `Cargo.toml` is probably a patch bump from the last release. Consider whether breaking changes or new features warrant a minor or major bump instead.
+2. **Push a tag** matching the version in `Cargo.toml`:
++
+[source,shell]
+----
+git tag 0.1.0
+git push origin 0.1.0
+----
+3. Hercules CI detects the tag and runs `cargo publish`
+4. **Bump the version** in `Cargo.toml` to the next version (e.g., `0.1.1`) to allow dry-run checks to verify subsequent commits
+
+With `assertVersions = true` (module) or `assertVersions = "0.1.0"` (function), the effect verifies that all workspace package versions match the tag name before publishing.

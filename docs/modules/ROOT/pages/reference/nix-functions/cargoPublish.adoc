@@ -97,6 +97,10 @@ effects.cargoPublish {
 }
 ```
 
+== Workflow
+
+include::partial$cargo-publish-workflow.adoc[]
+
 // Keep in sync with: ../flake-parts/cargo-publish.adoc#rate-limits
 [[rate-limits]]
 == Rate Limits
