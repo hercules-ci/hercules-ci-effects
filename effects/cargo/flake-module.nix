@@ -53,7 +53,7 @@ in
       src = mkOption {
         type = types.path;
         default = self.outPath;
-        defaultText = lib.literalExpression ''self.outPath'';
+        defaultText = lib.literalExpression "self.outPath";
         description = ''
           The path to the source code to publish.
         '';

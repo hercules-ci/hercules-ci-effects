@@ -81,12 +81,12 @@ mkEffect (
           lib.concatStringsSep "\n" (
             lib.mapAttrsToList (
               name: value:
-              ''hciCheckCargoVersion ${
+              "hciCheckCargoVersion ${
                 lib.escapeShellArgs [
                   name
                   value
                 ]
-              }''
+              }"
             ) assertVersions
           )
       }
