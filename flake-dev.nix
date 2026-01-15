@@ -197,7 +197,7 @@ top@{
           pkgs.python3Packages.mypy
           pkgs.python3Packages.autopep8
         ];
-        shellHook = config.pre-commit.installationScript;
+        inherit (config.pre-commit) shellHook;
       };
     };
 }
