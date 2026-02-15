@@ -61,11 +61,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1768366692,
-        "narHash": "sha256-L+Z1uXfASaBM8td6DbIbcYAeqz2XKpTtxsOWMMowXFY=",
+        "lastModified": 1769000415,
+        "narHash": "sha256-C3x2g91uiG5UiBWKOhsXL85PtmX7QUtwdfL+oHWC620=",
         "owner": "hercules-ci",
         "repo": "hercules-ci-agent",
-        "rev": "3d81f6445c211f621bcce41a0bc67a81d6809941",
+        "rev": "037a7f91a3156a6132171d90e8be2f96aab32ddc",
         "type": "github"
       },
       "original": {
@@ -76,11 +76,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1768127708,
-        "narHash": "sha256-1Sm77VfZh3mU0F5OqKABNLWxOuDeHIlcFjsXeeiPazs=",
+        "lastModified": 1768886240,
+        "narHash": "sha256-C2TjvwYZ2VDxYWeqvvJ5XPPp6U7H66zeJlRaErJKoEM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "ffbc9f8cbaacfb331b6017d5a5abb21a492c9a38",
+        "rev": "80e4adbcf8992d3fd27ad4964fbb84907f9478b0",
         "type": "github"
       },
       "original": {
