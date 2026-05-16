@@ -6,7 +6,7 @@ let
   fake-zip = pkgs.writers.writePython3Bin "zip" { } (builtins.readFile ./fake-zip.py);
   artifacts-tool = pkgs.callPackage ../package.nix { };
 in
-pkgs.runCommandNoCCLocal "github-releases-check"
+pkgs.runCommandLocal "github-releases-check"
   {
     nativeBuildInputs = [
       artifacts-tool
