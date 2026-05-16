@@ -233,7 +233,7 @@ in
               default.outputs.checks.release-artifacts = mkIf (cfg.checkArtifacts herculesCI) (
                 withSystem defaultEffectSystem (
                   { pkgs, ... }:
-                  pkgs.runCommandNoCCLocal "artifacts-check" {
+                  pkgs.runCommandLocal "artifacts-check" {
                     files = filesJSON;
                     check_only = "";
                     passthru.files = files;

@@ -50,6 +50,7 @@ in
     defaults =
       { nodes, ... }:
       {
+        networking.resolvconf.enable = false;
         environment.etc."resolv.conf".text = ''
           nameserver ${nodes.${cfg.nodeName}.networking.primaryIPAddress}
         '';
