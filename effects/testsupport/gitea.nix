@@ -14,6 +14,7 @@
         # services.gitea.settings.databas.LOG_SQL = true;
         services.gitea.settings.log.LEVEL = "Info";
         services.gitea.settings.database.LOG_SQL = false;
+        services.gitea.settings.server.ROOT_URL = "http://gitea";
         networking.firewall.allowedTCPPorts = [ 3000 ];
         environment.systemPackages = [ pkgs.gitea ];
       };
