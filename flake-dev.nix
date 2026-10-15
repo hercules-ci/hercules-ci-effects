@@ -186,7 +186,7 @@ top@{
 
       # https://flake.parts/options/git-hooks-nix.html#opt-perSystem.pre-commit.settings
       pre-commit.settings.hooks = {
-        nixfmt-rfc-style.enable = true;
+        nixfmt.enable = true;
       };
 
       devShells.default = pkgs.mkShell {
